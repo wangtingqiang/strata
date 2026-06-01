@@ -14,6 +14,8 @@ pub mod jwt;
 pub mod opaque_token;
 #[cfg(feature = "pagination")]
 pub mod pagination;
+#[cfg(feature = "password")]
+pub mod password;
 #[cfg(feature = "serde")]
 pub mod serde;
 #[cfg(feature = "text")]
