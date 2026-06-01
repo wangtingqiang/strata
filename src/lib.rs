@@ -1,5 +1,7 @@
 #[cfg(feature = "authorization")]
 pub mod authorization;
+#[cfg(feature = "config")]
+pub mod config;
 #[cfg(feature = "error")]
 pub mod error;
 #[cfg(feature = "hash")]
