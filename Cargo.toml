@@ -5,11 +5,13 @@ edition = "2024"
 
 [features]
 error = ["dep:thiserror"]
+hash = ["dep:sha2"]
 serde = ["dep:serde"]
 text = ["dep:thiserror"]
 time = ["dep:time"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"], optional = true }
+sha2 = { version = "0.10", optional = true }
 thiserror = { version = "2", optional = true }
 time = { version = "0.3", features = ["formatting", "macros", "parsing"], optional = true }

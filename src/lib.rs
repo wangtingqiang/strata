@@ -1,5 +1,7 @@
 #[cfg(feature = "error")]
 pub mod error;
+#[cfg(feature = "hash")]
+pub mod hash;
 #[cfg(feature = "serde")]
 pub mod serde;
 #[cfg(feature = "text")]
