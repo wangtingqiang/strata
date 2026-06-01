@@ -2,6 +2,8 @@
 pub mod error;
 #[cfg(feature = "hash")]
 pub mod hash;
+#[cfg(feature = "pagination")]
+pub mod pagination;
 #[cfg(feature = "serde")]
 pub mod serde;
 #[cfg(feature = "text")]

@@ -6,6 +6,7 @@ edition = "2024"
 [features]
 error = ["dep:thiserror"]
 hash = ["dep:sha2"]
+pagination = ["dep:serde", "dep:thiserror", "error"]
 serde = ["dep:serde"]
 text = ["dep:thiserror"]
 time = ["dep:time"]
