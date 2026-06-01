@@ -5,6 +5,8 @@ edition = "2024"
 
 [features]
 error = ["dep:thiserror"]
+time = ["dep:time"]
 
 [dependencies]
 thiserror = { version = "2", optional = true }
+time = { version = "0.3", features = ["formatting", "macros", "parsing"], optional = true }
