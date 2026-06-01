@@ -4,8 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-full = ["authorization", "config", "error", "hash", "http", "jwt", "opaque-token", "pagination", "password", "redis", "serde", "sqlx-mysql", "sqlx-postgres", "text", "time"]
-
 authorization = ["dep:async-trait", "dep:thiserror", "error"]
 config = ["dep:config", "dep:serde", "dep:thiserror"]
 error = ["dep:thiserror"]
@@ -19,6 +17,12 @@ redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror"]
 serde = ["dep:serde"]
 sqlx-mysql = ["dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
 sqlx-postgres = ["dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
+telemetry = [
+    "dep:axum", "dep:http", "dep:serde", "dep:thiserror",
+    "dep:opentelemetry", "dep:opentelemetry-otlp", "dep:opentelemetry_sdk",
+    "dep:tower", "dep:tower-http",
+    "dep:tracing", "dep:tracing-opentelemetry", "dep:tracing-subscriber"
+]
 text = ["dep:thiserror"]
 time = ["dep:time"]
 
@@ -29,7 +33,11 @@ axum = { version = "0.8", optional = true }
 base64 = { version = "0.22", optional = true }
 config = { version = "0.15", optional = true }
 ed25519-dalek = { version = "2", features = ["pem"], optional = true }
+http = { version = "1", optional = true }
 jsonwebtoken = { version = "10", features = ["rust_crypto"], optional = true }
+opentelemetry = { version = "0.31", optional = true }
+opentelemetry-otlp = { version = "0.31", features = ["trace", "http-proto", "reqwest-blocking-client"], optional = true }
+opentelemetry_sdk = { version = "0.31", features = ["trace"], optional = true }
 rand_core = { version = "0.6", features = ["getrandom"], optional = true }
 redis = { version = "1.0", features = ["tokio-comp"], optional = true }
 secrecy = { version = "0.10", features = ["serde"], optional = true }
@@ -39,5 +47,9 @@ sha2 = { version = "0.10", optional = true }
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls"], optional = true }
 thiserror = { version = "2", optional = true }
 time = { version = "0.3", features = ["formatting", "macros", "parsing"], optional = true }
+tower = { version = "0.5", optional = true }
+tower-http = { version = "0.6", features = ["trace"], optional = true }
 tracing = { version = "0.1", optional = true }
+tracing-opentelemetry = { version = "0.32", optional = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "local-time", "registry"], optional = true }
 uuid = { version = "1", features = ["v4"], optional = true }

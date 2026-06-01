@@ -22,6 +22,8 @@ pub mod redis;
 pub mod serde;
 #[cfg(any(feature = "sqlx-mysql", feature = "sqlx-postgres"))]
 pub mod sqlx;
+#[cfg(feature = "telemetry")]
+pub mod telemetry;
 #[cfg(feature = "text")]
 pub mod text;
 #[cfg(feature = "time")]
