@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-full = ["authorization", "config", "error", "hash", "http", "jwt", "opaque-token", "pagination", "password", "redis", "serde", "text", "time"]
+full = ["authorization", "config", "error", "hash", "http", "jwt", "opaque-token", "pagination", "password", "redis", "serde", "sqlx-mysql", "sqlx-postgres", "text", "time"]
 
 authorization = ["dep:async-trait", "dep:thiserror", "error"]
 config = ["dep:config", "dep:serde", "dep:thiserror"]
@@ -17,6 +17,8 @@ pagination = ["dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:rand_core", "dep:secrecy"]
 redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror"]
 serde = ["dep:serde"]
+sqlx-mysql = ["dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
+sqlx-postgres = ["dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
 text = ["dep:thiserror"]
 time = ["dep:time"]
 
@@ -34,6 +36,7 @@ secrecy = { version = "0.10", features = ["serde"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
 sha2 = { version = "0.10", optional = true }
+sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls"], optional = true }
 thiserror = { version = "2", optional = true }
 time = { version = "0.3", features = ["formatting", "macros", "parsing"], optional = true }
 tracing = { version = "0.1", optional = true }

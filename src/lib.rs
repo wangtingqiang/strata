@@ -20,6 +20,8 @@ pub mod password;
 pub mod redis;
 #[cfg(feature = "serde")]
 pub mod serde;
+#[cfg(any(feature = "sqlx-mysql", feature = "sqlx-postgres"))]
+pub mod sqlx;
 #[cfg(feature = "text")]
 pub mod text;
 #[cfg(feature = "time")]
