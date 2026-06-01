@@ -6,6 +6,7 @@ edition = "2024"
 [features]
 error = ["dep:thiserror"]
 serde = ["dep:serde"]
+text = ["dep:thiserror"]
 time = ["dep:time"]
 
 [dependencies]
