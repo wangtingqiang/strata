@@ -1,3 +1,5 @@
+#[cfg(feature = "authorization")]
+pub mod authorization;
 #[cfg(feature = "error")]
 pub mod error;
 #[cfg(feature = "hash")]

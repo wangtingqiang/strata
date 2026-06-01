@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
+authorization = ["dep:async-trait", "dep:thiserror", "error"]
 error = ["dep:thiserror"]
 hash = ["dep:sha2"]
 http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
@@ -13,6 +14,7 @@ text = ["dep:thiserror"]
 time = ["dep:time"]
 
 [dependencies]
+async-trait = { version = "0.1", optional = true }
 axum = { version = "0.8", optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 sha2 = { version = "0.10", optional = true }
