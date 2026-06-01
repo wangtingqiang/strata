@@ -4,12 +4,15 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
+full = ["authorization", "config", "error", "hash", "http", "jwt", "opaque-token", "pagination", "serde", "text", "time"]
+
 authorization = ["dep:async-trait", "dep:thiserror", "error"]
 config = ["dep:config", "dep:serde", "dep:thiserror"]
 error = ["dep:thiserror"]
 hash = ["dep:sha2"]
 http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
 jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror"]
+opaque-token = ["dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid"]
 pagination = ["dep:serde", "dep:thiserror", "error"]
 serde = ["dep:serde"]
 text = ["dep:thiserror"]
@@ -22,9 +25,11 @@ base64 = { version = "0.22", optional = true }
 config = { version = "0.15", optional = true }
 ed25519-dalek = { version = "2", features = ["pem"], optional = true }
 jsonwebtoken = { version = "10", features = ["rust_crypto"], optional = true }
+secrecy = { version = "0.10", features = ["serde"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
 sha2 = { version = "0.10", optional = true }
 thiserror = { version = "2", optional = true }
 time = { version = "0.3", features = ["formatting", "macros", "parsing"], optional = true }
 tracing = { version = "0.1", optional = true }
+uuid = { version = "1", features = ["v4"], optional = true }
