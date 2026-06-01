@@ -16,6 +16,8 @@ pub mod opaque_token;
 pub mod pagination;
 #[cfg(feature = "password")]
 pub mod password;
+#[cfg(feature = "redis")]
+pub mod redis;
 #[cfg(feature = "serde")]
 pub mod serde;
 #[cfg(feature = "text")]
