@@ -8,6 +8,8 @@ pub mod error;
 pub mod hash;
 #[cfg(feature = "http")]
 pub mod http;
+#[cfg(feature = "jwt")]
+pub mod jwt;
 #[cfg(feature = "pagination")]
 pub mod pagination;
 #[cfg(feature = "serde")]

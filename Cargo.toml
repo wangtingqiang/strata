@@ -9,6 +9,7 @@ config = ["dep:config", "dep:serde", "dep:thiserror"]
 error = ["dep:thiserror"]
 hash = ["dep:sha2"]
 http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
+jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror"]
 pagination = ["dep:serde", "dep:thiserror", "error"]
 serde = ["dep:serde"]
 text = ["dep:thiserror"]
@@ -17,8 +18,12 @@ time = ["dep:time"]
 [dependencies]
 async-trait = { version = "0.1", optional = true }
 axum = { version = "0.8", optional = true }
+base64 = { version = "0.22", optional = true }
 config = { version = "0.15", optional = true }
+ed25519-dalek = { version = "2", features = ["pem"], optional = true }
+jsonwebtoken = { version = "10", features = ["rust_crypto"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
 sha2 = { version = "0.10", optional = true }
 thiserror = { version = "2", optional = true }
 time = { version = "0.3", features = ["formatting", "macros", "parsing"], optional = true }
