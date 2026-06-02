@@ -1,5 +1,4 @@
-use std::str::FromStr;
-
+use redis::IntoConnectionInfo;
 use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
 
@@ -7,32 +6,28 @@ use crate::redis::RedisClientInitError;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct RedisClientConfig {
-    pub url: String,
+    pub host: String,
+    pub port: u16,
     pub username: String,
     pub password: SecretString,
+    pub database: u8,
 }
 
 impl RedisClientConfig {
     pub async fn connect(&self) -> Result<redis::Client, RedisClientInitError> {
-        let url = self.url.trim();
-        if url.is_empty() {
-            return Err(RedisClientInitError::EmptyUrl);
+        if self.host.trim().is_empty() {
+            return Err(RedisClientInitError::EmptyHost);
         }
 
-        let connection_info = redis::ConnectionInfo::from_str(url)
-            .map_err(|source| RedisClientInitError::BuildClient { source })?;
-        let mut redis_settings = connection_info.redis_settings().clone();
+        let redis_info = redis::RedisConnectionInfo::default()
+            .set_db(self.database as i64)
+            .set_username(self.username.clone())
+            .set_password(self.password.expose_secret());
 
-        let username = self.username.trim();
-        let password = self.password.expose_secret().trim();
-        if !username.is_empty() {
-            redis_settings = redis_settings.set_username(username);
-        }
-        if !password.is_empty() {
-            redis_settings = redis_settings.set_password(password);
-        }
-
-        let connection_info = connection_info.set_redis_settings(redis_settings);
+        let connection_info = redis::ConnectionAddr::Tcp(self.host.clone(), self.port)
+            .into_connection_info()
+            .map_err(|source| RedisClientInitError::BuildClient { source })?
+            .set_redis_settings(redis_info);
 
         let client = redis::Client::open(connection_info)
             .map_err(|source| RedisClientInitError::BuildClient { source })?;
