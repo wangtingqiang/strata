@@ -11,4 +11,9 @@ pub enum KafkaConsumerInitError {
         #[source]
         source: rdkafka::error::KafkaError,
     },
+    #[error("failed to connect kafka consumer: {source}")]
+    Connect {
+        #[source]
+        source: rdkafka::error::KafkaError,
+    },
 }

@@ -9,4 +9,9 @@ pub enum KafkaProducerInitError {
         #[source]
         source: rdkafka::error::KafkaError,
     },
+    #[error("failed to connect kafka producer: {source}")]
+    Connect {
+        #[source]
+        source: rdkafka::error::KafkaError,
+    },
 }
