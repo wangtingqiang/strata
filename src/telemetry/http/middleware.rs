@@ -36,7 +36,6 @@ impl<B> MakeSpan<B> for HttpMakeSpan {
             .map(MatchedPath::as_str)
             .unwrap_or_else(|| request.uri().path())
             .to_owned();
-        let path = request.uri().path().to_owned();
         let span = tracing::info_span!(
             "http.server.request",
             otel.kind = "server",
@@ -44,7 +43,6 @@ impl<B> MakeSpan<B> for HttpMakeSpan {
             span_id = tracing::field::Empty,
             http.request.method = %request.method(),
             http.route = %route,
-            url.path = %path,
             http.response.status_code = tracing::field::Empty,
         );
         let _ = span.set_parent(global::get_text_map_propagator(|propagator| {
