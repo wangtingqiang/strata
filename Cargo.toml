@@ -17,8 +17,8 @@ pagination = ["dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:rand_core", "dep:secrecy"]
 redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror"]
 serde = ["dep:serde"]
-sqlx-mysql = ["dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
-sqlx-postgres = ["dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
+sqlx-mysql = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
+sqlx-postgres = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
 telemetry = [
     "dep:axum", "dep:http", "dep:serde", "dep:thiserror",
     "dep:opentelemetry", "dep:opentelemetry-otlp", "dep:opentelemetry_sdk",
