@@ -10,6 +10,8 @@ pub mod hash;
 pub mod http;
 #[cfg(feature = "jwt")]
 pub mod jwt;
+#[cfg(feature = "kafka")]
+pub mod kafka;
 #[cfg(feature = "opaque-token")]
 pub mod opaque_token;
 #[cfg(feature = "pagination")]

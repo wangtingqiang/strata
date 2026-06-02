@@ -10,6 +10,7 @@ error = ["dep:thiserror"]
 hash = ["dep:sha2"]
 http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
 jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror"]
+kafka = ["dep:rdkafka", "dep:serde", "dep:thiserror"]
 opaque-token = ["dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid"]
 pagination = ["dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:rand_core", "dep:secrecy"]
@@ -35,6 +36,7 @@ config = { version = "0.15", optional = true }
 ed25519-dalek = { version = "2", features = ["pem"], optional = true }
 http = { version = "1", optional = true }
 jsonwebtoken = { version = "10", features = ["rust_crypto"], optional = true }
+rdkafka = { version = "0.39", features = ["cmake-build"], optional = true }
 opentelemetry = { version = "0.31", optional = true }
 opentelemetry-otlp = { version = "0.31", features = ["trace", "http-proto", "reqwest-blocking-client"], optional = true }
 opentelemetry_sdk = { version = "0.31", features = ["trace"], optional = true }
