@@ -3,16 +3,22 @@ use opentelemetry::{global, propagation::Injector, trace::TraceContextExt};
 use tracing::Span;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
-pub fn inject_trace_context(headers: &mut HeaderMap) {
-    let span = Span::current();
-    let context = span.context();
-    if !context.span().span_context().is_valid() {
-        return;
-    }
+pub trait HeaderMapExt {
+    fn inject_trace_context(&mut self);
+}
 
-    global::get_text_map_propagator(|propagator| {
-        propagator.inject_context(&context, &mut HeaderInjector(headers));
-    });
+impl HeaderMapExt for HeaderMap {
+    fn inject_trace_context(&mut self) {
+        let span = Span::current();
+        let context = span.context();
+        if !context.span().span_context().is_valid() {
+            return;
+        }
+
+        global::get_text_map_propagator(|propagator| {
+            propagator.inject_context(&context, &mut HeaderInjector(self));
+        });
+    }
 }
 
 struct HeaderInjector<'a>(&'a mut HeaderMap);
