@@ -1,5 +1,7 @@
 #[cfg(feature = "authorization")]
 pub mod authorization;
+#[cfg(feature = "clickhouse")]
+pub mod clickhouse;
 #[cfg(feature = "config")]
 pub mod config;
 #[cfg(feature = "error")]
