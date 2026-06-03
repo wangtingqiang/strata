@@ -51,7 +51,7 @@ impl KafkaProducerConfig {
 
         producer
             .client()
-            .fetch_metadata(None, Duration::from_secs(10))
+            .fetch_metadata(None, Duration::from_secs(1))
             .map_err(|source| KafkaProducerInitError::Connect { source })?;
 
         Ok(producer)

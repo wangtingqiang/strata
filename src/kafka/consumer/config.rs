@@ -56,7 +56,7 @@ impl KafkaConsumerConfig {
             .map_err(|source| KafkaConsumerInitError::CreateConsumer { source })?;
 
         consumer
-            .fetch_metadata(None, Duration::from_secs(10))
+            .fetch_metadata(None, Duration::from_secs(1))
             .map_err(|source| KafkaConsumerInitError::Connect { source })?;
 
         Ok(consumer)
