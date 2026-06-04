@@ -73,20 +73,11 @@ impl<B> OnResponse<B> for HttpOnResponse {
 
         let _guard = span.enter();
         if response.status().is_server_error() {
-            error!(
-                latency_ms = latency.as_millis(),
-                status_code, "request completed"
-            );
+            error!(latency_ms = latency.as_millis(), "request completed");
         } else if response.status().is_client_error() {
-            warn!(
-                latency_ms = latency.as_millis(),
-                status_code, "request completed"
-            );
+            warn!(latency_ms = latency.as_millis(), "request completed");
         } else {
-            info!(
-                latency_ms = latency.as_millis(),
-                status_code, "request completed"
-            );
+            info!(latency_ms = latency.as_millis(), "request completed");
         }
     }
 }
