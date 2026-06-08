@@ -1,61 +1,6 @@
-[package]
-name = "strata"
-version = "0.1.0"
+[workspace]
+resolver = "3"
+members = ["strata", "strata-macros"]
+
+[workspace.package]
 edition = "2024"
-
-[features]
-authorization = ["dep:async-trait", "dep:thiserror", "error"]
-clickhouse = ["dep:clickhouse", "dep:secrecy", "dep:serde", "dep:thiserror"]
-config = ["dep:config", "dep:serde", "dep:thiserror"]
-error = ["dep:thiserror"]
-hash = ["dep:sha2"]
-http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
-jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror"]
-kafka = ["dep:rdkafka", "dep:secrecy", "dep:serde", "dep:thiserror"]
-opaque-token = ["dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid"]
-pagination = ["dep:serde", "dep:thiserror", "error"]
-password = ["dep:argon2", "dep:rand_core", "dep:secrecy"]
-redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror"]
-serde = ["dep:serde"]
-sqlx-mysql = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
-sqlx-postgres = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
-task = ["dep:tokio", "dep:tracing"]
-telemetry = [
-    "dep:serde", "dep:thiserror",
-    "dep:opentelemetry", "dep:opentelemetry-otlp", "dep:opentelemetry_sdk",
-    "dep:tracing", "dep:tracing-opentelemetry", "dep:tracing-subscriber"
-]
-telemetry-http = ["dep:axum", "dep:http", "dep:tower", "dep:tower-http", "telemetry"]
-text = ["dep:thiserror"]
-time = ["dep:time"]
-
-[dependencies]
-argon2 = { version = "0.5", optional = true }
-async-trait = { version = "0.1", optional = true }
-axum = { version = "0.8", optional = true }
-base64 = { version = "0.22", optional = true }
-clickhouse = { version = "0.15", features = ["rustls-tls"], optional = true }
-config = { version = "0.15", optional = true }
-ed25519-dalek = { version = "2", features = ["pem"], optional = true }
-http = { version = "1", optional = true }
-jsonwebtoken = { version = "10", features = ["rust_crypto"], optional = true }
-opentelemetry = { version = "0.31", optional = true }
-opentelemetry-otlp = { version = "0.31", features = ["trace", "http-proto", "reqwest-blocking-client"], optional = true }
-opentelemetry_sdk = { version = "0.31", features = ["trace"], optional = true }
-rand_core = { version = "0.6", features = ["getrandom"], optional = true }
-rdkafka = { version = "0.39", features = ["cmake-build"], optional = true }
-redis = { version = "1.2", features = ["tokio-comp"], optional = true }
-secrecy = { version = "0.10", features = ["serde"], optional = true }
-serde = { version = "1", features = ["derive"], optional = true }
-serde_json = { version = "1", optional = true }
-sha2 = { version = "0.10", optional = true }
-sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls"], optional = true }
-thiserror = { version = "2", optional = true }
-time = { version = "0.3", features = ["formatting", "macros", "parsing"], optional = true }
-tokio = { version = "1", features = ["rt"], optional = true }
-tower = { version = "0.5", optional = true }
-tower-http = { version = "0.6", features = ["trace"], optional = true }
-tracing = { version = "0.1", optional = true }
-tracing-opentelemetry = { version = "0.32", optional = true }
-tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "local-time", "registry"], optional = true }
-uuid = { version = "1", features = ["v4"], optional = true }
