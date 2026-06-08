@@ -8,3 +8,9 @@ pub enum ErrorKind {
     Technical,
     Unexpected,
 }
+
+impl ErrorKind {
+    pub const fn is_severe(&self) -> bool {
+        matches!(self, Self::Technical | Self::Unexpected)
+    }
+}
