@@ -5,7 +5,7 @@ mod unexpected;
 
 pub use data_corrupted::DataCorruptedError;
 pub use port::{FromPortError, PortError};
-pub use presentation::{ErrorInfo, ToErrorInfo};
+pub use presentation::{ErrorInfo, ErrorKind, ToErrorInfo};
 pub use unexpected::UnexpectedError;
 
 pub type BoxedError = Box<dyn std::error::Error + Send + Sync + 'static>;

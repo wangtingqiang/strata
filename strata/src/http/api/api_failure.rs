@@ -5,7 +5,7 @@ use axum::{
 };
 
 use crate::{
-    error::{ErrorInfo, ToErrorInfo},
+    error::{ErrorKind, ToErrorInfo},
     http::api::{ResponseBody, body_factory::failure_body},
 };
 
@@ -24,17 +24,9 @@ impl ApiFailure {
         }
     }
 
-    pub fn from_error_info(status: StatusCode, error: ErrorInfo) -> Self {
-        Self::new(status, error.code(), error.message())
-    }
-
     /// 400
     pub fn bad_request(code: impl Into<String>, message: impl Into<String>) -> Self {
         Self::new(StatusCode::BAD_REQUEST, code, message)
-    }
-
-    pub fn bad_request_from(error: impl ToErrorInfo) -> Self {
-        Self::from_error_info(StatusCode::BAD_REQUEST, error.to_error_info())
     }
 
     /// 401
@@ -42,17 +34,9 @@ impl ApiFailure {
         Self::new(StatusCode::UNAUTHORIZED, code, message)
     }
 
-    pub fn unauthorized_from(error: impl ToErrorInfo) -> Self {
-        Self::from_error_info(StatusCode::UNAUTHORIZED, error.to_error_info())
-    }
-
     /// 403
     pub fn forbidden(code: impl Into<String>, message: impl Into<String>) -> Self {
         Self::new(StatusCode::FORBIDDEN, code, message)
-    }
-
-    pub fn forbidden_from(error: impl ToErrorInfo) -> Self {
-        Self::from_error_info(StatusCode::FORBIDDEN, error.to_error_info())
     }
 
     /// 404
@@ -60,17 +44,9 @@ impl ApiFailure {
         Self::new(StatusCode::NOT_FOUND, code, message)
     }
 
-    pub fn not_found_from(error: impl ToErrorInfo) -> Self {
-        Self::from_error_info(StatusCode::NOT_FOUND, error.to_error_info())
-    }
-
     /// 409
     pub fn conflict(code: impl Into<String>, message: impl Into<String>) -> Self {
         Self::new(StatusCode::CONFLICT, code, message)
-    }
-
-    pub fn conflict_from(error: impl ToErrorInfo) -> Self {
-        Self::from_error_info(StatusCode::CONFLICT, error.to_error_info())
     }
 
     /// 422
@@ -78,17 +54,9 @@ impl ApiFailure {
         Self::new(StatusCode::UNPROCESSABLE_ENTITY, code, message)
     }
 
-    pub fn unprocessable_entity_from(error: impl ToErrorInfo) -> Self {
-        Self::from_error_info(StatusCode::UNPROCESSABLE_ENTITY, error.to_error_info())
-    }
-
     /// 429
     pub fn too_many_requests(code: impl Into<String>, message: impl Into<String>) -> Self {
         Self::new(StatusCode::TOO_MANY_REQUESTS, code, message)
-    }
-
-    pub fn too_many_requests_from(error: impl ToErrorInfo) -> Self {
-        Self::from_error_info(StatusCode::TOO_MANY_REQUESTS, error.to_error_info())
     }
 
     /// 500
@@ -96,17 +64,9 @@ impl ApiFailure {
         Self::new(StatusCode::INTERNAL_SERVER_ERROR, code, message)
     }
 
-    pub fn internal_server_error_from(error: impl ToErrorInfo) -> Self {
-        Self::from_error_info(StatusCode::INTERNAL_SERVER_ERROR, error.to_error_info())
-    }
-
     /// 503
     pub fn service_unavailable(code: impl Into<String>, message: impl Into<String>) -> Self {
         Self::new(StatusCode::SERVICE_UNAVAILABLE, code, message)
-    }
-
-    pub fn service_unavailable_from(error: impl ToErrorInfo) -> Self {
-        Self::from_error_info(StatusCode::SERVICE_UNAVAILABLE, error.to_error_info())
     }
 
     pub fn with_status(mut self, status: StatusCode) -> Self {
@@ -140,5 +100,21 @@ impl ApiFailure {
 impl IntoResponse for ApiFailure {
     fn into_response(self) -> Response {
         (self.status, Json(self.body)).into_response()
+    }
+}
+
+impl<E: ToErrorInfo> From<E> for ApiFailure {
+    fn from(error: E) -> Self {
+        let info = error.to_error_info();
+        let status = match info.kind() {
+            ErrorKind::Validation => StatusCode::BAD_REQUEST,
+            ErrorKind::Unauthenticated => StatusCode::UNAUTHORIZED,
+            ErrorKind::AccessDenied => StatusCode::FORBIDDEN,
+            ErrorKind::NotFound => StatusCode::NOT_FOUND,
+            ErrorKind::Conflict => StatusCode::CONFLICT,
+            ErrorKind::Technical => StatusCode::INTERNAL_SERVER_ERROR,
+            ErrorKind::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
+        };
+        Self::new(status, info.code(), info.message())
     }
 }

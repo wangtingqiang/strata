@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::error::{ErrorInfo, ToErrorInfo};
+use crate::error::{ErrorInfo, ErrorKind, ToErrorInfo};
 
 const INVALID_PAGING_CODE: &str = "INVALID_PAGING";
 
@@ -36,11 +36,27 @@ impl ToErrorInfo for PagingError {
         use PagingError::*;
 
         match self {
-            PageZero => ErrorInfo::new(INVALID_PAGING_CODE, "页码必须大于0"),
-            PageSizeZero => ErrorInfo::new(INVALID_PAGING_CODE, "每页条数必须大于0"),
-            PageSizeTooLarge => ErrorInfo::new(INVALID_PAGING_CODE, "每页条数不能超过100"),
-            LimitZero => ErrorInfo::new(INVALID_PAGING_CODE, "查询条数必须大于0"),
-            LimitTooLarge => ErrorInfo::new(INVALID_PAGING_CODE, "查询条数不能超过100"),
+            PageZero => ErrorInfo::new(ErrorKind::Validation, INVALID_PAGING_CODE, "页码必须大于0"),
+            PageSizeZero => ErrorInfo::new(
+                ErrorKind::Validation,
+                INVALID_PAGING_CODE,
+                "每页条数必须大于0",
+            ),
+            PageSizeTooLarge => ErrorInfo::new(
+                ErrorKind::Validation,
+                INVALID_PAGING_CODE,
+                "每页条数不能超过100",
+            ),
+            LimitZero => ErrorInfo::new(
+                ErrorKind::Validation,
+                INVALID_PAGING_CODE,
+                "查询条数必须大于0",
+            ),
+            LimitTooLarge => ErrorInfo::new(
+                ErrorKind::Validation,
+                INVALID_PAGING_CODE,
+                "查询条数不能超过100",
+            ),
         }
     }
 }
