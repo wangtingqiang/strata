@@ -8,6 +8,9 @@ pub use port::{FromPortError, PortError};
 pub use presentation::{ErrorInfo, ErrorKind, ToErrorInfo};
 pub use unexpected::UnexpectedError;
 
+#[cfg(feature = "macros")]
+pub use strata_macros::ToErrorInfo;
+
 pub type BoxedError = Box<dyn std::error::Error + Send + Sync + 'static>;
 
 pub fn error_source_chain_fmt(
