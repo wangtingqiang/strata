@@ -17,7 +17,7 @@ impl Eq for PasswordHash {}
 impl PasswordHash {
     pub fn new(hash: impl Into<String>) -> Result<Self, PasswordVerifyError> {
         let hash = hash.into();
-        Argon2Hash::new(&hash).map_err(|_| PasswordVerifyError::InvalidHash)?;
+        Argon2Hash::new(&hash).map_err(|e| PasswordVerifyError::InvalidHashFormat(e))?;
         Ok(Self(SecretString::new(hash.into())))
     }
 
