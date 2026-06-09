@@ -5,11 +5,11 @@ mod unexpected;
 
 pub use data_corrupted::DataCorruptedError;
 pub use port::{FromPortError, PortError};
-pub use presentation::{ErrorInfo, ErrorKind, ToErrorInfo};
+pub use presentation::{ErrorInfo, ErrorKind};
 pub use unexpected::UnexpectedError;
 
 #[cfg(feature = "macros")]
-pub use strata_macros::ToErrorInfo;
+pub use strata_macros::ErrorInfo;
 
 pub type BoxedError = Box<dyn std::error::Error + Send + Sync + 'static>;
 

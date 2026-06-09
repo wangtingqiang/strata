@@ -5,7 +5,7 @@ use axum::{
 };
 
 use crate::{
-    error::{ErrorKind, ToErrorInfo},
+    error::{ErrorInfo, ErrorKind},
     http::api::{ResponseBody, body_factory::failure_body},
 };
 
@@ -103,10 +103,9 @@ impl IntoResponse for ApiFailure {
     }
 }
 
-impl<E: ToErrorInfo> From<E> for ApiFailure {
+impl<E: ErrorInfo> From<E> for ApiFailure {
     fn from(error: E) -> Self {
-        let info = error.to_error_info();
-        let status = match info.kind() {
+        let status = match error.kind() {
             ErrorKind::Validation => StatusCode::BAD_REQUEST,
             ErrorKind::Unauthenticated => StatusCode::UNAUTHORIZED,
             ErrorKind::AccessDenied => StatusCode::FORBIDDEN,
@@ -115,6 +114,6 @@ impl<E: ToErrorInfo> From<E> for ApiFailure {
             ErrorKind::Technical => StatusCode::INTERNAL_SERVER_ERROR,
             ErrorKind::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
         };
-        Self::new(status, info.code(), info.message())
+        Self::new(status, error.code(), error.message())
     }
 }

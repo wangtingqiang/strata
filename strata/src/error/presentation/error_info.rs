@@ -1,30 +1,11 @@
 use crate::error::presentation::ErrorKind;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct ErrorInfo {
-    kind: ErrorKind,
-    code: &'static str,
-    message: &'static str,
-}
+pub trait ErrorInfo {
+    fn kind(&self) -> ErrorKind;
+    fn code(&self) -> &'static str;
+    fn message(&self) -> &'static str;
 
-impl ErrorInfo {
-    pub const fn new(kind: ErrorKind, code: &'static str, message: &'static str) -> Self {
-        Self {
-            kind,
-            code,
-            message,
-        }
-    }
-
-    pub const fn kind(&self) -> ErrorKind {
-        self.kind
-    }
-
-    pub const fn code(&self) -> &'static str {
-        self.code
-    }
-
-    pub const fn message(&self) -> &'static str {
-        self.message
+    fn is_severe(&self) -> bool {
+        self.kind().is_severe()
     }
 }

@@ -1,21 +1,23 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput, MetaNameValue, Token, parse_macro_input, punctuated::Punctuated};
+use syn::{
+    Data, DeriveInput, Fields, MetaNameValue, Token, parse_macro_input, punctuated::Punctuated,
+};
 
-pub(crate) fn derive_to_error_info_impl(input: TokenStream) -> TokenStream {
+pub(crate) fn derive_error_info_impl(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = &input.ident;
 
     let data = match &input.data {
         Data::Enum(data) => data,
         _ => {
-            return syn::Error::new_spanned(&input, "ToErrorInfo derive macro only supports enums")
+            return syn::Error::new_spanned(&input, "ErrorInfo derive macro only supports enums")
                 .to_compile_error()
                 .into();
         }
     };
 
-    let arms: Vec<_> = data
+    let parsed = data
         .variants
         .iter()
         .map(|variant| {
@@ -70,48 +72,62 @@ pub(crate) fn derive_to_error_info_impl(input: TokenStream) -> TokenStream {
 
             let kind_ident = syn::Ident::new(&kind, variant_name.span());
 
-            let arm = match &variant.fields {
-                syn::Fields::Unit => {
-                    quote! {
-                        Self::#variant_name => ::strata::error::ErrorInfo::new(
-                            ::strata::error::ErrorKind::#kind_ident,
-                            #code,
-                            #message,
-                        ),
-                    }
-                }
-                syn::Fields::Unnamed(_) => {
-                    quote! {
-                        Self::#variant_name(..) => ::strata::error::ErrorInfo::new(
-                            ::strata::error::ErrorKind::#kind_ident,
-                            #code,
-                            #message,
-                        ),
-                    }
-                }
-                syn::Fields::Named(_) => {
-                    quote! {
-                        Self::#variant_name { .. } => ::strata::error::ErrorInfo::new(
-                            ::strata::error::ErrorKind::#kind_ident,
-                            #code,
-                            #message,
-                        ),
-                    }
-                }
-            };
-
-            Ok(arm)
+            Ok((
+                variant_name.clone(),
+                kind_ident,
+                code,
+                message,
+                variant.fields.clone(),
+            ))
         })
-        .collect::<Result<_, syn::Error>>()
-        .unwrap_or_else(|e| vec![e.to_compile_error()]);
+        .collect::<Result<Vec<_>, syn::Error>>();
+
+    let parsed = match parsed {
+        Ok(v) => v,
+        Err(e) => return TokenStream::from(e.to_compile_error()),
+    };
+
+    let mut kind_arms = vec![];
+    let mut code_arms = vec![];
+    let mut message_arms = vec![];
+
+    for (variant_name, kind_ident, code, message, fields) in &parsed {
+        let pat = match fields {
+            Fields::Unit => quote! { Self::#variant_name },
+            Fields::Unnamed(_) => quote! { Self::#variant_name(..) },
+            Fields::Named(_) => quote! { Self::#variant_name { .. } },
+        };
+
+        kind_arms.push(quote! {
+            #pat => ::strata::error::ErrorKind::#kind_ident,
+        });
+        code_arms.push(quote! {
+            #pat => #code,
+        });
+        message_arms.push(quote! {
+            #pat => #message,
+        });
+    }
 
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
     let expanded = quote! {
-        impl #impl_generics ::strata::error::ToErrorInfo for #name #ty_generics #where_clause {
-            fn to_error_info(&self) -> ::strata::error::ErrorInfo {
+        impl #impl_generics ::strata::error::ErrorInfo for #name #ty_generics #where_clause {
+            fn kind(&self) -> ::strata::error::ErrorKind {
                 match self {
-                    #(#arms)*
+                    #(#kind_arms)*
+                }
+            }
+
+            fn code(&self) -> &'static str {
+                match self {
+                    #(#code_arms)*
+                }
+            }
+
+            fn message(&self) -> &'static str {
+                match self {
+                    #(#message_arms)*
                 }
             }
         }

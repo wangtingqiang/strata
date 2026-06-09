@@ -1,3 +1,3 @@
-mod to_error_info;
+mod error_info;
 
-pub(crate) use to_error_info::derive_to_error_info_impl;
+pub(crate) use error_info::derive_error_info_impl;

@@ -1,8 +1,6 @@
 use thiserror::Error;
 
-use crate::error::{ErrorInfo, ErrorKind, ToErrorInfo};
-
-const INVALID_PAGING_CODE: &str = "INVALID_PAGING";
+use crate::error::{ErrorInfo, ErrorKind};
 
 pub const DEFAULT_PAGE: u64 = 1;
 pub const DEFAULT_PAGE_SIZE: u64 = 10;
@@ -31,32 +29,24 @@ pub enum PagingError {
     LimitTooLarge,
 }
 
-impl ToErrorInfo for PagingError {
-    fn to_error_info(&self) -> ErrorInfo {
+impl ErrorInfo for PagingError {
+    fn kind(&self) -> ErrorKind {
+        ErrorKind::Validation
+    }
+
+    fn code(&self) -> &'static str {
+        "INVALID_PAGING"
+    }
+
+    fn message(&self) -> &'static str {
         use PagingError::*;
 
         match self {
-            PageZero => ErrorInfo::new(ErrorKind::Validation, INVALID_PAGING_CODE, "页码必须大于0"),
-            PageSizeZero => ErrorInfo::new(
-                ErrorKind::Validation,
-                INVALID_PAGING_CODE,
-                "每页条数必须大于0",
-            ),
-            PageSizeTooLarge => ErrorInfo::new(
-                ErrorKind::Validation,
-                INVALID_PAGING_CODE,
-                "每页条数不能超过100",
-            ),
-            LimitZero => ErrorInfo::new(
-                ErrorKind::Validation,
-                INVALID_PAGING_CODE,
-                "查询条数必须大于0",
-            ),
-            LimitTooLarge => ErrorInfo::new(
-                ErrorKind::Validation,
-                INVALID_PAGING_CODE,
-                "查询条数不能超过100",
-            ),
+            PageZero => "页码必须大于0",
+            PageSizeZero => "每页条数必须大于0",
+            PageSizeTooLarge => "每页条数不能超过100",
+            LimitZero => "查询条数必须大于0",
+            LimitTooLarge => "查询条数不能超过100",
         }
     }
 }
