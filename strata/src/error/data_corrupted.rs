@@ -10,20 +10,20 @@ pub struct DataCorruptedError {
 }
 
 impl DataCorruptedError {
-    pub fn new(message: impl Into<String>) -> Self {
-        Self {
-            message: message.into(),
-            source: None,
-        }
-    }
-
-    pub fn with_source(
+    pub fn new(
         message: impl Into<String>,
         source: impl std::error::Error + Send + Sync + 'static,
     ) -> Self {
         Self {
             message: message.into(),
             source: Some(Box::new(source)),
+        }
+    }
+
+    pub fn from_message(message: impl Into<String>) -> Self {
+        Self {
+            message: message.into(),
+            source: None,
         }
     }
 

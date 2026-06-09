@@ -1,26 +1,26 @@
 use crate::error::PortError;
 
 pub trait FromPortError: Sized + From<PortError> {
-    fn data_corrupted(message: impl Into<String>) -> Self {
-        PortError::data_corrupted(message).into()
-    }
-
-    fn data_corrupted_with_source(
+    fn data_corrupted(
         message: impl Into<String>,
         source: impl std::error::Error + Send + Sync + 'static,
     ) -> Self {
-        PortError::data_corrupted_with_source(message, source).into()
+        PortError::data_corrupted(message, source).into()
     }
 
-    fn unexpected(message: impl Into<String>) -> Self {
-        PortError::unexpected(message).into()
+    fn data_corrupted_from_message(message: impl Into<String>) -> Self {
+        PortError::data_corrupted_from_message(message).into()
     }
 
-    fn unexpected_with_source(
+    fn unexpected(
         message: impl Into<String>,
         source: impl std::error::Error + Send + Sync + 'static,
     ) -> Self {
-        PortError::unexpected_with_source(message, source).into()
+        PortError::unexpected(message, source).into()
+    }
+
+    fn unexpected_from_message(message: impl Into<String>) -> Self {
+        PortError::unexpected_from_message(message).into()
     }
 }
 
