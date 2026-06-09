@@ -25,7 +25,7 @@ impl PasswordHash {
         self.0.expose_secret()
     }
 
-    pub fn verify(&self, password: &str) -> Result<(), PasswordVerifyError> {
+    pub fn verify(&self, password: &str) -> Result<bool, PasswordVerifyError> {
         verify_password(self.0.expose_secret(), password)
     }
 }
