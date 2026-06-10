@@ -4,10 +4,7 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum JwtSignerBuildError {
     #[error("invalid Ed25519 PEM")]
-    InvalidPem {
-        #[source]
-        source: jsonwebtoken::errors::Error,
-    },
+    InvalidPem(#[source] jsonwebtoken::errors::Error),
 }
 
 #[derive(Debug, Error)]
@@ -27,7 +24,7 @@ pub struct Ed25519JwtSigner {
 impl Ed25519JwtSigner {
     pub fn from_pem(pem: impl AsRef<[u8]>) -> Result<Self, JwtSignerBuildError> {
         let encoding_key = EncodingKey::from_ed_pem(pem.as_ref())
-            .map_err(|source| JwtSignerBuildError::InvalidPem { source })?;
+            .map_err(|source| JwtSignerBuildError::InvalidPem(source))?;
         Ok(Self { encoding_key })
     }
 }
