@@ -1,5 +1,4 @@
 use jsonwebtoken::{Algorithm, EncodingKey, Header};
-use serde::Serialize;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -17,19 +16,26 @@ pub enum JwtSignerError {
     SignFailed(#[source] jsonwebtoken::errors::Error),
 }
 
-pub struct JwtSigner {
+pub trait JwtSigner: Send + Sync + 'static {
+    fn sign(&self, payload: String) -> Result<String, JwtSignerError>;
+}
+
+pub struct Ed25519JwtSigner {
     encoding_key: EncodingKey,
 }
 
-impl JwtSigner {
-    pub fn from_ed25519_pem(ed25519_pem: impl AsRef<[u8]>) -> Result<Self, JwtSignerBuildError> {
-        let encoding_key = EncodingKey::from_ed_pem(ed25519_pem.as_ref())
+impl Ed25519JwtSigner {
+    pub fn from_pem(pem: impl AsRef<[u8]>) -> Result<Self, JwtSignerBuildError> {
+        let encoding_key = EncodingKey::from_ed_pem(pem.as_ref())
             .map_err(|source| JwtSignerBuildError::InvalidPem { source })?;
         Ok(Self { encoding_key })
     }
+}
 
-    pub fn sign<C: Serialize>(&self, claims: &C) -> Result<String, JwtSignerError> {
-        jsonwebtoken::encode(&Header::new(Algorithm::EdDSA), claims, &self.encoding_key)
+impl JwtSigner for Ed25519JwtSigner {
+    fn sign(&self, payload: String) -> Result<String, JwtSignerError> {
+        let header = Header::new(Algorithm::EdDSA);
+        jsonwebtoken::encode(&header, &payload, &self.encoding_key)
             .map_err(JwtSignerError::SignFailed)
     }
 }
