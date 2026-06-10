@@ -23,7 +23,7 @@ pub struct Ed25519JwtVerifier {
 }
 
 impl Ed25519JwtVerifier {
-    pub fn from_pem(pem: impl AsRef<[u8]>) -> Result<Self, JwtVerifierBuildError> {
+    pub fn try_from_pem(pem: impl AsRef<[u8]>) -> Result<Self, JwtVerifierBuildError> {
         let decoding_key = DecodingKey::from_ed_pem(pem.as_ref())
             .map_err(|source| JwtVerifierBuildError::InvalidPem(source))?;
         Ok(Self {
