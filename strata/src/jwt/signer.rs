@@ -9,8 +9,8 @@ pub enum JwtSignerBuildError {
 
 #[derive(Debug, Error)]
 pub enum JwtSignerError {
-    #[error("JWT sign failed")]
-    SignFailed(#[source] jsonwebtoken::errors::Error),
+    #[error("JWT encode failed")]
+    EncodeFailed(#[source] jsonwebtoken::errors::Error),
 }
 
 pub trait JwtSigner: Send + Sync + 'static {
@@ -35,6 +35,6 @@ impl JwtSigner for Ed25519JwtSigner {
         let header = Header::new(Algorithm::EdDSA);
 
         jsonwebtoken::encode(&header, &payload, &self.encoding_key)
-            .map_err(JwtSignerError::SignFailed)
+            .map_err(JwtSignerError::EncodeFailed)
     }
 }
