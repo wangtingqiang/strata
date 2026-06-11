@@ -14,7 +14,7 @@ pub enum JwtSignerError {
 }
 
 pub trait JwtSigner: Send + Sync + 'static {
-    fn sign(&self, payload: String) -> Result<String, JwtSignerError>;
+    fn sign(&self, payload: serde_json::Value) -> Result<String, JwtSignerError>;
 }
 
 pub struct Ed25519JwtSigner {
@@ -31,7 +31,7 @@ impl Ed25519JwtSigner {
 }
 
 impl JwtSigner for Ed25519JwtSigner {
-    fn sign(&self, payload: String) -> Result<String, JwtSignerError> {
+    fn sign(&self, payload: serde_json::Value) -> Result<String, JwtSignerError> {
         let header = Header::new(Algorithm::EdDSA);
 
         jsonwebtoken::encode(&header, &payload, &self.encoding_key)
