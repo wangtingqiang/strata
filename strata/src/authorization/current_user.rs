@@ -1,6 +1,12 @@
 #[derive(Debug, Clone)]
-pub struct CurrentUser {
-    pub id: String,
+pub struct CurrentUser<T>(pub T);
+
+impl<T> std::ops::Deref for CurrentUser<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 #[cfg(feature = "http")]
@@ -9,8 +15,9 @@ mod http {
 
     use crate::{authorization::CurrentUser, http::api::ApiFailure};
 
-    impl<S> FromRequestParts<S> for CurrentUser
+    impl<T, S> FromRequestParts<S> for CurrentUser<T>
     where
+        T: Clone + Send + Sync + 'static,
         S: Send + Sync,
     {
         type Rejection = ApiFailure;
@@ -21,13 +28,10 @@ mod http {
         ) -> Result<Self, Self::Rejection> {
             parts
                 .extensions
-                .get::<CurrentUser>()
+                .get::<CurrentUser<T>>()
                 .cloned()
                 .ok_or_else(|| {
-                    ApiFailure::internal_server_error(
-                        "INTERNAL_SERVER_ERROR",
-                        "系统异常，请稍后再试",
-                    )
+                    ApiFailure::internal_server_error("INTERNAL_ERROR", "系统异常，请稍后再试")
                 })
         }
     }
