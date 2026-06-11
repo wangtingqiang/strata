@@ -25,6 +25,7 @@ impl Ed25519JwtSigner {
     pub fn try_from_pem(pem: impl AsRef<[u8]>) -> Result<Self, JwtSignerBuildError> {
         let encoding_key = EncodingKey::from_ed_pem(pem.as_ref())
             .map_err(|source| JwtSignerBuildError::InvalidPem(source))?;
+
         Ok(Self { encoding_key })
     }
 }
@@ -32,6 +33,7 @@ impl Ed25519JwtSigner {
 impl JwtSigner for Ed25519JwtSigner {
     fn sign(&self, payload: String) -> Result<String, JwtSignerError> {
         let header = Header::new(Algorithm::EdDSA);
+
         jsonwebtoken::encode(&header, &payload, &self.encoding_key)
             .map_err(JwtSignerError::SignFailed)
     }

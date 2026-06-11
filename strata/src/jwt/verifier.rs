@@ -11,6 +11,8 @@ pub enum JwtVerifierBuildError {
 pub enum JwtVerifierError {
     #[error("JWT verify failed")]
     VerifyFailed(#[source] jsonwebtoken::errors::Error),
+    #[error("JWT claims serialization failed")]
+    ClaimsSerializeFailed(#[source] serde_json::Error),
 }
 
 pub trait JwtVerifier: Send + Sync + 'static {
@@ -26,6 +28,7 @@ impl Ed25519JwtVerifier {
     pub fn try_from_pem(pem: impl AsRef<[u8]>) -> Result<Self, JwtVerifierBuildError> {
         let decoding_key = DecodingKey::from_ed_pem(pem.as_ref())
             .map_err(|source| JwtVerifierBuildError::InvalidPem(source))?;
+
         Ok(Self {
             decoding_key,
             validation: Validation::new(Algorithm::EdDSA),
@@ -38,7 +41,7 @@ impl JwtVerifier for Ed25519JwtVerifier {
         let data =
             jsonwebtoken::decode::<serde_json::Value>(token, &self.decoding_key, &self.validation)
                 .map_err(JwtVerifierError::VerifyFailed)?;
-        Ok(serde_json::to_string(&data.claims)
-            .expect("serde_json::Value serialization should not fail"))
+
+        serde_json::to_string(&data.claims).map_err(JwtVerifierError::ClaimsSerializeFailed)
     }
 }
