@@ -105,7 +105,11 @@ impl IntoResponse for ApiFailure {
 
 impl<E: ErrorInfo> From<E> for ApiFailure {
     fn from(error: E) -> Self {
-        let status = match error.kind() {
+        let kind = error.kind();
+        let code = error.code();
+        let message = error.message();
+
+        let status = match kind {
             ErrorKind::Validation => StatusCode::BAD_REQUEST,
             ErrorKind::Unauthenticated => StatusCode::UNAUTHORIZED,
             ErrorKind::AccessDenied => StatusCode::FORBIDDEN,
@@ -114,6 +118,27 @@ impl<E: ErrorInfo> From<E> for ApiFailure {
             ErrorKind::Technical => StatusCode::INTERNAL_SERVER_ERROR,
             ErrorKind::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
         };
-        Self::new(status, error.code(), error.message())
+
+        if status.is_server_error() {
+            tracing::error!(
+                http.response.status_code = status.as_u16(),
+                error.kind = %kind,
+                error.code = code,
+                error.message = message,
+                %error,
+                "request failed"
+            );
+        } else {
+            tracing::warn!(
+                http.response.status_code = status.as_u16(),
+                error.kind = %kind,
+                error.code = code,
+                error.message = message,
+                %error,
+                "request failed"
+            );
+        }
+
+        Self::new(status, code, message)
     }
 }
