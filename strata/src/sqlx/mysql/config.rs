@@ -2,6 +2,7 @@ use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
 use sqlx::MySqlPool;
 use sqlx::mysql::{MySqlConnectOptions, MySqlPoolOptions};
+use std::time::Duration;
 
 use crate::sqlx::mysql::MySqlPoolInitError;
 
@@ -12,18 +13,14 @@ pub struct MySqlPoolConfig {
     pub username: String,
     pub password: SecretString,
     pub database: String,
-    pub max_connections: u32,
+    pub max_connections: Option<u32>,
+    pub acquire_timeout_seconds: Option<u64>,
 }
 
 impl MySqlPoolConfig {
     pub async fn connect(&self) -> Result<MySqlPool, MySqlPoolInitError> {
         if self.host.trim().is_empty() {
             return Err(MySqlPoolInitError::EmptyHost);
-        }
-        if self.max_connections == 0 {
-            return Err(MySqlPoolInitError::InvalidMaxConnections {
-                value: self.max_connections,
-            });
         }
 
         let options = MySqlConnectOptions::new()
@@ -33,10 +30,19 @@ impl MySqlPoolConfig {
             .password(self.password.expose_secret())
             .database(&self.database);
 
-        MySqlPoolOptions::new()
-            .max_connections(self.max_connections)
+        let mut pool_options = MySqlPoolOptions::new();
+
+        if let Some(n) = self.max_connections {
+            pool_options = pool_options.max_connections(n);
+        }
+
+        if let Some(t) = self.acquire_timeout_seconds {
+            pool_options = pool_options.acquire_timeout(Duration::from_secs(t));
+        }
+
+        pool_options
             .connect_with(options)
             .await
-            .map_err(|source| MySqlPoolInitError::Connect { source })
+            .map_err(|source| MySqlPoolInitError::Connect(source))
     }
 }
