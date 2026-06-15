@@ -3,7 +3,7 @@ use http::request::Parts;
 
 use crate::http::api::ApiFailure;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AppContext<T>(pub T);
 
 impl<T> std::ops::Deref for AppContext<T> {
