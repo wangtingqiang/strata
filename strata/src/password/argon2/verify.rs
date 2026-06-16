@@ -14,8 +14,7 @@ pub enum PasswordVerifyError {
 }
 
 pub fn verify_password(hash: &str, password: &str) -> Result<bool, PasswordVerifyError> {
-    let parsed_hash =
-        PasswordHash::new(hash).map_err(|e| PasswordVerifyError::InvalidHashFormat(e))?;
+    let parsed_hash = PasswordHash::new(hash).map_err(PasswordVerifyError::InvalidHashFormat)?;
 
     match Argon2::default().verify_password(password.as_bytes(), &parsed_hash) {
         Ok(()) => Ok(true),
