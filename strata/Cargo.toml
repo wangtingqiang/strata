@@ -11,7 +11,6 @@ error = ["dep:thiserror"]
 hash = ["dep:sha2"]
 http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
 jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror"]
-kafka = ["dep:rdkafka", "dep:secrecy", "dep:serde", "dep:thiserror"]
 macros = ["dep:strata-macros"]
 opaque-token = ["dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid"]
 pagination = ["dep:serde", "dep:thiserror", "error"]
@@ -47,7 +46,6 @@ opentelemetry = { version = "0.31", optional = true }
 opentelemetry-otlp = { version = "0.31", features = ["trace", "http-proto", "reqwest-blocking-client"], optional = true }
 opentelemetry_sdk = { version = "0.31", features = ["trace"], optional = true }
 rand_core = { version = "0.6", features = ["getrandom"], optional = true }
-rdkafka = { version = "0.39", features = ["cmake-build"], optional = true }
 redis = { version = "1.2", features = ["tokio-comp"], optional = true }
 secrecy = { version = "0.10", features = ["serde"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
