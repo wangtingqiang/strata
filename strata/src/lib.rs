@@ -34,3 +34,5 @@ pub mod telemetry;
 pub mod text;
 #[cfg(feature = "time")]
 pub mod time;
+#[cfg(feature = "validation")]
+pub mod validation;

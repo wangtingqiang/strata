@@ -29,6 +29,7 @@ telemetry = [
 telemetry-http = ["dep:axum", "dep:http", "dep:tower", "dep:tower-http", "telemetry"]
 text = ["dep:thiserror"]
 time = ["dep:time"]
+validation = ["dep:secrecy", "dep:thiserror"]
 
 [dependencies]
 strata-macros = { path = "../strata-macros", optional = true }
