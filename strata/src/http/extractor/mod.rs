@@ -1,5 +1,5 @@
-mod app_context;
+mod context;
 mod request_data;
 
-pub use app_context::AppContext;
+pub use context::Context;
 pub use request_data::{Json, Path, Query};
