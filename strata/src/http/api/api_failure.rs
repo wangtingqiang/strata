@@ -110,11 +110,13 @@ impl<E: ErrorInfo> From<E> for ApiFailure {
         let message = error.message();
 
         let status = match kind {
-            ErrorKind::Validation => StatusCode::BAD_REQUEST,
             ErrorKind::Unauthenticated => StatusCode::UNAUTHORIZED,
             ErrorKind::AccessDenied => StatusCode::FORBIDDEN,
+            ErrorKind::Validation => StatusCode::BAD_REQUEST,
+            ErrorKind::Business => StatusCode::UNPROCESSABLE_ENTITY,
             ErrorKind::NotFound => StatusCode::NOT_FOUND,
             ErrorKind::Conflict => StatusCode::CONFLICT,
+            ErrorKind::Internal => StatusCode::INTERNAL_SERVER_ERROR,
             ErrorKind::Technical => StatusCode::INTERNAL_SERVER_ERROR,
             ErrorKind::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
         };
