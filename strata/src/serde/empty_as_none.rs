@@ -40,3 +40,24 @@ where
         }
     }
 }
+
+pub fn deserialize_optional_bool_or_empty<'de, D>(deserializer: D) -> Result<Option<bool>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = Option::<String>::deserialize(deserializer)?;
+    match value {
+        None => Ok(None),
+        Some(value) => {
+            let normalized = value.trim();
+            if normalized.is_empty() {
+                return Ok(None);
+            }
+
+            normalized
+                .parse::<bool>()
+                .map(Some)
+                .map_err(serde::de::Error::custom)
+        }
+    }
+}
