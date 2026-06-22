@@ -116,6 +116,7 @@ impl<E: ErrorInfo> From<E> for ApiFailure {
             ErrorKind::Business => StatusCode::UNPROCESSABLE_ENTITY,
             ErrorKind::NotFound => StatusCode::NOT_FOUND,
             ErrorKind::Conflict => StatusCode::CONFLICT,
+            ErrorKind::RateLimited => StatusCode::TOO_MANY_REQUESTS,
             ErrorKind::Internal => StatusCode::INTERNAL_SERVER_ERROR,
             ErrorKind::Technical => StatusCode::INTERNAL_SERVER_ERROR,
             ErrorKind::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
