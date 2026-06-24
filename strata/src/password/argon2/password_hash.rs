@@ -1,4 +1,4 @@
-use argon2::password_hash::PasswordHash as Argon2Hash;
+use argon2::password_hash::phc;
 use secrecy::{ExposeSecret, SecretString};
 
 use crate::password::argon2::{verify::PasswordVerifyError, verify_password};
@@ -15,17 +15,22 @@ impl PartialEq for PasswordHash {
 impl Eq for PasswordHash {}
 
 impl PasswordHash {
-    pub fn new(hash: impl Into<String>) -> Result<Self, PasswordVerifyError> {
-        let hash = hash.into();
-        Argon2Hash::new(&hash).map_err(PasswordVerifyError::InvalidHashFormat)?;
-        Ok(Self(SecretString::new(hash.into())))
-    }
-
     pub fn expose_secret(&self) -> &str {
         self.0.expose_secret()
     }
 
     pub fn verify(&self, password: &str) -> Result<bool, PasswordVerifyError> {
         verify_password(self.0.expose_secret(), password)
+    }
+}
+
+impl TryFrom<&str> for PasswordHash {
+    type Error = PasswordVerifyError;
+
+    fn try_from(hash: &str) -> Result<Self, Self::Error> {
+        phc::PasswordHash::new(hash)
+            .map_err(|e| PasswordVerifyError::InvalidHashFormat(e.into()))?;
+
+        Ok(Self(hash.into()))
     }
 }

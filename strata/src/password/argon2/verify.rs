@@ -1,7 +1,4 @@
-use argon2::{
-    Argon2,
-    password_hash::{PasswordHash, PasswordVerifier},
-};
+use argon2::{Argon2, password_hash::PasswordVerifier};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -14,11 +11,9 @@ pub enum PasswordVerifyError {
 }
 
 pub fn verify_password(hash: &str, password: &str) -> Result<bool, PasswordVerifyError> {
-    let parsed_hash = PasswordHash::new(hash).map_err(PasswordVerifyError::InvalidHashFormat)?;
-
-    match Argon2::default().verify_password(password.as_bytes(), &parsed_hash) {
+    match Argon2::default().verify_password(password.as_bytes(), hash) {
         Ok(()) => Ok(true),
-        Err(argon2::password_hash::Error::Password) => Ok(false),
+        Err(argon2::password_hash::Error::PasswordInvalid) => Ok(false),
         Err(e) => Err(PasswordVerifyError::HashComputationFailed(e)),
     }
 }
