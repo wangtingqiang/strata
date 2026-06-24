@@ -110,6 +110,10 @@ fn build_tracer_provider(
     }
 
     let endpoint = otlp_http_endpoint.trim();
+    if endpoint.is_empty() {
+        return Err(TelemetryInitError::InvalidRemoteEndpoint);
+    }
+
     let exporter = SpanExporter::builder()
         .with_http()
         .with_protocol(Protocol::HttpBinary)
