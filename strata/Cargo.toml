@@ -24,7 +24,7 @@ telemetry = [
     "dep:opentelemetry", "dep:opentelemetry-otlp", "dep:opentelemetry_sdk",
     "dep:tracing", "dep:tracing-opentelemetry", "dep:tracing-subscriber",
     "opentelemetry-otlp/trace", "opentelemetry-otlp/http-proto", "opentelemetry-otlp/reqwest-blocking-client",
-    "opentelemetry_sdk/trace",
+    "opentelemetry/internal-logs", "opentelemetry_sdk/trace",
     "tracing-subscriber/env-filter", "tracing-subscriber/fmt", "tracing-subscriber/local-time", "tracing-subscriber/registry"
 ]
 telemetry-http = ["dep:axum", "dep:http", "dep:tower", "dep:tower-http", "telemetry", "tower-http/trace"]
