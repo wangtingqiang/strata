@@ -24,9 +24,7 @@ pub fn init(
     let local_layer = match local {
         TelemetryLocalConfig::Enabled { filter } => {
             let env_filter =
-                EnvFilter::try_new(filter).map_err(|error| TelemetryInitError::InvalidFilter {
-                    message: error.to_string(),
-                })?;
+                EnvFilter::try_new(filter).map_err(TelemetryInitError::InvalidFilter)?;
 
             Some(
                 tracing_subscriber::fmt::layer()
@@ -59,9 +57,7 @@ pub fn init(
             let tracer = provider.tracer(service_name.clone());
 
             let env_filter =
-                EnvFilter::try_new(filter).map_err(|error| TelemetryInitError::InvalidFilter {
-                    message: error.to_string(),
-                })?;
+                EnvFilter::try_new(filter).map_err(TelemetryInitError::InvalidFilter)?;
 
             let layer = Some(
                 tracing_opentelemetry::layer()
@@ -78,9 +74,7 @@ pub fn init(
         .with(local_layer)
         .with(remote_layer)
         .try_init()
-        .map_err(|error| TelemetryInitError::InitSubscriber {
-            message: error.to_string(),
-        })?;
+        .map_err(TelemetryInitError::InitSubscriber)?;
 
     Ok(TelemetryGuard { tracer_provider })
 }
