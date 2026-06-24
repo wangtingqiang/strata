@@ -37,7 +37,7 @@ axum = { version = "0.8", optional = true }
 base64 = { version = "0.22", optional = true }
 clickhouse = { version = "0.15", optional = true }
 config = { version = "0.15", optional = true }
-ed25519-dalek = { version = "2", features = ["pem"], optional = true }
+ed25519-dalek = { version = "2", optional = true }
 http = { version = "1", optional = true }
 jsonwebtoken = { version = "10", features = ["rust_crypto"], optional = true }
 opentelemetry = { version = "0.31", optional = true }
