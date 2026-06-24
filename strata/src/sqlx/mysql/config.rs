@@ -43,6 +43,6 @@ impl MySqlPoolConfig {
         pool_options
             .connect_with(options)
             .await
-            .map_err(|source| MySqlPoolInitError::Connect(source))
+            .map_err(MySqlPoolInitError::Connect)
     }
 }

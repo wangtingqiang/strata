@@ -42,7 +42,8 @@ impl Clone for Ed25519JwkExporter {
 impl Ed25519JwkExporter {
     pub fn new(public_key_pem: &str, kid: String) -> Result<Self, JwkExporterBuildError> {
         let public_key = VerifyingKey::from_public_key_pem(public_key_pem.trim())
-            .map_err(|source| JwkExporterBuildError::InvalidPem(source))?;
+            .map_err(JwkExporterBuildError::InvalidPem)?;
+
         Ok(Self { public_key, kid })
     }
 

@@ -23,8 +23,8 @@ pub struct Ed25519JwtSigner {
 
 impl Ed25519JwtSigner {
     pub fn try_from_pem(pem: impl AsRef<[u8]>) -> Result<Self, JwtSignerBuildError> {
-        let encoding_key = EncodingKey::from_ed_pem(pem.as_ref())
-            .map_err(|source| JwtSignerBuildError::InvalidPem(source))?;
+        let encoding_key =
+            EncodingKey::from_ed_pem(pem.as_ref()).map_err(JwtSignerBuildError::InvalidPem)?;
 
         Ok(Self { encoding_key })
     }

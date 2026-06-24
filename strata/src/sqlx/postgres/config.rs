@@ -43,6 +43,6 @@ impl PgPoolConfig {
         pool_options
             .connect_with(options)
             .await
-            .map_err(|source| PgPoolInitError::Connect(source))
+            .map_err(PgPoolInitError::Connect)
     }
 }
