@@ -9,22 +9,25 @@ config = ["dep:config", "dep:serde", "dep:thiserror"]
 error = ["dep:thiserror"]
 hash = ["dep:sha2"]
 http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
-jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror"]
+jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror", "jsonwebtoken/rust_crypto"]
 macros = ["dep:strata-macros"]
-opaque-token = ["dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid"]
+opaque-token = ["dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid", "uuid/v4"]
 pagination = ["dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:secrecy", "dep:thiserror"]
-redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror"]
+redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror", "redis/tokio-comp"]
 serde = ["dep:serde"]
 sqlx-mysql = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
 sqlx-postgres = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
-task = ["dep:tokio", "dep:tracing"]
+task = ["dep:tokio", "dep:tracing", "tokio/rt"]
 telemetry = [
     "dep:serde", "dep:thiserror",
     "dep:opentelemetry", "dep:opentelemetry-otlp", "dep:opentelemetry_sdk",
-    "dep:tracing", "dep:tracing-opentelemetry", "dep:tracing-subscriber"
+    "dep:tracing", "dep:tracing-opentelemetry", "dep:tracing-subscriber",
+    "opentelemetry-otlp/trace", "opentelemetry-otlp/http-proto", "opentelemetry-otlp/reqwest-blocking-client",
+    "opentelemetry_sdk/trace",
+    "tracing-subscriber/env-filter", "tracing-subscriber/fmt", "tracing-subscriber/local-time", "tracing-subscriber/registry"
 ]
-telemetry-http = ["dep:axum", "dep:http", "dep:tower", "dep:tower-http", "telemetry"]
+telemetry-http = ["dep:axum", "dep:http", "dep:tower", "dep:tower-http", "telemetry", "tower-http/trace"]
 text = ["dep:thiserror"]
 time = ["dep:time"]
 validation = ["dep:secrecy", "dep:thiserror"]
@@ -39,11 +42,11 @@ clickhouse = { version = "0.15", optional = true }
 config = { version = "0.15", optional = true }
 ed25519-dalek = { version = "2", optional = true }
 http = { version = "1", optional = true }
-jsonwebtoken = { version = "10", features = ["rust_crypto"], optional = true }
+jsonwebtoken = { version = "10", optional = true }
 opentelemetry = { version = "0.32", optional = true }
-opentelemetry-otlp = { version = "0.32", features = ["trace", "http-proto", "reqwest-blocking-client"], optional = true }
-opentelemetry_sdk = { version = "0.32", features = ["trace"], optional = true }
-redis = { version = "1.2", features = ["tokio-comp"], optional = true }
+opentelemetry-otlp = { version = "0.32", optional = true }
+opentelemetry_sdk = { version = "0.32", optional = true }
+redis = { version = "1.2", optional = true }
 secrecy = { version = "0.10", features = ["serde"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
@@ -51,10 +54,10 @@ sha2 = { version = "0.10", optional = true }
 sqlx = { version = "0.9", optional = true }
 thiserror = { version = "2", optional = true }
 time = { version = "0.3", features = ["formatting", "macros", "parsing"], optional = true }
-tokio = { version = "1", features = ["rt"], optional = true }
+tokio = { version = "1", optional = true }
 tower = { version = "0.5", optional = true }
-tower-http = { version = "0.7", features = ["trace"], optional = true }
+tower-http = { version = "0.7", optional = true }
 tracing = { version = "0.1", optional = true }
 tracing-opentelemetry = { version = "0.33", optional = true }
-tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "local-time", "registry"], optional = true }
-uuid = { version = "1", features = ["v4"], optional = true }
+tracing-subscriber = { version = "0.3", optional = true }
+uuid = { version = "1", optional = true }
