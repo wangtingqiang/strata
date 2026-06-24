@@ -26,16 +26,16 @@ impl RedisClientConfig {
 
         let connection_info = redis::ConnectionAddr::Tcp(self.host.clone(), self.port)
             .into_connection_info()
-            .map_err(|source| RedisClientInitError::BuildClient { source })?
+            .map_err(RedisClientInitError::BuildClient)?
             .set_redis_settings(redis_info);
 
-        let client = redis::Client::open(connection_info)
-            .map_err(|source| RedisClientInitError::BuildClient { source })?;
+        let client =
+            redis::Client::open(connection_info).map_err(RedisClientInitError::BuildClient)?;
 
         client
             .get_multiplexed_async_connection()
             .await
-            .map_err(|source| RedisClientInitError::Connect { source })?;
+            .map_err(RedisClientInitError::Connect)?;
 
         Ok(client)
     }
