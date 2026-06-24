@@ -116,7 +116,7 @@ fn build_tracer_provider(
         .with_endpoint(endpoint.to_owned())
         .with_timeout(Duration::from_millis(*otlp_http_timeout_ms))
         .build()
-        .map_err(|source| TelemetryInitError::BuildTraceExporter { source })?;
+        .map_err(TelemetryInitError::BuildTraceExporter)?;
 
     Ok(builder.with_batch_exporter(exporter).build())
 }

@@ -88,7 +88,7 @@ fn resolve_environment_from_env(
     match value {
         Ok(raw) => Environment::try_from(raw.as_str()).map_err(ConfigError::from),
         Err(std::env::VarError::NotPresent) => Ok(Environment::default()),
-        Err(source) => Err(ConfigError::ReadAppEnvironment { source }),
+        Err(source) => Err(ConfigError::ReadAppEnvironment(source)),
     }
 }
 
@@ -104,7 +104,7 @@ fn resolve_config_dir_from_env(
             }
         }
         Err(std::env::VarError::NotPresent) => Ok(None),
-        Err(source) => Err(ConfigError::ReadAppConfigDir { source }),
+        Err(source) => Err(ConfigError::ReadAppConfigDir(source)),
     }
 }
 

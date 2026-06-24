@@ -11,20 +11,14 @@ pub enum EnvironmentError {
 
 #[derive(Debug, Error)]
 pub enum ConfigError {
-    #[error("failed to read APP_ENVIRONMENT: {source}")]
-    ReadAppEnvironment {
-        #[source]
-        source: std::env::VarError,
-    },
+    #[error("failed to read APP_ENVIRONMENT: {0}")]
+    ReadAppEnvironment(#[source] std::env::VarError),
 
     #[error(transparent)]
     InvalidEnvironment(#[from] EnvironmentError),
 
-    #[error("failed to read APP_CONFIG_DIR: {source}")]
-    ReadAppConfigDir {
-        #[source]
-        source: std::env::VarError,
-    },
+    #[error("failed to read APP_CONFIG_DIR: {0}")]
+    ReadAppConfigDir(#[source] std::env::VarError),
 
     #[error("APP_CONFIG_DIR is set but empty")]
     EmptyAppConfigDir,
