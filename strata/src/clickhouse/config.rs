@@ -28,7 +28,7 @@ impl ChClientConfig {
             .query("SELECT 1")
             .fetch_one::<u8>()
             .await
-            .map_err(|source| ChClientInitError::Connect { source })?;
+            .map_err(ChClientInitError::Connect)?;
 
         Ok(client)
     }

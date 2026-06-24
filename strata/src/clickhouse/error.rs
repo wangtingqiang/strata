@@ -4,9 +4,6 @@ use thiserror::Error;
 pub enum ChClientInitError {
     #[error("clickhouse url is empty")]
     EmptyUrl,
-    #[error("failed to connect to clickhouse: {source}")]
-    Connect {
-        #[source]
-        source: clickhouse::error::Error,
-    },
+    #[error("failed to connect to clickhouse: {0}")]
+    Connect(#[source] clickhouse::error::Error),
 }
