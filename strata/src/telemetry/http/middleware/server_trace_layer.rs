@@ -7,7 +7,6 @@ use tower_http::{
     classify::{ServerErrorsAsFailures, SharedClassifier},
     trace::{MakeSpan, OnRequest, OnResponse, TraceLayer},
 };
-use tracing::{Span, error, info, warn};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -29,13 +28,14 @@ pub fn server_trace_layer()
 }
 
 impl<B> MakeSpan<B> for HttpMakeSpan {
-    fn make_span(&mut self, request: &Request<B>) -> Span {
+    fn make_span(&mut self, request: &Request<B>) -> tracing::Span {
         let route = request
             .extensions()
             .get::<MatchedPath>()
             .map(MatchedPath::as_str)
             .unwrap_or_else(|| request.uri().path())
             .to_owned();
+
         let span = tracing::info_span!(
             "http.server.request",
             otel.kind = "server",
@@ -45,18 +45,21 @@ impl<B> MakeSpan<B> for HttpMakeSpan {
             http.route = %route,
             http.response.status_code = tracing::field::Empty,
         );
+
         let _ = span.set_parent(global::get_text_map_propagator(|propagator| {
             propagator.extract(&HeaderExtractor(request.headers()))
         }));
+
         span
     }
 }
 
 impl<B> OnRequest<B> for HttpOnRequest {
-    fn on_request(&mut self, _request: &Request<B>, span: &Span) {
+    fn on_request(&mut self, _request: &Request<B>, span: &tracing::Span) {
         let context = span.context();
         let otel_span = context.span();
         let span_context = otel_span.span_context();
+
         if !span_context.is_valid() {
             return;
         }
@@ -67,17 +70,19 @@ impl<B> OnRequest<B> for HttpOnRequest {
 }
 
 impl<B> OnResponse<B> for HttpOnResponse {
-    fn on_response(self, response: &http::Response<B>, latency: Duration, span: &Span) {
+    fn on_response(self, response: &http::Response<B>, latency: Duration, span: &tracing::Span) {
         let status_code = response.status().as_u16();
+
         span.record("http.response.status_code", status_code);
 
         let _guard = span.enter();
+
         if response.status().is_server_error() {
-            error!(latency_ms = latency.as_millis(), "request completed");
+            tracing::error!(latency_ms = latency.as_millis(), "request completed");
         } else if response.status().is_client_error() {
-            warn!(latency_ms = latency.as_millis(), "request completed");
+            tracing::warn!(latency_ms = latency.as_millis(), "request completed");
         } else {
-            info!(latency_ms = latency.as_millis(), "request completed");
+            tracing::info!(latency_ms = latency.as_millis(), "request completed");
         }
     }
 }
