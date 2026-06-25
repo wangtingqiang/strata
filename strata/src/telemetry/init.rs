@@ -14,6 +14,14 @@ pub struct TelemetryGuard {
     tracer_provider: Option<SdkTracerProvider>,
 }
 
+impl Drop for TelemetryGuard {
+    fn drop(&mut self) {
+        if let Some(ref provider) = self.tracer_provider {
+            let _ = provider.shutdown();
+        }
+    }
+}
+
 pub fn init(
     local: &TelemetryLocalConfig,
     remote: &TelemetryRemoteConfig,
@@ -79,35 +87,28 @@ pub fn init(
     Ok(TelemetryGuard { tracer_provider })
 }
 
-impl Drop for TelemetryGuard {
-    fn drop(&mut self) {
-        if let Some(ref provider) = self.tracer_provider {
-            let _ = provider.shutdown();
-        }
-    }
-}
-
 fn build_tracer_provider(
     service_name: &str,
     service_version: &str,
     otlp_http_endpoint: &str,
     otlp_http_timeout_ms: u64,
 ) -> Result<SdkTracerProvider, TelemetryInitError> {
+    let endpoint = otlp_http_endpoint.trim();
+
+    if endpoint.is_empty() {
+        return Err(TelemetryInitError::InvalidRemoteEndpoint);
+    }
+
+    if otlp_http_timeout_ms == 0 {
+        return Err(TelemetryInitError::InvalidRemoteTimeout);
+    }
+
     let resource = Resource::builder_empty()
         .with_attributes([
             KeyValue::new("service.name", service_name.to_owned()),
             KeyValue::new("service.version", service_version.to_owned()),
         ])
         .build();
-
-    if otlp_http_timeout_ms == 0 {
-        return Err(TelemetryInitError::InvalidRemoteTimeout);
-    }
-
-    let endpoint = otlp_http_endpoint.trim();
-    if endpoint.is_empty() {
-        return Err(TelemetryInitError::InvalidRemoteEndpoint);
-    }
 
     let exporter = SpanExporter::builder()
         .with_http()
@@ -117,8 +118,10 @@ fn build_tracer_provider(
         .build()
         .map_err(TelemetryInitError::BuildTraceExporter)?;
 
-    Ok(SdkTracerProvider::builder()
+    let provider = SdkTracerProvider::builder()
         .with_resource(resource)
         .with_batch_exporter(exporter)
-        .build())
+        .build();
+
+    Ok(provider)
 }
