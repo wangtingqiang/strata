@@ -43,19 +43,23 @@ impl TelemetryConfig {
                 ref otlp_http_endpoint,
                 otlp_http_timeout_ms,
             } => {
-                let tracer_provider = build_tracer_provider(
-                    service_name,
-                    service_version,
-                    otlp_http_endpoint,
-                    otlp_http_timeout_ms,
-                )?;
+                let endpoint = otlp_http_endpoint.trim();
 
-                let meter_provider = build_meter_provider(
-                    service_name,
-                    service_version,
-                    otlp_http_endpoint,
-                    otlp_http_timeout_ms,
-                )?;
+                if endpoint.is_empty() {
+                    return Err(TelemetryInitError::InvalidRemoteEndpoint);
+                }
+
+                if otlp_http_timeout_ms == 0 {
+                    return Err(TelemetryInitError::InvalidRemoteTimeout);
+                }
+
+                let timeout = Duration::from_millis(otlp_http_timeout_ms);
+
+                let tracer_provider =
+                    build_tracer_provider(service_name, service_version, endpoint, timeout)?;
+
+                let meter_provider =
+                    build_meter_provider(service_name, service_version, endpoint, timeout)?;
 
                 global::set_tracer_provider(tracer_provider.clone());
                 global::set_meter_provider(meter_provider.clone());
@@ -91,19 +95,9 @@ impl TelemetryConfig {
 fn build_tracer_provider(
     service_name: &str,
     service_version: &str,
-    otlp_http_endpoint: &str,
-    otlp_http_timeout_ms: u64,
+    endpoint: &str,
+    timeout: Duration,
 ) -> Result<SdkTracerProvider, TelemetryInitError> {
-    let endpoint = otlp_http_endpoint.trim();
-
-    if endpoint.is_empty() {
-        return Err(TelemetryInitError::InvalidRemoteEndpoint);
-    }
-
-    if otlp_http_timeout_ms == 0 {
-        return Err(TelemetryInitError::InvalidRemoteTimeout);
-    }
-
     let resource = Resource::builder_empty()
         .with_attributes([
             KeyValue::new("service.name", service_name.to_owned()),
@@ -114,8 +108,8 @@ fn build_tracer_provider(
     let exporter = SpanExporter::builder()
         .with_http()
         .with_protocol(Protocol::HttpBinary)
-        .with_endpoint(endpoint.to_owned())
-        .with_timeout(Duration::from_millis(otlp_http_timeout_ms))
+        .with_endpoint(endpoint)
+        .with_timeout(timeout)
         .build()
         .map_err(TelemetryInitError::BuildTraceExporter)?;
 
@@ -130,19 +124,9 @@ fn build_tracer_provider(
 fn build_meter_provider(
     service_name: &str,
     service_version: &str,
-    otlp_http_endpoint: &str,
-    otlp_http_timeout_ms: u64,
+    endpoint: &str,
+    timeout: Duration,
 ) -> Result<SdkMeterProvider, TelemetryInitError> {
-    let endpoint = otlp_http_endpoint.trim();
-
-    if endpoint.is_empty() {
-        return Err(TelemetryInitError::InvalidRemoteEndpoint);
-    }
-
-    if otlp_http_timeout_ms == 0 {
-        return Err(TelemetryInitError::InvalidRemoteTimeout);
-    }
-
     let resource = Resource::builder_empty()
         .with_attributes([
             KeyValue::new("service.name", service_name.to_owned()),
@@ -153,8 +137,8 @@ fn build_meter_provider(
     let exporter = MetricExporter::builder()
         .with_http()
         .with_protocol(Protocol::HttpBinary)
-        .with_endpoint(endpoint.to_owned())
-        .with_timeout(Duration::from_millis(otlp_http_timeout_ms))
+        .with_endpoint(endpoint)
+        .with_timeout(timeout)
         .build()
         .map_err(TelemetryInitError::BuildMetricExporter)?;
 
