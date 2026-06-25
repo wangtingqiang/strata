@@ -1,10 +1,11 @@
 mod config;
 mod error;
+mod guard;
 mod init;
 
-pub use config::{TelemetryLocalConfig, TelemetryRemoteConfig};
+pub use config::{TelemetryConfig, TelemetryLocalConfig, TelemetryRemoteConfig};
 pub use error::TelemetryInitError;
-pub use init::{TelemetryGuard, init};
+pub use guard::TelemetryGuard;
 
 #[cfg(feature = "telemetry-http")]
 pub mod http;

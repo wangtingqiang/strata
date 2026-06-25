@@ -1,6 +1,12 @@
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
+pub struct TelemetryConfig {
+    pub local: TelemetryLocalConfig,
+    pub remote: TelemetryRemoteConfig,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 #[serde(try_from = "TelemetryLocalConfigHelper")]
 pub enum TelemetryLocalConfig {
     Disabled,

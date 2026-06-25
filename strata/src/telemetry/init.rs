@@ -9,99 +9,83 @@ use tracing_subscriber::{
     EnvFilter, Layer, fmt::time::LocalTime, layer::SubscriberExt as _, util::SubscriberInitExt as _,
 };
 
-use crate::telemetry::{TelemetryInitError, TelemetryLocalConfig, TelemetryRemoteConfig};
+use crate::telemetry::{
+    TelemetryGuard, TelemetryInitError, TelemetryLocalConfig, TelemetryRemoteConfig,
+    config::TelemetryConfig,
+};
 
-#[derive(Debug)]
-pub struct TelemetryGuard {
-    tracer_provider: Option<SdkTracerProvider>,
-    meter_provider: Option<SdkMeterProvider>,
-}
+impl TelemetryConfig {
+    pub fn init(&self) -> Result<TelemetryGuard, TelemetryInitError> {
+        #[cfg(feature = "telemetry-http")]
+        global::set_text_map_propagator(TraceContextPropagator::new());
 
-impl Drop for TelemetryGuard {
-    fn drop(&mut self) {
-        if let Some(ref provider) = self.tracer_provider {
-            let _ = provider.shutdown();
-        }
-        if let Some(ref provider) = self.meter_provider {
-            let _ = provider.shutdown();
-        }
+        let local_layer = match self.local {
+            TelemetryLocalConfig::Enabled { ref filter } => {
+                let env_filter =
+                    EnvFilter::try_new(filter).map_err(TelemetryInitError::InvalidFilter)?;
+
+                Some(
+                    tracing_subscriber::fmt::layer()
+                        .with_target(false)
+                        .with_timer(LocalTime::rfc_3339())
+                        .compact()
+                        .with_filter(env_filter),
+                )
+            }
+            TelemetryLocalConfig::Disabled => None,
+        };
+
+        let (tracer_provider, meter_provider, remote_layer) = match self.remote {
+            TelemetryRemoteConfig::Enabled {
+                ref filter,
+                ref service_name,
+                ref service_version,
+                ref otlp_http_endpoint,
+                otlp_http_timeout_ms,
+            } => {
+                let tracer_provider = build_tracer_provider(
+                    service_name,
+                    service_version,
+                    otlp_http_endpoint,
+                    otlp_http_timeout_ms,
+                )?;
+
+                let meter_provider = build_meter_provider(
+                    service_name,
+                    service_version,
+                    otlp_http_endpoint,
+                    otlp_http_timeout_ms,
+                )?;
+
+                global::set_tracer_provider(tracer_provider.clone());
+                global::set_meter_provider(meter_provider.clone());
+
+                let tracer = tracer_provider.tracer(service_name.clone());
+
+                let env_filter =
+                    EnvFilter::try_new(filter).map_err(TelemetryInitError::InvalidFilter)?;
+
+                let layer = Some(
+                    tracing_opentelemetry::layer()
+                        .with_tracer(tracer)
+                        .with_filter(env_filter),
+                );
+
+                (Some(tracer_provider), Some(meter_provider), layer)
+            }
+            TelemetryRemoteConfig::Disabled => (None, None, None),
+        };
+
+        tracing_subscriber::registry()
+            .with(local_layer)
+            .with(remote_layer)
+            .try_init()
+            .map_err(TelemetryInitError::InitSubscriber)?;
+
+        let guard = TelemetryGuard::new(tracer_provider, meter_provider);
+
+        Ok(guard)
     }
-}
-
-pub fn init(
-    local: &TelemetryLocalConfig,
-    remote: &TelemetryRemoteConfig,
-) -> Result<TelemetryGuard, TelemetryInitError> {
-    #[cfg(feature = "telemetry-http")]
-    global::set_text_map_propagator(TraceContextPropagator::new());
-
-    let local_layer = match local {
-        TelemetryLocalConfig::Enabled { filter } => {
-            let env_filter =
-                EnvFilter::try_new(filter).map_err(TelemetryInitError::InvalidFilter)?;
-
-            Some(
-                tracing_subscriber::fmt::layer()
-                    .with_target(false)
-                    .with_timer(LocalTime::rfc_3339())
-                    .compact()
-                    .with_filter(env_filter),
-            )
-        }
-        TelemetryLocalConfig::Disabled => None,
-    };
-
-    let (tracer_provider, meter_provider, remote_layer) = match remote {
-        TelemetryRemoteConfig::Enabled {
-            filter,
-            service_name,
-            service_version,
-            otlp_http_endpoint,
-            otlp_http_timeout_ms,
-        } => {
-            let tracer_provider = build_tracer_provider(
-                service_name,
-                service_version,
-                otlp_http_endpoint,
-                *otlp_http_timeout_ms,
-            )?;
-
-            let meter_provider = build_meter_provider(
-                service_name,
-                service_version,
-                otlp_http_endpoint,
-                *otlp_http_timeout_ms,
-            )?;
-
-            global::set_tracer_provider(tracer_provider.clone());
-            global::set_meter_provider(meter_provider.clone());
-
-            let tracer = tracer_provider.tracer(service_name.clone());
-
-            let env_filter =
-                EnvFilter::try_new(filter).map_err(TelemetryInitError::InvalidFilter)?;
-
-            let layer = Some(
-                tracing_opentelemetry::layer()
-                    .with_tracer(tracer)
-                    .with_filter(env_filter),
-            );
-
-            (Some(tracer_provider), Some(meter_provider), layer)
-        }
-        TelemetryRemoteConfig::Disabled => (None, None, None),
-    };
-
-    tracing_subscriber::registry()
-        .with(local_layer)
-        .with(remote_layer)
-        .try_init()
-        .map_err(TelemetryInitError::InitSubscriber)?;
-
-    Ok(TelemetryGuard {
-        tracer_provider,
-        meter_provider,
-    })
 }
 
 fn build_tracer_provider(
