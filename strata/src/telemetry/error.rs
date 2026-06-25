@@ -14,6 +14,9 @@ pub enum TelemetryInitError {
     #[error("build otlp http trace exporter failed: {0}")]
     BuildTraceExporter(#[source] opentelemetry_otlp::ExporterBuildError),
 
+    #[error("build otlp http metric exporter failed: {0}")]
+    BuildMetricExporter(#[source] opentelemetry_otlp::ExporterBuildError),
+
     #[error("initialize tracing subscriber failed: {0}")]
     InitSubscriber(#[source] tracing_subscriber::util::TryInitError),
 }
