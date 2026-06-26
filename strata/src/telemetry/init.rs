@@ -108,7 +108,7 @@ fn build_tracer_provider(
     let exporter = SpanExporter::builder()
         .with_http()
         .with_protocol(Protocol::HttpBinary)
-        .with_endpoint(endpoint)
+        .with_endpoint(format!("{}/v1/traces", endpoint))
         .with_timeout(timeout)
         .build()
         .map_err(TelemetryInitError::BuildTraceExporter)?;
@@ -137,7 +137,7 @@ fn build_meter_provider(
     let exporter = MetricExporter::builder()
         .with_http()
         .with_protocol(Protocol::HttpBinary)
-        .with_endpoint(endpoint)
+        .with_endpoint(format!("{}/v1/metrics", endpoint))
         .with_timeout(timeout)
         .build()
         .map_err(TelemetryInitError::BuildMetricExporter)?;
