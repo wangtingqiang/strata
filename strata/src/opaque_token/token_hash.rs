@@ -26,8 +26,9 @@ impl Eq for TokenHash {}
 
 impl From<&OpaqueToken> for TokenHash {
     fn from(token: &OpaqueToken) -> Self {
-        let digest = Sha256::digest(token.expose_secret().as_bytes());
-        Self(SecretString::from(format!("{digest:x}")))
+        let digest = hex::encode(Sha256::digest(token.expose_secret()));
+
+        Self(digest.into())
     }
 }
 

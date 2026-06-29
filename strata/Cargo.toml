@@ -7,11 +7,11 @@ edition.workspace = true
 clickhouse = ["dep:clickhouse", "dep:secrecy", "dep:serde", "dep:thiserror"]
 config = ["dep:config", "dep:serde", "dep:thiserror"]
 error = ["dep:thiserror"]
-hash = ["dep:sha2"]
+hash = ["dep:hex", "dep:sha2"]
 http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
 jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror", "jsonwebtoken/rust_crypto"]
 macros = ["dep:strata-macros"]
-opaque-token = ["dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid", "uuid/v4"]
+opaque-token = ["dep:hex", "dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid", "uuid/v4"]
 pagination = ["dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:secrecy", "dep:thiserror"]
 redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror", "redis/tokio-comp"]
@@ -41,6 +41,7 @@ base64 = { version = "0.22", optional = true }
 clickhouse = { version = "0.15", optional = true }
 config = { version = "0.15", optional = true }
 ed25519-dalek = { version = "2", optional = true }
+hex = { version = "0.4", optional = true }
 http = { version = "1", optional = true }
 jsonwebtoken = { version = "10", optional = true }
 opentelemetry = { version = "0.32", optional = true }
@@ -50,7 +51,7 @@ redis = { version = "1.2", optional = true }
 secrecy = { version = "0.10", features = ["serde"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
-sha2 = { version = "0.10", optional = true }
+sha2 = { version = "0.11", optional = true }
 sqlx = { version = "0.9", optional = true }
 thiserror = { version = "2", optional = true }
 time = { version = "0.3", features = ["formatting", "macros", "parsing"], optional = true }
