@@ -51,7 +51,7 @@ pub fn s3_authorization(
     url: &str,
     amz_date: &str,
     region: &str,
-    access_key: &str,
+    access_key: &SecretString,
     secret_key: &SecretString,
 ) -> Result<String, SigningError> {
     if amz_date.len() != 16 {
@@ -97,6 +97,7 @@ UNSIGNED-PAYLOAD"#,
         .into_bytes();
     let signature = hex::encode(signature);
 
+    let access_key = access_key.expose_secret();
     let authorization = format!(
         "AWS4-HMAC-SHA256 Credential={access_key}/{credential_scope}, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature={signature}"
     );
