@@ -1,9 +1,12 @@
 use thiserror::Error;
 
-use crate::error::{DataCorruptedError, UnexpectedError};
+use crate::error::{DataCorruptedError, InvalidArgumentError, UnexpectedError};
 
 #[derive(Debug, Error)]
 pub enum PortError {
+    #[error(transparent)]
+    InvalidArgument(#[from] InvalidArgumentError),
+
     #[error(transparent)]
     DataCorrupted(#[from] DataCorruptedError),
 
@@ -12,6 +15,17 @@ pub enum PortError {
 }
 
 impl PortError {
+    pub fn invalid_argument(
+        message: impl Into<String>,
+        source: impl std::error::Error + Send + Sync + 'static,
+    ) -> Self {
+        InvalidArgumentError::new(message, source).into()
+    }
+
+    pub fn invalid_argument_from_message(message: impl Into<String>) -> Self {
+        InvalidArgumentError::from_message(message).into()
+    }
+
     pub fn data_corrupted(
         message: impl Into<String>,
         source: impl std::error::Error + Send + Sync + 'static,
