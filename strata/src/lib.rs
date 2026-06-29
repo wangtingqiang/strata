@@ -18,6 +18,8 @@ pub mod pagination;
 pub mod password;
 #[cfg(feature = "redis")]
 pub mod redis;
+#[cfg(feature = "s3")]
+pub mod s3;
 #[cfg(feature = "serde")]
 pub mod serde;
 #[cfg(any(feature = "sqlx-mysql", feature = "sqlx-postgres"))]

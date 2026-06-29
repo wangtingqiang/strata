@@ -15,6 +15,7 @@ opaque-token = ["dep:hex", "dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid
 pagination = ["dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:secrecy", "dep:thiserror"]
 redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror", "redis/tokio-comp"]
+s3 = ["dep:hex", "dep:hmac", "dep:secrecy", "dep:serde", "dep:sha2", "dep:thiserror", "dep:url"]
 serde = ["dep:serde"]
 sqlx-mysql = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
 sqlx-postgres = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
@@ -42,6 +43,7 @@ clickhouse = { version = "0.15", optional = true }
 config = { version = "0.15", optional = true }
 ed25519-dalek = { version = "2", optional = true }
 hex = { version = "0.4", optional = true }
+hmac = { version = "0.13", optional = true }
 http = { version = "1", optional = true }
 jsonwebtoken = { version = "10", optional = true }
 opentelemetry = { version = "0.32", optional = true }
@@ -62,3 +64,4 @@ tracing = { version = "0.1", optional = true }
 tracing-opentelemetry = { version = "0.33", optional = true }
 tracing-subscriber = { version = "0.3", optional = true }
 uuid = { version = "1", optional = true }
+url = { version = "2", optional = true }
