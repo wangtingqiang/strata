@@ -18,8 +18,6 @@ pub enum TelemetryLocalConfig {
 pub enum TelemetryRemoteConfig {
     Disabled,
     Enabled {
-        service_name: String,
-        service_version: String,
         filter: String,
         otlp_http_endpoint: String,
         otlp_http_timeout_ms: u64,
@@ -48,8 +46,6 @@ impl TryFrom<TelemetryLocalConfigHelper> for TelemetryLocalConfig {
 #[derive(Debug, Clone, Deserialize)]
 struct TelemetryRemoteConfigHelper {
     enabled: bool,
-    service_name: Option<String>,
-    service_version: Option<String>,
     filter: Option<String>,
     otlp_http_endpoint: Option<String>,
     otlp_http_timeout_ms: Option<u64>,
@@ -63,12 +59,6 @@ impl TryFrom<TelemetryRemoteConfigHelper> for TelemetryRemoteConfig {
             return Ok(Self::Disabled);
         }
         Ok(Self::Enabled {
-            service_name: h
-                .service_name
-                .ok_or("service_name is required when enabled")?,
-            service_version: h
-                .service_version
-                .ok_or("service_version is required when enabled")?,
             filter: h.filter.ok_or("filter is required when enabled")?,
             otlp_http_endpoint: h
                 .otlp_http_endpoint

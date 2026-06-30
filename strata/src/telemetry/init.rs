@@ -15,7 +15,11 @@ use crate::telemetry::{
 };
 
 impl TelemetryConfig {
-    pub fn init(&self) -> Result<TelemetryGuard, TelemetryInitError> {
+    pub fn init(
+        &self,
+        service_name: &str,
+        service_version: &str,
+    ) -> Result<TelemetryGuard, TelemetryInitError> {
         #[cfg(feature = "telemetry-http")]
         global::set_text_map_propagator(TraceContextPropagator::new());
 
@@ -38,8 +42,6 @@ impl TelemetryConfig {
         let (tracer_provider, meter_provider, remote_layer) = match self.remote {
             TelemetryRemoteConfig::Enabled {
                 ref filter,
-                ref service_name,
-                ref service_version,
                 ref otlp_http_endpoint,
                 otlp_http_timeout_ms,
             } => {
@@ -64,7 +66,7 @@ impl TelemetryConfig {
                 global::set_tracer_provider(tracer_provider.clone());
                 global::set_meter_provider(meter_provider.clone());
 
-                let tracer = tracer_provider.tracer(service_name.clone());
+                let tracer = tracer_provider.tracer(service_name.to_owned());
 
                 let env_filter =
                     EnvFilter::try_new(filter).map_err(TelemetryInitError::InvalidFilter)?;
@@ -148,4 +150,11 @@ fn build_meter_provider(
         .build();
 
     Ok(provider)
+}
+
+#[macro_export]
+macro_rules! init_telemetry {
+    ($config:expr) => {
+        $config.init(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+    };
 }
