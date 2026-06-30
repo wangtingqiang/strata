@@ -151,10 +151,3 @@ fn build_meter_provider(
 
     Ok(provider)
 }
-
-#[macro_export]
-macro_rules! init_telemetry {
-    ($config:expr) => {
-        $config.init(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
-    };
-}
