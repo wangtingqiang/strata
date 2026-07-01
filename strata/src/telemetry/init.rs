@@ -30,9 +30,11 @@ impl TelemetryConfig {
 
                 Some(
                     tracing_subscriber::fmt::layer()
+                        .pretty()
                         .with_target(false)
+                        .with_file(false)
+                        .with_line_number(false)
                         .with_timer(LocalTime::rfc_3339())
-                        .compact()
                         .with_filter(env_filter),
                 )
             }

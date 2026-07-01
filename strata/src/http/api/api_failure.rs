@@ -128,7 +128,7 @@ impl<E: ErrorInfo> From<E> for ApiFailure {
                 error.kind = %kind,
                 error.code = %code,
                 error.message = %message,
-                %error,
+                error.detail = %error,
                 "request failed"
             );
         } else {
@@ -137,7 +137,7 @@ impl<E: ErrorInfo> From<E> for ApiFailure {
                 error.kind = %kind,
                 error.code = %code,
                 error.message = %message,
-                %error,
+                error.detail = %error,
                 "request failed"
             );
         }
