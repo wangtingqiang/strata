@@ -136,7 +136,7 @@ impl<E: ErrorInfo> From<E> for ApiFailure {
                 http.response.status_code = status.as_u16(),
                 error.kind = %kind,
                 error.code = %code,
-                error.message = &message,
+                error.message = %message,
                 %error,
                 "request failed"
             );
