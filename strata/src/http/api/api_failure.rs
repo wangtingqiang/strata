@@ -124,21 +124,19 @@ impl<E: ErrorInfo> From<E> for ApiFailure {
 
         if status.is_server_error() {
             tracing::error!(
-                http.response.status_code = status.as_u16(),
                 error.kind = %kind,
                 error.code = %code,
                 error.message = %message,
                 error.detail = %error,
-                "request failed"
+                "server error"
             );
         } else {
             tracing::warn!(
-                http.response.status_code = status.as_u16(),
                 error.kind = %kind,
                 error.code = %code,
                 error.message = %message,
                 error.detail = %error,
-                "request failed"
+                "client error"
             );
         }
 
