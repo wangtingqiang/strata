@@ -39,7 +39,6 @@ impl<B> MakeSpan<B> for HttpMakeSpan {
         let span = tracing::info_span!(
             "http.server.request",
             otel.kind = %"server",
-            trace_id = tracing::field::Empty,
             http.request.method = %request.method(),
             http.route = %route,
             http.response.status_code = tracing::field::Empty,
@@ -63,24 +62,23 @@ impl<B> OnRequest<B> for HttpOnRequest {
             return;
         }
 
-        span.record("trace_id", tracing::field::display(span_context.trace_id()));
+        tracing::info!(trace_id = %span_context.trace_id(), "request started");
     }
 }
 
 impl<B> OnResponse<B> for HttpOnResponse {
     fn on_response(self, response: &http::Response<B>, latency: Duration, span: &tracing::Span) {
         let status_code = response.status().as_u16();
+        let latency_ms = latency.as_millis();
 
         span.record("http.response.status_code", status_code);
 
-        let _guard = span.enter();
-
         if response.status().is_server_error() {
-            tracing::error!(latency_ms = latency.as_millis(), "request completed");
+            tracing::error!(%latency_ms, "request completed");
         } else if response.status().is_client_error() {
-            tracing::warn!(latency_ms = latency.as_millis(), "request completed");
+            tracing::warn!(%latency_ms, "request completed");
         } else {
-            tracing::info!(latency_ms = latency.as_millis(), "request completed");
+            tracing::info!(%latency_ms, "request completed");
         }
     }
 }
