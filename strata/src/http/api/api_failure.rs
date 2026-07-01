@@ -126,8 +126,8 @@ impl<E: ErrorInfo> From<E> for ApiFailure {
             tracing::error!(
                 http.response.status_code = status.as_u16(),
                 error.kind = %kind,
-                error.code = code,
-                error.message = message,
+                error.code = %code,
+                error.message = %message,
                 %error,
                 "request failed"
             );
@@ -135,8 +135,8 @@ impl<E: ErrorInfo> From<E> for ApiFailure {
             tracing::warn!(
                 http.response.status_code = status.as_u16(),
                 error.kind = %kind,
-                error.code = code,
-                error.message = message,
+                error.code = %code,
+                error.message = &message,
                 %error,
                 "request failed"
             );
