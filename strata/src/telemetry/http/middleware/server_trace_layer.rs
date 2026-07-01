@@ -40,7 +40,6 @@ impl<B> MakeSpan<B> for HttpMakeSpan {
             "http.server.request",
             otel.kind = %"server",
             trace_id = tracing::field::Empty,
-            span_id = tracing::field::Empty,
             http.request.method = %request.method(),
             http.route = %route,
             http.response.status_code = tracing::field::Empty,
@@ -65,7 +64,6 @@ impl<B> OnRequest<B> for HttpOnRequest {
         }
 
         span.record("trace_id", tracing::field::display(span_context.trace_id()));
-        span.record("span_id", tracing::field::display(span_context.span_id()));
     }
 }
 
