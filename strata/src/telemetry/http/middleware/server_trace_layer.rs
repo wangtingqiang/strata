@@ -1,11 +1,13 @@
 use std::time::Duration;
 
 use axum::extract::MatchedPath;
-use http::{HeaderMap, HeaderName, Request};
-use opentelemetry::{global, propagation::Extractor, trace::TraceContextExt};
+use http::{HeaderMap, HeaderName};
+use opentelemetry::{global, propagation::Extractor};
 use tower_http::{
     classify::{ServerErrorsAsFailures, SharedClassifier},
-    trace::{MakeSpan, OnRequest, OnResponse, TraceLayer},
+    trace::{
+        DefaultOnBodyChunk, DefaultOnEos, MakeSpan, OnFailure, OnRequest, OnResponse, TraceLayer,
+    },
 };
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
@@ -18,23 +20,32 @@ pub struct HttpOnRequest;
 #[derive(Clone, Copy, Debug, Default)]
 pub struct HttpOnResponse;
 
-pub fn server_trace_layer()
--> TraceLayer<SharedClassifier<ServerErrorsAsFailures>, HttpMakeSpan, HttpOnRequest, HttpOnResponse>
-{
+#[derive(Clone, Copy, Debug, Default)]
+pub struct HttpOnFailure;
+
+pub fn server_trace_layer() -> TraceLayer<
+    SharedClassifier<ServerErrorsAsFailures>,
+    HttpMakeSpan,
+    HttpOnRequest,
+    HttpOnResponse,
+    DefaultOnBodyChunk,
+    DefaultOnEos,
+    HttpOnFailure,
+> {
     TraceLayer::new_for_http()
         .make_span_with(HttpMakeSpan)
         .on_request(HttpOnRequest)
         .on_response(HttpOnResponse)
+        .on_failure(HttpOnFailure)
 }
 
 impl<B> MakeSpan<B> for HttpMakeSpan {
-    fn make_span(&mut self, request: &Request<B>) -> tracing::Span {
+    fn make_span(&mut self, request: &http::Request<B>) -> tracing::Span {
         let route = request
             .extensions()
             .get::<MatchedPath>()
             .map(MatchedPath::as_str)
-            .unwrap_or_else(|| request.uri().path())
-            .to_owned();
+            .unwrap_or("unmatched");
 
         let span = tracing::info_span!(
             "http.server.request",
@@ -53,17 +64,7 @@ impl<B> MakeSpan<B> for HttpMakeSpan {
 }
 
 impl<B> OnRequest<B> for HttpOnRequest {
-    fn on_request(&mut self, _request: &Request<B>, span: &tracing::Span) {
-        let context = span.context();
-        let otel_span = context.span();
-        let span_context = otel_span.span_context();
-
-        if !span_context.is_valid() {
-            return;
-        }
-
-        tracing::info!(trace_id = %span_context.trace_id(), "request started");
-    }
+    fn on_request(&mut self, _: &http::Request<B>, _: &tracing::Span) {}
 }
 
 impl<B> OnResponse<B> for HttpOnResponse {
@@ -81,6 +82,10 @@ impl<B> OnResponse<B> for HttpOnResponse {
             tracing::info!(%latency_ms, "request completed");
         }
     }
+}
+
+impl<FailureClass> OnFailure<FailureClass> for HttpOnFailure {
+    fn on_failure(&mut self, _: FailureClass, _: Duration, _: &tracing::Span) {}
 }
 
 struct HeaderExtractor<'a>(&'a HeaderMap);
