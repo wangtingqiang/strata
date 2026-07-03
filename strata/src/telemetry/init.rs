@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use opentelemetry::{KeyValue, global, trace::TracerProvider as _};
+use opentelemetry::{KeyValue, trace::TracerProvider as _};
 use opentelemetry_otlp::{MetricExporter, Protocol, SpanExporter, WithExportConfig};
 #[cfg(feature = "telemetry-http")]
 use opentelemetry_sdk::propagation::TraceContextPropagator;
@@ -21,7 +21,7 @@ impl TelemetryConfig {
         service_version: &str,
     ) -> Result<TelemetryGuard, TelemetryInitError> {
         #[cfg(feature = "telemetry-http")]
-        global::set_text_map_propagator(TraceContextPropagator::new());
+        opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
 
         let local_layer = match self.local {
             TelemetryLocalConfig::Enabled { ref filter } => {
@@ -65,8 +65,8 @@ impl TelemetryConfig {
                 let meter_provider =
                     build_meter_provider(service_name, service_version, endpoint, timeout)?;
 
-                global::set_tracer_provider(tracer_provider.clone());
-                global::set_meter_provider(meter_provider.clone());
+                opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+                opentelemetry::global::set_meter_provider(meter_provider.clone());
 
                 let tracer = tracer_provider.tracer(service_name.to_owned());
 
