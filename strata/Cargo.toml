@@ -26,7 +26,8 @@ telemetry = [
     "dep:tracing", "dep:tracing-opentelemetry", "dep:tracing-subscriber",
     "opentelemetry-otlp/trace", "opentelemetry-otlp/http-proto", "opentelemetry-otlp/reqwest-blocking-client",
     "opentelemetry/internal-logs", "opentelemetry_sdk/trace",
-    "tracing-subscriber/env-filter", "tracing-subscriber/fmt", "tracing-subscriber/local-time", "tracing-subscriber/registry"
+    "tracing-subscriber/ansi", "tracing-subscriber/fmt", "tracing-subscriber/smallvec", "tracing-subscriber/std",
+    "tracing-subscriber/env-filter", "tracing-subscriber/local-time", "tracing-subscriber/registry",
 ]
 telemetry-http = ["dep:axum", "dep:http", "telemetry"]
 text = ["dep:thiserror"]
@@ -60,6 +61,6 @@ time = { version = "0.3", features = ["formatting", "macros", "parsing"], option
 tokio = { version = "1", optional = true }
 tracing = { version = "0.1", optional = true }
 tracing-opentelemetry = { version = "0.33", optional = true }
-tracing-subscriber = { version = "0.3", optional = true }
+tracing-subscriber = { version = "0.3", optional = true, default-features = false }
 uuid = { version = "1", optional = true }
 url = { version = "2", optional = true }
