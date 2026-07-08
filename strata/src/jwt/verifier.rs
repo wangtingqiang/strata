@@ -7,12 +7,6 @@ pub enum JwtVerifierBuildError {
     InvalidPem(#[source] jsonwebtoken::errors::Error),
 }
 
-#[derive(Debug)]
-pub enum JwtVerification {
-    Valid(serde_json::Value),
-    Invalid,
-}
-
 #[derive(Debug, Error)]
 pub enum JwtVerifierError {
     #[error("JWT decode failed: {0}")]
@@ -20,7 +14,7 @@ pub enum JwtVerifierError {
 }
 
 pub trait JwtVerifier: Send + Sync + 'static {
-    fn verify(&self, token: &str) -> Result<JwtVerification, JwtVerifierError>;
+    fn verify(&self, token: &str) -> Result<serde_json::Value, JwtVerifierError>;
 }
 
 pub struct Ed25519JwtVerifier {
@@ -41,26 +35,11 @@ impl Ed25519JwtVerifier {
 }
 
 impl JwtVerifier for Ed25519JwtVerifier {
-    fn verify(&self, token: &str) -> Result<JwtVerification, JwtVerifierError> {
-        let data = match jsonwebtoken::decode::<serde_json::Value>(
-            token,
-            &self.decoding_key,
-            &self.validation,
-        ) {
-            Ok(data) => data,
-            Err(e) => {
-                use jsonwebtoken::errors::ErrorKind;
-
-                return match e.kind() {
-                    ErrorKind::Json(_)
-                    | ErrorKind::Base64(_)
-                    | ErrorKind::Utf8(_)
-                    | ErrorKind::Provider(_) => Err(JwtVerifierError::DecodeFailed(e)),
-                    _ => Ok(JwtVerification::Invalid),
-                };
-            }
-        };
-
-        Ok(JwtVerification::Valid(data.claims))
+    fn verify(&self, token: &str) -> Result<serde_json::Value, JwtVerifierError> {
+        match jsonwebtoken::decode::<serde_json::Value>(token, &self.decoding_key, &self.validation)
+        {
+            Ok(data) => Ok(data.claims),
+            Err(error) => Err(JwtVerifierError::DecodeFailed(error)),
+        }
     }
 }
