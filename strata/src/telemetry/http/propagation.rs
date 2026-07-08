@@ -9,6 +9,8 @@ pub trait HeaderMapExt {
 
 impl HeaderMapExt for HeaderMap {
     fn inject_trace_context(&mut self) {
+        crate::telemetry::http::ensure_propagator();
+
         let span = Span::current();
         let context = span.context();
         if !context.span().span_context().is_valid() {

@@ -10,6 +10,8 @@ use tracing::Instrument;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 pub async fn server_trace(request: Request, next: Next) -> Response {
+    crate::telemetry::http::ensure_propagator();
+
     let route = request
         .extensions()
         .get::<MatchedPath>()
