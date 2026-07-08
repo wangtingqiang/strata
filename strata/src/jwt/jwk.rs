@@ -5,13 +5,13 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum JwkExporterBuildError {
-    #[error("invalid Ed25519 PEM")]
+    #[error("invalid Ed25519 PEM: {0}")]
     InvalidPem(#[source] ed25519_dalek::pkcs8::spki::Error),
 }
 
 #[derive(Debug, Error)]
 pub enum JwkExporterError {
-    #[error("export JWKS failed")]
+    #[error("export JWKS failed: {0}")]
     ExportFailed(#[source] serde_json::Error),
 }
 

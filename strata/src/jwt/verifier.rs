@@ -3,7 +3,7 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum JwtVerifierBuildError {
-    #[error("invalid Ed25519 PEM")]
+    #[error("invalid Ed25519 PEM: {0}")]
     InvalidPem(#[source] jsonwebtoken::errors::Error),
 }
 
@@ -15,7 +15,7 @@ pub enum JwtVerification {
 
 #[derive(Debug, Error)]
 pub enum JwtVerifierError {
-    #[error("JWT decode failed")]
+    #[error("JWT decode failed: {0}")]
     DecodeFailed(#[source] jsonwebtoken::errors::Error),
 }
 
