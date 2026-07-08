@@ -1,0 +1,7 @@
+error: ErrorInfo derive macro only supports enums
+ --> tests/ui/01-not-enum.rs:4:1
+  |
+4 | / struct NotAnEnum {
+5 | |     _x: i32,
+6 | | }
+  | |_^
