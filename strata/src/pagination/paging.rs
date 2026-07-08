@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use thiserror::Error;
 
 use crate::error::{ErrorInfo, ErrorKind};
@@ -38,15 +40,15 @@ impl ErrorInfo for PagingError {
         "INVALID_PAGING"
     }
 
-    fn message(&self) -> &'static str {
+    fn message(&self) -> Cow<'static, str> {
         use PagingError::*;
 
         match self {
-            PageZero => "页码必须大于0",
-            PageSizeZero => "每页条数必须大于0",
-            PageSizeTooLarge => "每页条数不能超过100",
-            LimitZero => "查询条数必须大于0",
-            LimitTooLarge => "查询条数不能超过100",
+            PageZero => Cow::Borrowed("页码必须大于 0"),
+            PageSizeZero => Cow::Borrowed("每页条数必须大于 0"),
+            PageSizeTooLarge => Cow::Owned(format!("每页条数不能超过 {MAX_PAGE_SIZE}")),
+            LimitZero => Cow::Borrowed("查询条数必须大于 0"),
+            LimitTooLarge => Cow::Owned(format!("查询条数不能超过 {MAX_LIMIT}")),
         }
     }
 }
