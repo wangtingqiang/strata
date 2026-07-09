@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use const_format::formatcp;
 use thiserror::Error;
 
 use crate::error::{ErrorInfo, ErrorKind};
@@ -20,15 +21,15 @@ pub struct Paging {
 #[derive(Debug, Clone, Copy, Error, PartialEq, Eq)]
 pub enum PagingError {
     #[error("page must be greater than 0")]
-    PageZero,
+    InvalidPage,
     #[error("page size must be greater than 0")]
-    PageSizeZero,
+    InvalidPageSize,
     #[error("page size must not exceed {MAX_PAGE_SIZE}")]
-    PageSizeTooLarge,
+    PageSizeExceeded,
     #[error("limit must be greater than 0")]
-    LimitZero,
+    InvalidLimit,
     #[error("limit must not exceed {MAX_LIMIT}")]
-    LimitTooLarge,
+    LimitExceeded,
 }
 
 impl ErrorInfo for PagingError {
@@ -37,18 +38,24 @@ impl ErrorInfo for PagingError {
     }
 
     fn code(&self) -> &'static str {
-        "INVALID_PAGING"
+        match self {
+            PagingError::InvalidPage => "INVALID_PAGE",
+            PagingError::InvalidPageSize => "INVALID_PAGE_SIZE",
+            PagingError::PageSizeExceeded => "PAGE_SIZE_EXCEEDED",
+            PagingError::InvalidLimit => "INVALID_LIMIT",
+            PagingError::LimitExceeded => "LIMIT_EXCEEDED",
+        }
     }
 
     fn message(&self) -> Cow<'static, str> {
-        use PagingError::*;
-
         match self {
-            PageZero => Cow::Borrowed("页码必须大于 0"),
-            PageSizeZero => Cow::Borrowed("每页条数必须大于 0"),
-            PageSizeTooLarge => Cow::Owned(format!("每页条数不能超过 {MAX_PAGE_SIZE}")),
-            LimitZero => Cow::Borrowed("查询条数必须大于 0"),
-            LimitTooLarge => Cow::Owned(format!("查询条数不能超过 {MAX_LIMIT}")),
+            PagingError::InvalidPage => Cow::Borrowed("页码必须大于 0"),
+            PagingError::InvalidPageSize => Cow::Borrowed("每页条数必须大于 0"),
+            PagingError::PageSizeExceeded => {
+                Cow::Borrowed(formatcp!("每页条数不能超过 {MAX_PAGE_SIZE}"))
+            }
+            PagingError::InvalidLimit => Cow::Borrowed("查询条数必须大于 0"),
+            PagingError::LimitExceeded => Cow::Borrowed(formatcp!("查询条数不能超过 {MAX_LIMIT}")),
         }
     }
 }
@@ -56,13 +63,13 @@ impl ErrorInfo for PagingError {
 impl Paging {
     pub fn new(page: u64, page_size: u64, need_total: bool) -> Result<Self, PagingError> {
         if page == 0 {
-            return Err(PagingError::PageZero);
+            return Err(PagingError::InvalidPage);
         }
         if page_size == 0 {
-            return Err(PagingError::PageSizeZero);
+            return Err(PagingError::InvalidPageSize);
         }
         if page_size > MAX_PAGE_SIZE {
-            return Err(PagingError::PageSizeTooLarge);
+            return Err(PagingError::PageSizeExceeded);
         }
 
         Ok(Self {
@@ -122,10 +129,10 @@ pub struct CursorPaging<C> {
 impl<C> CursorPaging<C> {
     pub fn new(limit: u64, cursor: Option<C>) -> Result<Self, PagingError> {
         if limit == 0 {
-            return Err(PagingError::LimitZero);
+            return Err(PagingError::InvalidLimit);
         }
         if limit > MAX_LIMIT {
-            return Err(PagingError::LimitTooLarge);
+            return Err(PagingError::LimitExceeded);
         }
 
         Ok(Self { limit, cursor })

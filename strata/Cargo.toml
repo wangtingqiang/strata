@@ -12,7 +12,7 @@ http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
 jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror", "jsonwebtoken/rust_crypto"]
 macros = ["dep:strata-macros"]
 opaque-token = ["dep:hex", "dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid", "uuid/v4"]
-pagination = ["dep:serde", "dep:thiserror", "error"]
+pagination = ["dep:const_format", "dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:secrecy", "dep:thiserror"]
 redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror", "redis/tokio-comp"]
 s3 = ["dep:hex", "dep:hmac", "dep:secrecy", "dep:serde", "dep:sha2", "dep:thiserror", "dep:url"]
@@ -42,6 +42,7 @@ axum = { version = "0.8", optional = true }
 base64 = { version = "0.22", optional = true }
 clickhouse = { version = "0.15", optional = true }
 config = { version = "0.15", optional = true }
+const_format = { version = "0.2", optional = true }
 ed25519-dalek = { version = "2", optional = true }
 hex = { version = "0.4", optional = true }
 hmac = { version = "0.13", optional = true }
