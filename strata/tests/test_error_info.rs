@@ -149,6 +149,49 @@ fn test_message_escaped_braces() {
 }
 
 #[test]
+fn test_message_named_partial_refs() {
+    #[derive(Debug, Error, ErrorInfo)]
+    enum E {
+        #[error("limit {name} exceeded")]
+        #[info(
+            kind = "RateLimited",
+            code = "E001",
+            message = "{name} rate limit exceeded"
+        )]
+        RateLimit {
+            name: String,
+            max: u64,
+            window_secs: u64,
+        },
+    }
+
+    assert_msg(
+        &E::RateLimit {
+            name: "login".into(),
+            max: 5,
+            window_secs: 60,
+        },
+        "login rate limit exceeded",
+    );
+}
+
+#[test]
+fn test_message_unnamed_partial_refs() {
+    #[derive(Debug, Error, ErrorInfo)]
+    enum E {
+        #[error("too large: {0}")]
+        #[info(
+            kind = "Validation",
+            code = "E001",
+            message = "value {0} exceeds limit"
+        )]
+        TooLarge(u64, u64, u64),
+    }
+
+    assert_msg(&E::TooLarge(100, 50, 30), "value 100 exceeds limit");
+}
+
+#[test]
 fn test_is_severe() {
     #[derive(Debug, Error, ErrorInfo)]
     enum E {

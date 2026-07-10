@@ -294,26 +294,8 @@ fn message_pattern(
             quote! { Self::#variant_name(#(#bindings,)*) }
         }
         Fields::Named(named) => {
-            if field_refs.is_empty() {
-                return quote! { Self::#variant_name { .. } };
-            }
-            let mut patterns: Vec<proc_macro2::TokenStream> = named
-                .named
-                .iter()
-                .filter_map(|f| {
-                    let id = f.ident.as_ref()?;
-                    if field_refs.contains(&id.to_string()) {
-                        Some(quote! { #id })
-                    } else {
-                        None
-                    }
-                })
-                .collect();
-            let remaining = named.named.len() - field_refs.len();
-            if remaining > 0 {
-                patterns.push(quote! { .. });
-            }
-            quote! { Self::#variant_name { #(#patterns,)* } }
+            let ids = named.named.iter().filter_map(|f| f.ident.as_ref());
+            quote! { Self::#variant_name { #(#ids),* } }
         }
     }
 }
