@@ -14,8 +14,10 @@ pub struct RedisClientConfig {
 }
 
 impl RedisClientConfig {
-    pub async fn connect(&self) -> Result<redis::Client, RedisClientInitError> {
-        if self.host.trim().is_empty() {
+    pub fn connect(&self) -> Result<redis::Client, RedisClientInitError> {
+        let host = self.host.trim();
+
+        if host.is_empty() {
             return Err(RedisClientInitError::EmptyHost);
         }
 
@@ -24,7 +26,7 @@ impl RedisClientConfig {
             .set_username(self.username.clone())
             .set_password(self.password.expose_secret());
 
-        let connection_info = redis::ConnectionAddr::Tcp(self.host.clone(), self.port)
+        let connection_info = redis::ConnectionAddr::Tcp(host.to_owned(), self.port)
             .into_connection_info()
             .map_err(RedisClientInitError::BuildClient)?
             .set_redis_settings(redis_info);
@@ -32,9 +34,8 @@ impl RedisClientConfig {
         let client =
             redis::Client::open(connection_info).map_err(RedisClientInitError::BuildClient)?;
 
-        client
-            .get_multiplexed_async_connection()
-            .await
+        let _ = client
+            .get_connection()
             .map_err(RedisClientInitError::Connect)?;
 
         Ok(client)

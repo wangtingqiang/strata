@@ -14,7 +14,7 @@ macros = ["dep:strata-macros"]
 opaque-token = ["dep:hex", "dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid", "uuid/v4"]
 pagination = ["dep:const_format", "dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:secrecy", "dep:thiserror"]
-redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror", "redis/tokio-comp"]
+redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror"]
 s3 = ["dep:hex", "dep:hmac", "dep:secrecy", "dep:serde", "dep:sha2", "dep:thiserror", "dep:url"]
 serde = ["dep:serde"]
 sqlx-mysql = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
@@ -51,7 +51,7 @@ jsonwebtoken = { version = "10", optional = true }
 opentelemetry = { version = "0.32", optional = true }
 opentelemetry-otlp = { version = "0.32", optional = true }
 opentelemetry_sdk = { version = "0.32", optional = true }
-redis = { version = "1.2", optional = true }
+redis = { version = "1.3", optional = true }
 secrecy = { version = "0.10", features = ["serde"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
