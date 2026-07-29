@@ -42,13 +42,14 @@ impl ApiSuccess<()> {
     /// 为无数据成功响应补充 data，并保持已有 code/message/timestamp。
     pub fn with_data<T>(self, data: T) -> ApiSuccess<T> {
         let ApiSuccess { status, body } = self;
+
         ApiSuccess {
             status,
             body: ResponseBody {
                 success: body.success,
                 code: body.code,
                 message: body.message,
-                timestamp: body.timestamp,
+                time: body.time,
                 data: Some(data),
             },
         }

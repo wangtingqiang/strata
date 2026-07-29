@@ -7,7 +7,7 @@ pub(in crate::http::api) fn success_body(message: impl Into<String>) -> Response
         success: true,
         code: "0".to_owned(),
         message: message.into(),
-        timestamp: Some(OffsetDateTime::now_utc().to_rfc3339_utc8()),
+        time: Some(OffsetDateTime::now_utc().to_rfc3339_utc8()),
         data: None,
     }
 }
@@ -20,7 +20,7 @@ pub(in crate::http::api) fn failure_body(
         success: false,
         code: code.into(),
         message: message.into(),
-        timestamp: Some(OffsetDateTime::now_utc().to_rfc3339_utc8()),
+        time: Some(OffsetDateTime::now_utc().to_rfc3339_utc8()),
         data: None,
     }
 }
