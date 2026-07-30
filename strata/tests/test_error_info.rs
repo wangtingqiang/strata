@@ -1,5 +1,4 @@
 use strata::error::{ErrorInfo, ErrorKind};
-use thiserror::Error;
 
 fn assert_msg(err: &impl ErrorInfo, expected: &str) {
     assert_eq!(err.message(), expected);
@@ -7,17 +6,14 @@ fn assert_msg(err: &impl ErrorInfo, expected: &str) {
 
 #[test]
 fn test_kind() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("validation error")]
         #[info(kind = "Validation", code = "E001", message = "validation error")]
         Validation,
 
-        #[error("not found: {0}")]
         #[info(kind = "NotFound", code = "E002", message = "resource {0} not found")]
         NotFound(String),
 
-        #[error("access denied for {user}")]
         #[info(
             kind = "AccessDenied",
             code = "E003",
@@ -36,13 +32,11 @@ fn test_kind() {
 
 #[test]
 fn test_code() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("validation")]
         #[info(kind = "Validation", code = "E001", message = "validation")]
         Validation,
 
-        #[error("internal")]
         #[info(kind = "Internal", code = "E002", message = "internal")]
         Internal,
     }
@@ -53,9 +47,8 @@ fn test_code() {
 
 #[test]
 fn test_message_static() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("rate limit exceeded")]
         #[info(kind = "RateLimited", code = "E001", message = "too many requests")]
         RateLimited,
     }
@@ -65,13 +58,11 @@ fn test_message_static() {
 
 #[test]
 fn test_message_positional() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("not found: {0}")]
         #[info(kind = "NotFound", code = "E001", message = "resource {0} not found")]
         NotFound(String),
 
-        #[error("conflict: {0} {1}")]
         #[info(kind = "Conflict", code = "E002", message = "conflict: {0} and {1}")]
         Conflict(String, String),
     }
@@ -82,9 +73,8 @@ fn test_message_positional() {
 
 #[test]
 fn test_message_named() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("invalid: {field}")]
         #[info(kind = "Validation", code = "E001", message = "invalid value: {field}")]
         Invalid { field: String },
     }
@@ -99,9 +89,8 @@ fn test_message_named() {
 
 #[test]
 fn test_message_named_multiple() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("name: {first} {last}")]
         #[info(
             kind = "Validation",
             code = "E001",
@@ -121,9 +110,8 @@ fn test_message_named_multiple() {
 
 #[test]
 fn test_message_repeated_field() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("value: {0}")]
         #[info(kind = "Validation", code = "E001", message = "{0} -> {0}")]
         Dup(String),
     }
@@ -133,9 +121,8 @@ fn test_message_repeated_field() {
 
 #[test]
 fn test_message_escaped_braces() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("key: {key}")]
         #[info(kind = "Validation", code = "E001", message = "{{key}}: {key}")]
         InvalidKey { key: String },
     }
@@ -150,9 +137,8 @@ fn test_message_escaped_braces() {
 
 #[test]
 fn test_message_named_partial_refs() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("limit {name} exceeded")]
         #[info(
             kind = "RateLimited",
             code = "E001",
@@ -177,9 +163,8 @@ fn test_message_named_partial_refs() {
 
 #[test]
 fn test_message_unnamed_partial_refs() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("too large: {0}")]
         #[info(
             kind = "Validation",
             code = "E001",
@@ -193,25 +178,20 @@ fn test_message_unnamed_partial_refs() {
 
 #[test]
 fn test_is_severe() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("internal")]
         #[info(kind = "Internal", code = "E001", message = "internal error")]
         Internal,
 
-        #[error("technical")]
         #[info(kind = "Technical", code = "E002", message = "technical error")]
         Technical,
 
-        #[error("unexpected")]
         #[info(kind = "Unexpected", code = "E003", message = "unexpected error")]
         Unexpected,
 
-        #[error("validation")]
         #[info(kind = "Validation", code = "E004", message = "validation error")]
         Validation,
 
-        #[error("not found")]
         #[info(kind = "NotFound", code = "E005", message = "not found")]
         NotFound,
     }
@@ -225,17 +205,14 @@ fn test_is_severe() {
 
 #[test]
 fn test_multiple_variants() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E {
-        #[error("invalid: {0}")]
         #[info(kind = "Validation", code = "E100", message = "invalid: {0}")]
         Invalid(String),
 
-        #[error("not found: {id}")]
         #[info(kind = "NotFound", code = "E101", message = "resource {id} not found")]
         NotFound { id: u64 },
 
-        #[error("internal error")]
         #[info(kind = "Internal", code = "E102", message = "internal server error")]
         Internal,
     }
@@ -258,9 +235,8 @@ fn test_multiple_variants() {
 
 #[test]
 fn test_transparent_tuple() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum Inner {
-        #[error("validation failed: {0}")]
         #[info(kind = "Validation", code = "I001", message = "内部验证错误: {0}")]
         Validate(String),
     }
@@ -273,16 +249,14 @@ fn test_transparent_tuple() {
 
 #[test]
 fn test_transparent_delegation() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum Inner {
-        #[error("invalid value")]
         #[info(kind = "Validation", code = "I001", message = "invalid value")]
         Invalid,
     }
 
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum Outer {
-        #[error("{0}")]
         #[info(transparent)]
         Wrap(Inner),
     }
@@ -295,16 +269,14 @@ fn test_transparent_delegation() {
 
 #[test]
 fn test_transparent_named_field() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum Inner {
-        #[error("not found: {0}")]
         #[info(kind = "NotFound", code = "I002", message = "资源 {0} 未找到")]
         NotFound(String),
     }
 
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum Outer {
-        #[error("{source}")]
         #[info(transparent)]
         Wrap { source: Inner },
     }
@@ -319,20 +291,17 @@ fn test_transparent_named_field() {
 
 #[test]
 fn test_transparent_mixed_variants() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum Inner {
-        #[error("access denied")]
         #[info(kind = "AccessDenied", code = "I003", message = "拒绝访问")]
         Denied,
     }
 
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum Outer {
-        #[error("unauthenticated")]
         #[info(kind = "Unauthenticated", code = "O001", message = "未认证")]
         Unauthenticated,
 
-        #[error("{0}")]
         #[info(transparent)]
         Wrap(Inner),
     }
@@ -350,16 +319,14 @@ fn test_transparent_mixed_variants() {
 
 #[test]
 fn test_transparent_multi_field_inner() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum Inner {
-        #[error("conflict: {0} / {1}")]
         #[info(kind = "Conflict", code = "I004", message = "冲突: {0} 和 {1}")]
         Conflict(String, String),
     }
 
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum Outer {
-        #[error("{0}")]
         #[info(transparent)]
         Wrap(Inner),
     }
@@ -372,9 +339,8 @@ fn test_transparent_multi_field_inner() {
 
 #[test]
 fn test_generic() {
-    #[derive(Debug, Error, ErrorInfo)]
+    #[derive(Debug, ErrorInfo)]
     enum E<T: std::fmt::Debug + std::fmt::Display> {
-        #[error("{0}")]
         #[info(kind = "Internal", code = "E001", message = "internal: {0}")]
         Internal(T),
     }

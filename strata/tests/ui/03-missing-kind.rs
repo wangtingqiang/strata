@@ -1,10 +1,8 @@
 use strata::error::ErrorInfo;
-use thiserror::Error;
 
-#[derive(Debug, Error, ErrorInfo)]
+#[derive(Debug, ErrorInfo)]
 enum MissingKind {
     #[info(code = "E001", message = "error")]
-    #[error("error")]
     Variant,
 }
 

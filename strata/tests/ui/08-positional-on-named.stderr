@@ -1,5 +1,5 @@
 error: variant `Variant` has named fields, placeholder `{0}` must use field name
- --> tests/ui/08-positional-on-named.rs:6:5
+ --> tests/ui/08-positional-on-named.rs:5:5
   |
-6 |     #[info(kind = "Validation", code = "E001", message = "error: {0}")]
+5 |     #[info(kind = "Validation", code = "E001", message = "error: {0}")]
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

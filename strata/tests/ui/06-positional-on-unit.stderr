@@ -1,5 +1,5 @@
 error: variant `Variant` is a unit variant, cannot use positional placeholder `{0}`
- --> tests/ui/06-positional-on-unit.rs:6:5
+ --> tests/ui/06-positional-on-unit.rs:5:5
   |
-6 |     #[info(kind = "Validation", code = "E001", message = "error: {0}")]
+5 |     #[info(kind = "Validation", code = "E001", message = "error: {0}")]
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

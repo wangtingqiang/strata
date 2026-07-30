@@ -1,7 +1,6 @@
 error: #[info(transparent)] requires exactly one field
- --> tests/ui/11-transparent-multi-field.rs:6:5
+ --> tests/ui/11-transparent-multi-field.rs:5:5
   |
-6 | /     #[error("error: {0} {1}")]
-7 | |     #[info(transparent)]
-8 | |     Variant(String, String),
+5 | /     #[info(transparent)]
+6 | |     Variant(String, String),
   | |___________________________^

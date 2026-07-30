@@ -1,25 +1,5 @@
 error: missing #[info] attribute
- --> tests/ui/02-missing-attr.rs:6:5
+ --> tests/ui/02-missing-attr.rs:5:5
   |
-6 |     NoAttr,
+5 |     NoAttr,
   |     ^^^^^^
-
-error[E0277]: `MissingAttr` doesn't implement `std::fmt::Display`
- --> tests/ui/02-missing-attr.rs:5:6
-  |
-4 | #[derive(Debug, Error, ErrorInfo)]
-  |                 ----- in this derive macro expansion
-5 | enum MissingAttr {
-  |      ^^^^^^^^^^^ unsatisfied trait bound
-  |
-help: the trait `std::fmt::Display` is not implemented for `MissingAttr`
- --> tests/ui/02-missing-attr.rs:5:1
-  |
-5 | enum MissingAttr {
-  | ^^^^^^^^^^^^^^^^
-note: required by a bound in `std::error::Error`
- --> $RUST/core/src/error.rs
-  |
-  | pub trait Error: Debug + Display {
-  |                          ^^^^^^^ required by this bound in `Error`
-  = note: this error originates in the derive macro `Error` (in Nightly builds, run with -Z macro-backtrace for more info)

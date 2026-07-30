@@ -1,5 +1,5 @@
 error: variant `Variant` has 1 field(s), placeholder `{1}` is out of range
- --> tests/ui/07-out-of-range.rs:6:5
+ --> tests/ui/07-out-of-range.rs:5:5
   |
-6 |     #[info(kind = "Validation", code = "E001", message = "error: {1}")]
+5 |     #[info(kind = "Validation", code = "E001", message = "error: {1}")]
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
