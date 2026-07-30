@@ -1,9 +1,9 @@
-use strata::error::ErrorInfo;
+use strata_error::ErrorInfo;
 
 #[derive(Debug, ErrorInfo)]
-enum PositionalOnNamed {
+enum PositionalOnUnit {
     #[info(kind = "Validation", code = "E001", message = "error: {0}")]
-    Variant { key: String },
+    Variant,
 }
 
 fn main() {}

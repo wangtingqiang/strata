@@ -10,7 +10,6 @@ error = ["dep:thiserror"]
 hash = ["dep:hex", "dep:sha2"]
 http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
 jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror", "jsonwebtoken/rust_crypto"]
-macros = ["dep:strata-macros"]
 opaque-token = ["dep:hex", "dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid", "uuid/v4"]
 pagination = ["dep:const_format", "dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:secrecy", "dep:thiserror"]
@@ -35,7 +34,7 @@ time = ["dep:time"]
 validation = ["dep:secrecy", "dep:thiserror"]
 
 [dependencies]
-strata-macros = { path = "../strata-macros", optional = true }
+strata-error = { path = "../strata-error" }
 
 argon2 = { version = "0.6.0-rc.8", optional = true }
 axum = { version = "0.8", optional = true }
@@ -65,14 +64,3 @@ tracing-opentelemetry = { version = "0.33", optional = true }
 tracing-subscriber = { version = "0.3", optional = true, default-features = false }
 uuid = { version = "1", optional = true }
 url = { version = "2", optional = true }
-
-[dev-dependencies]
-trybuild = "1"
-
-[[test]]
-name = "compiletest"
-required-features = ["macros", "error"]
-
-[[test]]
-name = "test_error_info"
-required-features = ["macros", "error"]

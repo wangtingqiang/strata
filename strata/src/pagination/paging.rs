@@ -1,9 +1,6 @@
-use std::borrow::Cow;
-
-use const_format::formatcp;
 use thiserror::Error;
 
-use crate::error::{ErrorInfo, ErrorKind};
+use strata_error::ErrorInfo;
 
 pub const DEFAULT_PAGE: u64 = 1;
 pub const DEFAULT_PAGE_SIZE: u64 = 10;
@@ -18,46 +15,43 @@ pub struct Paging {
     need_total: bool,
 }
 
-#[derive(Debug, Clone, Copy, Error, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Error, PartialEq, Eq, ErrorInfo)]
 pub enum PagingError {
     #[error("page must be greater than 0")]
+    #[info(kind = "Validation", code = "INVALID_PAGE", message = "页码必须大于 0")]
     InvalidPage,
+
     #[error("page size must be greater than 0")]
+    #[info(
+        kind = "Validation",
+        code = "INVALID_PAGE_SIZE",
+        message = "每页条数必须大于 0"
+    )]
     InvalidPageSize,
+
     #[error("page size must not exceed {MAX_PAGE_SIZE}")]
+    #[info(
+        kind = "Validation",
+        code = "PAGE_SIZE_EXCEEDED",
+        message = "每页条数不能超过 {MAX_PAGE_SIZE}"
+    )]
     PageSizeExceeded,
+
     #[error("limit must be greater than 0")]
+    #[info(
+        kind = "Validation",
+        code = "INVALID_LIMIT",
+        message = "查询条数必须大于 0"
+    )]
     InvalidLimit,
+
     #[error("limit must not exceed {MAX_LIMIT}")]
+    #[info(
+        kind = "Validation",
+        code = "LIMIT_EXCEEDED",
+        message = "查询条数不能超过 {MAX_LIMIT}"
+    )]
     LimitExceeded,
-}
-
-impl ErrorInfo for PagingError {
-    fn kind(&self) -> ErrorKind {
-        ErrorKind::Validation
-    }
-
-    fn code(&self) -> &'static str {
-        match self {
-            PagingError::InvalidPage => "INVALID_PAGE",
-            PagingError::InvalidPageSize => "INVALID_PAGE_SIZE",
-            PagingError::PageSizeExceeded => "PAGE_SIZE_EXCEEDED",
-            PagingError::InvalidLimit => "INVALID_LIMIT",
-            PagingError::LimitExceeded => "LIMIT_EXCEEDED",
-        }
-    }
-
-    fn message(&self) -> Cow<'static, str> {
-        match self {
-            PagingError::InvalidPage => Cow::Borrowed("页码必须大于 0"),
-            PagingError::InvalidPageSize => Cow::Borrowed("每页条数必须大于 0"),
-            PagingError::PageSizeExceeded => {
-                Cow::Borrowed(formatcp!("每页条数不能超过 {MAX_PAGE_SIZE}"))
-            }
-            PagingError::InvalidLimit => Cow::Borrowed("查询条数必须大于 0"),
-            PagingError::LimitExceeded => Cow::Borrowed(formatcp!("查询条数不能超过 {MAX_LIMIT}")),
-        }
-    }
 }
 
 impl Paging {

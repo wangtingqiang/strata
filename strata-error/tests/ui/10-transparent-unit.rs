@@ -1,4 +1,4 @@
-use strata::error::ErrorInfo;
+use strata_error::ErrorInfo;
 
 #[derive(Debug, ErrorInfo)]
 enum TransparentUnit {

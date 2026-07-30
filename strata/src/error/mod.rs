@@ -1,17 +1,12 @@
 mod data_corrupted;
 mod invalid_argument;
 mod port;
-mod presentation;
 mod unexpected;
 
 pub use data_corrupted::DataCorruptedError;
 pub use invalid_argument::InvalidArgumentError;
 pub use port::{FromPortError, PortError};
-pub use presentation::{ErrorInfo, ErrorKind};
 pub use unexpected::UnexpectedError;
-
-#[cfg(feature = "macros")]
-pub use strata_macros::ErrorInfo;
 
 pub type BoxedError = Box<dyn std::error::Error + Send + Sync + 'static>;
 

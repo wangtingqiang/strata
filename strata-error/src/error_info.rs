@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use crate::error::presentation::ErrorKind;
+use crate::error_kind::ErrorKind;
 
 pub trait ErrorInfo {
     fn kind(&self) -> ErrorKind;

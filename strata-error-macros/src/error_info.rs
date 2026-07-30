@@ -174,13 +174,13 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
                 let pat = transparent_pattern(variant_name, fields, field_ident);
 
                 kind_arms.push(quote! {
-                    #pat => ::strata::error::ErrorInfo::kind(#field_ident),
+                    #pat => ::strata_error::ErrorInfo::kind(#field_ident),
                 });
                 code_arms.push(quote! {
-                    #pat => ::strata::error::ErrorInfo::code(#field_ident),
+                    #pat => ::strata_error::ErrorInfo::code(#field_ident),
                 });
                 message_arms.push(quote! {
-                    #pat => ::strata::error::ErrorInfo::message(#field_ident),
+                    #pat => ::strata_error::ErrorInfo::message(#field_ident),
                 });
             }
             InfoMode::Declarative {
@@ -192,7 +192,7 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
                 field_refs,
             } => {
                 let pat = message_pattern(variant_name, fields, field_refs);
-                kind_arms.push(quote! { #pat => ::strata::error::ErrorKind::#kind_ident, });
+                kind_arms.push(quote! { #pat => ::strata_error::ErrorKind::#kind_ident, });
                 code_arms.push(quote! { #pat => #code, });
 
                 let msg_body = message_body(message, *message_span, placeholders);
@@ -205,8 +205,8 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
 
     let expanded = quote! {
         #[allow(unused_variables)]
-        impl #impl_generics ::strata::error::ErrorInfo for #name #ty_generics #where_clause {
-            fn kind(&self) -> ::strata::error::ErrorKind {
+        impl #impl_generics ::strata_error::ErrorInfo for #name #ty_generics #where_clause {
+            fn kind(&self) -> ::strata_error::ErrorKind {
                 match self {
                     #(#kind_arms)*
                 }

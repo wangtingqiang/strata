@@ -18,28 +18,26 @@ where
     type Rejection = ApiFailure;
 
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
-        let value = axum::Json::<T>::from_request(req, state).await?;
+        let value = axum::Json::<T>::from_request(req, state)
+            .await
+            .map_err(|rejection| {
+                let code = match rejection {
+                    JsonRejection::JsonDataError(_) => "JSON_DATA_ERROR",
+                    JsonRejection::JsonSyntaxError(_) => "JSON_SYNTAX_ERROR",
+                    JsonRejection::MissingJsonContentType(_) => "MISSING_JSON_CONTENT_TYPE",
+                    JsonRejection::BytesRejection(_) => "BYTES_REJECTION",
+                    _ => "JSON_REJECTION",
+                };
+
+                tracing::debug!(
+                    rejection.kind = %code,
+                    rejection.detail = %rejection.body_text(),
+                    "json extractor rejected"
+                );
+
+                ApiFailure::new(rejection.status(), code, "请求参数错误")
+            })?;
 
         Ok(Self(value.0))
-    }
-}
-
-impl From<JsonRejection> for ApiFailure {
-    fn from(rejection: JsonRejection) -> Self {
-        let code = match rejection {
-            JsonRejection::JsonDataError(_) => "JSON_DATA_ERROR",
-            JsonRejection::JsonSyntaxError(_) => "JSON_SYNTAX_ERROR",
-            JsonRejection::MissingJsonContentType(_) => "MISSING_JSON_CONTENT_TYPE",
-            JsonRejection::BytesRejection(_) => "BYTES_REJECTION",
-            _ => "JSON_REJECTION",
-        };
-
-        tracing::debug!(
-            rejection.kind = %code,
-            rejection.detail = %rejection.body_text(),
-            "json extractor rejected"
-        );
-
-        ApiFailure::new(rejection.status(), code, "请求参数错误")
     }
 }

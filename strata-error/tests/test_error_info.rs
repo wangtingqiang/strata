@@ -1,4 +1,4 @@
-use strata::error::{ErrorInfo, ErrorKind};
+use strata_error::{ErrorInfo, ErrorKind};
 
 fn assert_msg(err: &impl ErrorInfo, expected: &str) {
     assert_eq!(err.message(), expected);
