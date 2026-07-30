@@ -251,10 +251,7 @@ fn validate_transparent_variant(variant: &syn::Variant) -> Result<syn::Ident, sy
                     "#[info(transparent)] requires exactly one field",
                 ));
             }
-            named
-                .named
-                .first()
-                .unwrap()
+            named.named[0]
                 .ident
                 .clone()
                 .ok_or_else(|| syn::Error::new_spanned(variant, "field must have an identifier"))
