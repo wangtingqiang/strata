@@ -103,7 +103,7 @@ impl IntoResponse for ApiFailure {
     }
 }
 
-impl<E: ErrorInfo> From<E> for ApiFailure {
+impl<E: ErrorInfo + std::fmt::Display> From<E> for ApiFailure {
     fn from(error: E) -> Self {
         let kind = error.kind();
         let code = error.code();

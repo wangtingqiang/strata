@@ -1,11 +1,8 @@
-use std::{
-    borrow::Cow,
-    fmt::{Debug, Display},
-};
+use std::borrow::Cow;
 
 use crate::error::presentation::ErrorKind;
 
-pub trait ErrorInfo: Debug + Display {
+pub trait ErrorInfo {
     fn kind(&self) -> ErrorKind;
     fn code(&self) -> &'static str;
     fn message(&self) -> Cow<'static, str>;
