@@ -19,17 +19,24 @@ impl fmt::Display for Placeholder {
     }
 }
 
+enum InfoMode {
+    Transparent {
+        field_ident: syn::Ident,
+    },
+    Declarative {
+        kind_ident: syn::Ident,
+        code: String,
+        message: String,
+        message_span: proc_macro2::Span,
+        placeholders: Vec<Placeholder>,
+        field_refs: BTreeSet<String>,
+    },
+}
+
 struct VariantInfo {
     variant_name: syn::Ident,
-    is_transparent: bool,
-    transparent_field_ident: Option<syn::Ident>,
-    kind_ident: syn::Ident,
-    code: String,
-    message: String,
-    message_span: proc_macro2::Span,
+    mode: InfoMode,
     fields: Fields,
-    placeholders: Vec<Placeholder>,
-    field_refs: BTreeSet<String>,
 }
 
 pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -81,15 +88,8 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
 
                 return Ok(VariantInfo {
                     variant_name: variant_name.clone(),
-                    is_transparent: true,
-                    transparent_field_ident: Some(field_ident),
-                    kind_ident: format_ident!("unused"),
-                    code: String::new(),
-                    message: String::new(),
-                    message_span: proc_macro2::Span::call_site(),
+                    mode: InfoMode::Transparent { field_ident },
                     fields: variant.fields.clone(),
-                    placeholders: Vec::new(),
-                    field_refs: BTreeSet::new(),
                 });
             }
 
@@ -140,15 +140,15 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
 
             Ok(VariantInfo {
                 variant_name: variant_name.clone(),
-                is_transparent: false,
-                transparent_field_ident: None,
-                kind_ident,
-                code,
-                message,
-                message_span,
+                mode: InfoMode::Declarative {
+                    kind_ident,
+                    code,
+                    message,
+                    message_span,
+                    placeholders,
+                    field_refs,
+                },
                 fields: variant.fields.clone(),
-                placeholders,
-                field_refs,
             })
         })
         .collect::<Result<Vec<_>, syn::Error>>();
@@ -165,37 +165,39 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
     for info in &parsed {
         let VariantInfo {
             variant_name,
-            is_transparent,
-            transparent_field_ident,
-            kind_ident,
-            code,
-            message,
-            message_span,
+            mode,
             fields,
-            placeholders,
-            field_refs,
         } = info;
 
-        if *is_transparent {
-            let field_ident = transparent_field_ident.as_ref().unwrap();
-            let pat = transparent_pattern(variant_name, fields, field_ident);
+        match mode {
+            InfoMode::Transparent { field_ident } => {
+                let pat = transparent_pattern(variant_name, fields, field_ident);
 
-            kind_arms.push(quote! {
-                #pat => ::strata::error::ErrorInfo::kind(#field_ident),
-            });
-            code_arms.push(quote! {
-                #pat => ::strata::error::ErrorInfo::code(#field_ident),
-            });
-            message_arms.push(quote! {
-                #pat => ::strata::error::ErrorInfo::message(#field_ident),
-            });
-        } else {
-            let pat = message_pattern(variant_name, fields, field_refs);
-            kind_arms.push(quote! { #pat => ::strata::error::ErrorKind::#kind_ident, });
-            code_arms.push(quote! { #pat => #code, });
+                kind_arms.push(quote! {
+                    #pat => ::strata::error::ErrorInfo::kind(#field_ident),
+                });
+                code_arms.push(quote! {
+                    #pat => ::strata::error::ErrorInfo::code(#field_ident),
+                });
+                message_arms.push(quote! {
+                    #pat => ::strata::error::ErrorInfo::message(#field_ident),
+                });
+            }
+            InfoMode::Declarative {
+                kind_ident,
+                code,
+                message,
+                message_span,
+                placeholders,
+                field_refs,
+            } => {
+                let pat = message_pattern(variant_name, fields, field_refs);
+                kind_arms.push(quote! { #pat => ::strata::error::ErrorKind::#kind_ident, });
+                code_arms.push(quote! { #pat => #code, });
 
-            let msg_body = message_body(message, *message_span, placeholders);
-            message_arms.push(quote! { #pat => #msg_body, });
+                let msg_body = message_body(message, *message_span, placeholders);
+                message_arms.push(quote! { #pat => #msg_body, });
+            }
         }
     }
 
