@@ -1,0 +1,5 @@
+error: expected `=`
+ --> tests/ui/12-transparent-with-kind.rs:7:23
+  |
+7 |     #[info(transparent, kind = "Validation", code = "E001", message = "error")]
+  |                       ^

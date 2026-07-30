@@ -257,6 +257,120 @@ fn test_multiple_variants() {
 }
 
 #[test]
+fn test_transparent_tuple() {
+    #[derive(Debug, Error, ErrorInfo)]
+    enum Inner {
+        #[error("validation failed: {0}")]
+        #[info(kind = "Validation", code = "I001", message = "内部验证错误: {0}")]
+        Validate(String),
+    }
+
+    let inner = Inner::Validate("email".into());
+    assert_eq!(inner.kind(), ErrorKind::Validation);
+    assert_eq!(inner.code(), "I001");
+    assert_msg(&inner, "内部验证错误: email");
+}
+
+#[test]
+fn test_transparent_delegation() {
+    #[derive(Debug, Error, ErrorInfo)]
+    enum Inner {
+        #[error("invalid value")]
+        #[info(kind = "Validation", code = "I001", message = "invalid value")]
+        Invalid,
+    }
+
+    #[derive(Debug, Error, ErrorInfo)]
+    enum Outer {
+        #[error("{0}")]
+        #[info(transparent)]
+        Wrap(Inner),
+    }
+
+    let e = Outer::Wrap(Inner::Invalid);
+    assert_eq!(e.kind(), ErrorKind::Validation);
+    assert_eq!(e.code(), "I001");
+    assert_msg(&e, "invalid value");
+}
+
+#[test]
+fn test_transparent_named_field() {
+    #[derive(Debug, Error, ErrorInfo)]
+    enum Inner {
+        #[error("not found: {0}")]
+        #[info(kind = "NotFound", code = "I002", message = "资源 {0} 未找到")]
+        NotFound(String),
+    }
+
+    #[derive(Debug, Error, ErrorInfo)]
+    enum Outer {
+        #[error("{source}")]
+        #[info(transparent)]
+        Wrap { source: Inner },
+    }
+
+    let e = Outer::Wrap {
+        source: Inner::NotFound("user-1".into()),
+    };
+    assert_eq!(e.kind(), ErrorKind::NotFound);
+    assert_eq!(e.code(), "I002");
+    assert_msg(&e, "资源 user-1 未找到");
+}
+
+#[test]
+fn test_transparent_mixed_variants() {
+    #[derive(Debug, Error, ErrorInfo)]
+    enum Inner {
+        #[error("access denied")]
+        #[info(kind = "AccessDenied", code = "I003", message = "拒绝访问")]
+        Denied,
+    }
+
+    #[derive(Debug, Error, ErrorInfo)]
+    enum Outer {
+        #[error("unauthenticated")]
+        #[info(kind = "Unauthenticated", code = "O001", message = "未认证")]
+        Unauthenticated,
+
+        #[error("{0}")]
+        #[info(transparent)]
+        Wrap(Inner),
+    }
+
+    let e = Outer::Unauthenticated;
+    assert_eq!(e.kind(), ErrorKind::Unauthenticated);
+    assert_eq!(e.code(), "O001");
+    assert_msg(&e, "未认证");
+
+    let e = Outer::Wrap(Inner::Denied);
+    assert_eq!(e.kind(), ErrorKind::AccessDenied);
+    assert_eq!(e.code(), "I003");
+    assert_msg(&e, "拒绝访问");
+}
+
+#[test]
+fn test_transparent_multi_field_inner() {
+    #[derive(Debug, Error, ErrorInfo)]
+    enum Inner {
+        #[error("conflict: {0} / {1}")]
+        #[info(kind = "Conflict", code = "I004", message = "冲突: {0} 和 {1}")]
+        Conflict(String, String),
+    }
+
+    #[derive(Debug, Error, ErrorInfo)]
+    enum Outer {
+        #[error("{0}")]
+        #[info(transparent)]
+        Wrap(Inner),
+    }
+
+    let e = Outer::Wrap(Inner::Conflict("a".into(), "b".into()));
+    assert_eq!(e.kind(), ErrorKind::Conflict);
+    assert_eq!(e.code(), "I004");
+    assert_msg(&e, "冲突: a 和 b");
+}
+
+#[test]
 fn test_generic() {
     #[derive(Debug, Error, ErrorInfo)]
     enum E<T: std::fmt::Debug + std::fmt::Display> {

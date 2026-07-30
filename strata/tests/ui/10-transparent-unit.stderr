@@ -1,0 +1,7 @@
+error: #[info(transparent)] requires exactly one field
+ --> tests/ui/10-transparent-unit.rs:6:5
+  |
+6 | /     #[error("error")]
+7 | |     #[info(transparent)]
+8 | |     Variant,
+  | |___________^

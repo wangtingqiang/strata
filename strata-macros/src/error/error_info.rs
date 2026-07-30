@@ -21,6 +21,8 @@ impl fmt::Display for Placeholder {
 
 struct VariantInfo {
     variant_name: syn::Ident,
+    is_transparent: bool,
+    transparent_field_ident: Option<syn::Ident>,
     kind_ident: syn::Ident,
     code: String,
     message: String,
@@ -53,12 +55,43 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
                 .attrs
                 .iter()
                 .find(|attr| attr.path().is_ident("info"))
-                .ok_or_else(|| {
-                    syn::Error::new_spanned(
-                        variant,
-                        "missing #[info(kind, code, message)] attribute",
+                .ok_or_else(|| syn::Error::new_spanned(variant, "missing #[info] attribute"))?;
+
+            let is_transparent = {
+                let tokens = match &info_attr.meta {
+                    syn::Meta::List(list) => list.tokens.clone(),
+                    _ => {
+                        return Err(syn::Error::new_spanned(info_attr, "expected #[info(...)]"));
+                    }
+                };
+
+                let tts: Vec<proc_macro2::TokenTree> = tokens
+                    .into_iter()
+                    .filter(
+                        |tt| !matches!(tt, proc_macro2::TokenTree::Punct(p) if p.as_char() == ','),
                     )
-                })?;
+                    .collect();
+
+                tts.len() == 1
+                    && matches!(&tts[0], proc_macro2::TokenTree::Ident(id) if id == "transparent")
+            };
+
+            if is_transparent {
+                let field_ident = validate_transparent_variant(variant)?;
+
+                return Ok(VariantInfo {
+                    variant_name: variant_name.clone(),
+                    is_transparent: true,
+                    transparent_field_ident: Some(field_ident),
+                    kind_ident: format_ident!("unused"),
+                    code: String::new(),
+                    message: String::new(),
+                    message_span: proc_macro2::Span::call_site(),
+                    fields: variant.fields.clone(),
+                    placeholders: Vec::new(),
+                    field_refs: BTreeSet::new(),
+                });
+            }
 
             let meta_items: Punctuated<MetaNameValue, Token![,]> =
                 info_attr.parse_args_with(Punctuated::parse_terminated)?;
@@ -107,6 +140,8 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
 
             Ok(VariantInfo {
                 variant_name: variant_name.clone(),
+                is_transparent: false,
+                transparent_field_ident: None,
                 kind_ident,
                 code,
                 message,
@@ -130,6 +165,8 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
     for info in &parsed {
         let VariantInfo {
             variant_name,
+            is_transparent,
+            transparent_field_ident,
             kind_ident,
             code,
             message,
@@ -139,12 +176,27 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
             field_refs,
         } = info;
 
-        let pat = message_pattern(variant_name, fields, field_refs);
-        kind_arms.push(quote! { #pat => ::strata::error::ErrorKind::#kind_ident, });
-        code_arms.push(quote! { #pat => #code, });
+        if *is_transparent {
+            let field_ident = transparent_field_ident.as_ref().unwrap();
+            let pat = transparent_pattern(variant_name, fields, field_ident);
 
-        let msg_body = message_body(message, *message_span, placeholders);
-        message_arms.push(quote! { #pat => #msg_body, });
+            kind_arms.push(quote! {
+                #pat => ::strata::error::ErrorInfo::kind(#field_ident),
+            });
+            code_arms.push(quote! {
+                #pat => ::strata::error::ErrorInfo::code(#field_ident),
+            });
+            message_arms.push(quote! {
+                #pat => ::strata::error::ErrorInfo::message(#field_ident),
+            });
+        } else {
+            let pat = message_pattern(variant_name, fields, field_refs);
+            kind_arms.push(quote! { #pat => ::strata::error::ErrorKind::#kind_ident, });
+            code_arms.push(quote! { #pat => #code, });
+
+            let msg_body = message_body(message, *message_span, placeholders);
+            message_arms.push(quote! { #pat => #msg_body, });
+        }
     }
 
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
@@ -173,6 +225,51 @@ pub(crate) fn derive_error_info_impl(input: proc_macro::TokenStream) -> proc_mac
     };
 
     proc_macro::TokenStream::from(expanded)
+}
+
+fn validate_transparent_variant(variant: &syn::Variant) -> Result<syn::Ident, syn::Error> {
+    match &variant.fields {
+        Fields::Unit => Err(syn::Error::new_spanned(
+            variant,
+            "#[info(transparent)] requires exactly one field",
+        )),
+        Fields::Unnamed(unnamed) => {
+            if unnamed.unnamed.len() != 1 {
+                return Err(syn::Error::new_spanned(
+                    variant,
+                    "#[info(transparent)] requires exactly one field",
+                ));
+            }
+            Ok(format_ident!("inner"))
+        }
+        Fields::Named(named) => {
+            if named.named.len() != 1 {
+                return Err(syn::Error::new_spanned(
+                    variant,
+                    "#[info(transparent)] requires exactly one field",
+                ));
+            }
+            named
+                .named
+                .first()
+                .unwrap()
+                .ident
+                .clone()
+                .ok_or_else(|| syn::Error::new_spanned(variant, "field must have an identifier"))
+        }
+    }
+}
+
+fn transparent_pattern(
+    variant_name: &syn::Ident,
+    fields: &Fields,
+    field_ident: &syn::Ident,
+) -> proc_macro2::TokenStream {
+    match fields {
+        Fields::Unnamed(_) => quote! { Self::#variant_name(#field_ident) },
+        Fields::Named(_) => quote! { Self::#variant_name { #field_ident } },
+        Fields::Unit => unreachable!("already validated"),
+    }
 }
 
 fn parse_placeholders(message: &str) -> Vec<Placeholder> {
