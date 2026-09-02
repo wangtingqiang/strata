@@ -1,7 +1,7 @@
 use argon2::password_hash::PasswordVerifier;
 
 #[derive(Debug, thiserror::Error)]
-#[error("password hash computation failed: {0}")]
+#[error("password verification failed: {0}")]
 pub struct PasswordVerifyError(#[from] argon2::password_hash::Error);
 
 pub fn verify_password(password: &str, hash: &str) -> Result<bool, PasswordVerifyError> {
