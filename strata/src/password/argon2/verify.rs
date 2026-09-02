@@ -1,19 +1,19 @@
-use argon2::{Argon2, password_hash::PasswordVerifier};
-use thiserror::Error;
+use argon2::password_hash::PasswordVerifier;
+use secrecy::{ExposeSecret, SecretString};
 
-#[derive(Debug, Error)]
-pub enum PasswordVerifyError {
-    #[error("password hash format is corrupted: {0}")]
-    InvalidHashFormat(argon2::password_hash::Error),
+#[derive(Debug, thiserror::Error)]
+#[error("password hash computation failed: {0}")]
+pub struct PasswordVerifyError(#[from] argon2::password_hash::Error);
 
-    #[error("password hash computation failed: {0}")]
-    HashComputationFailed(argon2::password_hash::Error),
-}
-
-pub fn verify_password(hash: &str, password: &str) -> Result<bool, PasswordVerifyError> {
-    match Argon2::default().verify_password(password.as_bytes(), hash) {
+pub fn verify_password(
+    password: &SecretString,
+    hash: &SecretString,
+) -> Result<bool, PasswordVerifyError> {
+    match argon2::Argon2::default()
+        .verify_password(password.expose_secret().as_bytes(), hash.expose_secret())
+    {
         Ok(()) => Ok(true),
         Err(argon2::password_hash::Error::PasswordInvalid) => Ok(false),
-        Err(e) => Err(PasswordVerifyError::HashComputationFailed(e)),
+        Err(error) => Err(PasswordVerifyError(error)),
     }
 }

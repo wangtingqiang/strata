@@ -1,7 +1,7 @@
 pub mod hash;
-pub mod password_hash;
+pub mod validate;
 pub mod verify;
 
 pub use hash::hash_password;
-pub use password_hash::PasswordHash;
+pub use validate::validate_password_hash;
 pub use verify::verify_password;
