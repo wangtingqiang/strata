@@ -57,25 +57,30 @@ impl ApiSuccess<()> {
 }
 
 impl<T> ApiSuccess<T> {
+    /// 覆盖 HTTP 状态码。
     pub fn with_status(mut self, status: StatusCode) -> Self {
         self.status = status;
         self
     }
 
+    /// 覆盖业务错误码。
     pub fn with_code(mut self, code: impl Into<String>) -> Self {
         self.body.code = code.into();
         self
     }
 
+    /// 覆盖消息。
     pub fn with_message(mut self, message: impl Into<String>) -> Self {
         self.body.message = message.into();
         self
     }
 
+    /// HTTP 状态码。
     pub fn status(&self) -> StatusCode {
         self.status
     }
 
+    /// 统一响应体。
     pub fn body(&self) -> &ResponseBody<T> {
         &self.body
     }

@@ -2,7 +2,9 @@ use axum::http::{HeaderMap, header};
 
 use crate::response::ApiFailure;
 
+/// HeaderMap 扩展。
 pub trait HeaderMapExt {
+    /// 从 Authorization 头解析 Bearer token。
     fn bearer_token(&self) -> Result<String, ApiFailure>;
 }
 

@@ -2,9 +2,11 @@ use axum::extract::{FromRequest, Request, rejection::JsonRejection};
 
 use crate::response::ApiFailure;
 
+/// JSON 请求体提取器（拒绝时返回统一错误响应）。
 pub struct Json<T>(pub T);
 
 impl<T> Json<T> {
+    /// 取回内部值。
     pub fn into_inner(self) -> T {
         self.0
     }

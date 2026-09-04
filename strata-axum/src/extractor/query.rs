@@ -5,9 +5,11 @@ use axum::{
 
 use crate::response::ApiFailure;
 
+/// 查询参数提取器（拒绝时返回统一错误响应）。
 pub struct Query<T>(pub T);
 
 impl<T> Query<T> {
+    /// 取回内部值。
     pub fn into_inner(self) -> T {
         self.0
     }

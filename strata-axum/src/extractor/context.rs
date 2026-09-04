@@ -2,6 +2,7 @@ use axum::{extract::FromRequestParts, http::request::Parts};
 
 use crate::response::ApiFailure;
 
+/// 请求上下文提取器：从请求扩展中取出预先注入的值。
 #[derive(Debug, Clone)]
 pub struct Context<T>(pub T);
 

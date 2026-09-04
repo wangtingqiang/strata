@@ -16,6 +16,7 @@ pub struct ApiFailure {
 }
 
 impl ApiFailure {
+    /// 构建带指定状态码、错误码与消息的失败响应。
     pub fn new(status: StatusCode, code: impl Into<String>, message: impl Into<String>) -> Self {
         Self {
             status,
@@ -68,29 +69,35 @@ impl ApiFailure {
         Self::new(StatusCode::SERVICE_UNAVAILABLE, code, message)
     }
 
+    /// 覆盖 HTTP 状态码。
     pub fn with_status(mut self, status: StatusCode) -> Self {
         self.status = status;
         self
     }
 
+    /// 覆盖业务错误码。
     pub fn with_code(mut self, code: impl Into<String>) -> Self {
         self.body.code = code.into();
         self
     }
 
+    /// 覆盖消息。
     pub fn with_message(mut self, message: impl Into<String>) -> Self {
         self.body.message = message.into();
         self
     }
 
+    /// HTTP 状态码。
     pub fn status(&self) -> StatusCode {
         self.status
     }
 
+    /// 业务错误码。
     pub fn code(&self) -> &str {
         &self.body.code
     }
 
+    /// 消息。
     pub fn message(&self) -> &str {
         &self.body.message
     }
