@@ -94,3 +94,101 @@ UNSIGNED-PAYLOAD"#,
 
     Ok(authorization)
 }
+
+#[cfg(test)]
+mod tests {
+    use secrecy::SecretString;
+
+    use super::*;
+
+    fn access_key() -> SecretString {
+        SecretString::from("AKIDEXAMPLE")
+    }
+
+    fn secret_key() -> SecretString {
+        SecretString::from("wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY")
+    }
+
+    #[test]
+    fn signing_key_matches_known_answer() {
+        // AWS SigV4 规范算法（secret=示例凭据, date=20150830, region=us-east-1, service=s3），
+        // 期望值由 Python hmac 与 OpenSSL 两个独立实现演算交叉验证得出。
+        let key = s3_signing_key(&secret_key(), "20150830", "us-east-1").unwrap();
+
+        assert_eq!(
+            hex::encode(key),
+            "32f78051dcde24c552811d654f4a769112bb834b03975cdd6b1fd7d16248c269"
+        );
+    }
+
+    #[test]
+    fn signing_key_is_deterministic() {
+        let first = s3_signing_key(&secret_key(), "20150830", "us-east-1").unwrap();
+        let second = s3_signing_key(&secret_key(), "20150830", "us-east-1").unwrap();
+
+        assert_eq!(first, second);
+    }
+
+    #[test]
+    fn rejects_amz_date_with_wrong_length() {
+        let result = s3_authorization(
+            "GET",
+            "https://example.com/path/to/object",
+            "20150830",
+            "us-east-1",
+            &access_key(),
+            &secret_key(),
+        );
+
+        assert!(matches!(result, Err(SigningError::InvalidAmzDate)));
+    }
+
+    #[test]
+    fn rejects_malformed_url() {
+        let result = s3_authorization(
+            "GET",
+            "not a url",
+            "20150830T123600Z",
+            "us-east-1",
+            &access_key(),
+            &secret_key(),
+        );
+
+        assert!(matches!(result, Err(SigningError::ParseUrl(_))));
+    }
+
+    #[test]
+    fn rejects_url_without_host() {
+        let result = s3_authorization(
+            "GET",
+            "file:///tmp/object",
+            "20150830T123600Z",
+            "us-east-1",
+            &access_key(),
+            &secret_key(),
+        );
+
+        assert!(matches!(result, Err(SigningError::MissingHost)));
+    }
+
+    #[test]
+    fn authorization_matches_known_answer() {
+        // 期望值由 Python hmac + OpenSSL 独立演算交叉验证（与 signing_key 同源）。
+        let authorization = s3_authorization(
+            "GET",
+            "https://example.com/path/to/object",
+            "20150830T123600Z",
+            "us-east-1",
+            &access_key(),
+            &secret_key(),
+        )
+        .unwrap();
+
+        assert_eq!(
+            authorization,
+            "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/s3/aws4_request, \
+             SignedHeaders=host;x-amz-content-sha256;x-amz-date, \
+             Signature=29a92096cc12c9aaa9f64408afa2f7ad41d491965404b15b14bb88bf77355c40"
+        );
+    }
+}
