@@ -7,7 +7,6 @@ edition.workspace = true
 config = ["dep:config", "dep:serde", "dep:thiserror"]
 error = ["dep:thiserror"]
 hash = ["dep:hex", "dep:sha2"]
-jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror", "jsonwebtoken/rust_crypto"]
 opaque-token = ["dep:hex", "dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid", "uuid/v4"]
 pagination = ["dep:const_format", "dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:thiserror"]
@@ -21,15 +20,11 @@ validation = ["dep:secrecy", "dep:thiserror"]
 strata-error = { path = "../strata-error" }
 
 argon2 = { version = "0.6.0", optional = true }
-base64 = { workspace = true, optional = true }
 config = { version = "0.15", optional = true }
 const_format = { version = "0.2", optional = true }
-ed25519-dalek = { version = "2", optional = true }
 hex = { workspace = true, optional = true }
-jsonwebtoken = { version = "10", optional = true }
 secrecy = { workspace = true, features = ["serde"], optional = true }
 serde = { workspace = true, features = ["derive"], optional = true }
-serde_json = { workspace = true, optional = true }
 sha2 = { workspace = true, optional = true }
 thiserror = { workspace = true, optional = true }
 time = { workspace = true, features = ["formatting", "macros", "parsing"], optional = true }

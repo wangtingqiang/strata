@@ -5,6 +5,7 @@ members = [
     "strata-axum",
     "strata-error",
     "strata-error-macros",
+    "strata-jwt",
     "strata-store",
     "strata-telemetry",
 ]

@@ -1,13 +1,12 @@
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
-use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum JwtVerifierBuildError {
     #[error("invalid Ed25519 PEM: {0}")]
     InvalidPem(#[source] jsonwebtoken::errors::Error),
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum JwtVerifierError {
     #[error("JWT decode failed: {0}")]
     DecodeFailed(#[source] jsonwebtoken::errors::Error),

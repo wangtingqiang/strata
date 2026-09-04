@@ -1,13 +1,12 @@
 use jsonwebtoken::{Algorithm, EncodingKey, Header};
-use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum JwtSignerBuildError {
     #[error("invalid Ed25519 PEM: {0}")]
     InvalidPem(#[source] jsonwebtoken::errors::Error),
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum JwtSignerError {
     #[error("JWT encode failed: {0}")]
     EncodeFailed(#[source] jsonwebtoken::errors::Error),

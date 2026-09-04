@@ -1,15 +1,14 @@
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine as _};
 use ed25519_dalek::{VerifyingKey, pkcs8::DecodePublicKey};
 use serde::Serialize;
-use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum JwkExporterBuildError {
     #[error("invalid Ed25519 PEM: {0}")]
     InvalidPem(#[source] ed25519_dalek::pkcs8::spki::Error),
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum JwkExporterError {
     #[error("export JWKS failed: {0}")]
     ExportFailed(#[source] serde_json::Error),

@@ -4,8 +4,6 @@ pub mod config;
 pub mod error;
 #[cfg(feature = "hash")]
 pub mod hash;
-#[cfg(feature = "jwt")]
-pub mod jwt;
 #[cfg(feature = "opaque-token")]
 pub mod opaque_token;
 #[cfg(feature = "pagination")]
