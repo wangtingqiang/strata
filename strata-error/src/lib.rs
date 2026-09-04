@@ -1,4 +1,4 @@
-//! 错误信息模型：`ErrorInfo` trait（类别、错误码、消息）与 `ErrorKind` 枚举，配合 `#[derive(ErrorInfo)]` 使用。
+//! 错误信息模型：ErrorInfo trait 与 #[derive(ErrorInfo)] 派生宏。
 
 #![warn(missing_docs)]
 

@@ -1,4 +1,4 @@
-//! 外部数据系统客户端适配：ClickHouse、Redis、S3、SQLx（MySQL/PostgreSQL）的配置、连接与签名封装。
+//! 外部数据系统客户端适配：配置、连接与签名封装。
 
 #![warn(missing_docs)]
 
