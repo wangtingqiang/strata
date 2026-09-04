@@ -45,3 +45,51 @@ impl JwtSigner for Ed25519JwtSigner {
             .map_err(JwtSignerError::EncodeFailed)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
+
+    use super::*;
+
+    const PRIVATE_PEM: &str = r#"-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIAnbWbKwbQDD8fqnEa6ub3kv2a9XKC9a5w5iKR8vVqK4
+-----END PRIVATE KEY-----"#;
+
+    fn signer() -> Ed25519JwtSigner {
+        Ed25519JwtSigner::try_from_pem(PRIVATE_PEM).unwrap()
+    }
+
+    fn payload() -> serde_json::Value {
+        serde_json::json!({"sub": "user-1", "exp": 4_102_444_800i64})
+    }
+
+    #[test]
+    fn signs_payload_into_eddsa_jwt() {
+        let token = signer().sign(payload()).unwrap();
+
+        let parts: Vec<&str> = token.split('.').collect();
+        assert_eq!(parts.len(), 3);
+
+        let header: serde_json::Value =
+            serde_json::from_slice(&BASE64_URL_SAFE_NO_PAD.decode(parts[0]).unwrap()).unwrap();
+        assert_eq!(header["alg"], "EdDSA");
+    }
+
+    #[test]
+    fn sign_is_deterministic() {
+        let signer = signer();
+        assert_eq!(
+            signer.sign(payload()).unwrap(),
+            signer.sign(payload()).unwrap()
+        );
+    }
+
+    #[test]
+    fn rejects_invalid_pem() {
+        assert!(matches!(
+            Ed25519JwtSigner::try_from_pem("not a pem"),
+            Err(JwtSignerBuildError::InvalidPem(_))
+        ));
+    }
+}

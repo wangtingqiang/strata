@@ -50,3 +50,69 @@ impl JwtVerifier for Ed25519JwtVerifier {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::signer::{Ed25519JwtSigner, JwtSigner};
+
+    use super::*;
+
+    const PRIVATE_PEM: &str = r#"-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIAnbWbKwbQDD8fqnEa6ub3kv2a9XKC9a5w5iKR8vVqK4
+-----END PRIVATE KEY-----"#;
+
+    const PUBLIC_PEM: &str = r#"-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAPWTvB+xr+7wmxJfJHOgpwnw7VwZRicW8gJnjT+SckeQ=
+-----END PUBLIC KEY-----"#;
+
+    const OTHER_PUBLIC_PEM: &str = r#"-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAo1c9w3gXxuq4congiRcv1MbjI1alHPRzhG1lHO0c9lQ=
+-----END PUBLIC KEY-----"#;
+
+    fn verifier(pem: &str) -> Ed25519JwtVerifier {
+        Ed25519JwtVerifier::try_from_pem(pem).unwrap()
+    }
+
+    fn signed_token() -> String {
+        Ed25519JwtSigner::try_from_pem(PRIVATE_PEM)
+            .unwrap()
+            .sign(serde_json::json!({"sub": "user-1", "exp": 4_102_444_800i64}))
+            .unwrap()
+    }
+
+    #[test]
+    fn verifies_token_signed_by_matching_key() {
+        let claims = verifier(PUBLIC_PEM).verify(&signed_token()).unwrap();
+
+        assert_eq!(claims["sub"], "user-1");
+    }
+
+    #[test]
+    fn rejects_tampered_token() {
+        let mut chars: Vec<char> = signed_token().chars().collect();
+        let last = chars.last_mut().unwrap();
+        *last = if *last == 'a' { 'b' } else { 'a' };
+        let tampered: String = chars.into_iter().collect();
+
+        assert!(matches!(
+            verifier(PUBLIC_PEM).verify(&tampered),
+            Err(JwtVerifierError::DecodeFailed(_))
+        ));
+    }
+
+    #[test]
+    fn rejects_token_from_other_key() {
+        assert!(matches!(
+            verifier(OTHER_PUBLIC_PEM).verify(&signed_token()),
+            Err(JwtVerifierError::DecodeFailed(_))
+        ));
+    }
+
+    #[test]
+    fn rejects_invalid_pem() {
+        assert!(matches!(
+            Ed25519JwtVerifier::try_from_pem("not a pem"),
+            Err(JwtVerifierBuildError::InvalidPem(_))
+        ));
+    }
+}
