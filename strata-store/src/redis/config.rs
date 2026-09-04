@@ -4,16 +4,23 @@ use serde::Deserialize;
 
 use super::RedisClientInitError;
 
+/// Redis 客户端配置。
 #[derive(Debug, Clone, Deserialize)]
 pub struct RedisClientConfig {
+    /// 主机地址。
     pub host: String,
+    /// 端口。
     pub port: u16,
+    /// 用户名。
     pub username: String,
+    /// 密码。
     pub password: SecretString,
+    /// 数据库编号。
     pub database: u8,
 }
 
 impl RedisClientConfig {
+    /// 建立 Redis 连接（同步）并探活，失败返回初始化错误。
     pub fn connect(&self) -> Result<redis::Client, RedisClientInitError> {
         let host = self.host.trim();
 

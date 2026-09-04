@@ -6,6 +6,7 @@ use super::SigningError;
 
 type HmacSha256 = Hmac<Sha256>;
 
+/// 按 AWS SigV4 规范从密钥、日期、地域派生签名密钥（service 固定为 s3），date 需为 YYYYMMDD。
 pub fn s3_signing_key(secret_key: &str, date: &str, region: &str) -> Result<Vec<u8>, SigningError> {
     let date_key = HmacSha256::new_from_slice(&[b"AWS4", secret_key.as_bytes()].concat())?
         .chain_update(date.as_bytes())
@@ -30,6 +31,8 @@ pub fn s3_signing_key(secret_key: &str, date: &str, region: &str) -> Result<Vec<
     Ok(signing_key.to_vec())
 }
 
+/// 生成 AWS SigV4 Authorization 请求头，amz_date 需为 `YYYYMMDD'T'HHMMSS'Z'` 格式，
+/// payload 按 UNSIGNED-PAYLOAD 处理。
 pub fn s3_authorization(
     method: &str,
     url: &str,
