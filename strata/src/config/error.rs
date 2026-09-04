@@ -3,7 +3,7 @@
 pub enum EnvironmentError {
     /// 环境值不在支持列表中。
     #[error(
-        "unsupported environment value [{value}], expected one of local/development/test/staging/production"
+        "unsupported environment value `{value}`, expected one of local/development/test/staging/production"
     )]
     Unsupported {
         /// 不支持的环境值。
@@ -35,28 +35,28 @@ pub enum ConfigError {
     ConfigDirUnspecified,
 
     /// 配置目录不存在。
-    #[error("config directory [{path}] does not exist")]
+    #[error("config directory `{path}` does not exist")]
     ConfigDirNotFound {
         /// 配置目录路径。
         path: String,
     },
 
     /// 配置目录不是目录。
-    #[error("config directory [{path}] is not a directory")]
+    #[error("config directory `{path}` is not a directory")]
     ConfigDirInvalid {
         /// 配置目录路径。
         path: String,
     },
 
     /// 配置文件不存在。
-    #[error("config file [{path}] does not exist")]
+    #[error("config file `{path}` does not exist")]
     ConfigFileNotFound {
         /// 配置文件路径。
         path: String,
     },
 
     /// 配置构建失败。
-    #[error("failed to build config from [{path}]: {source}")]
+    #[error("failed to build config from `{path}`: {source}")]
     BuildConfig {
         /// 配置文件路径。
         path: String,
@@ -66,7 +66,7 @@ pub enum ConfigError {
     },
 
     /// 配置反序列化失败。
-    #[error("failed to deserialize config from [{path}]: {source}")]
+    #[error("failed to deserialize config from `{path}`: {source}")]
     DeserializeConfig {
         /// 配置文件路径。
         path: String,
