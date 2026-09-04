@@ -1,8 +1,6 @@
-use thiserror::Error;
-
 use crate::error::{DataCorruptedError, InvalidArgumentError, UnexpectedError};
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum PortError {
     #[error(transparent)]
     InvalidArgument(#[from] InvalidArgumentError),

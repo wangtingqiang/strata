@@ -1,8 +1,6 @@
-use thiserror::Error;
-
 use crate::error::{BoxedError, error_source_chain_fmt};
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub struct DataCorruptedError {
     message: String,
     #[source]

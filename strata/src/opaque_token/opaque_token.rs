@@ -1,7 +1,5 @@
 use secrecy::{ExposeSecret, SecretString};
-use thiserror::Error;
-
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum OpaqueTokenError {
     #[error("token must not be empty")]
     Empty,

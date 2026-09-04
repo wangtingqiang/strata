@@ -1,7 +1,5 @@
-use thiserror::Error;
-
 /// 环境字符串解析失败时返回的错误。
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum EnvironmentError {
     #[error(
         "unsupported environment value [{value}], expected one of local/development/test/staging/production"
@@ -9,7 +7,7 @@ pub enum EnvironmentError {
     Unsupported { value: String },
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum ConfigError {
     #[error("failed to read APP_ENVIRONMENT: {0}")]
     ReadAppEnvironment(#[source] std::env::VarError),

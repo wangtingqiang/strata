@@ -1,6 +1,4 @@
-use thiserror::Error;
-
-#[derive(Debug, Clone, PartialEq, Eq, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum TextError {
     #[error("value must not be empty")]
     Empty,

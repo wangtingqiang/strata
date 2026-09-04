@@ -1,12 +1,10 @@
 use secrecy::{ExposeSecret, SecretString};
-use thiserror::Error;
-
 const MIN_LENGTH: usize = 8;
 const MAX_LENGTH: usize = 128;
 
 const SPECIAL_CHARS: &str = "!@#$%^&*()-_=+[]{}|;:'\",.<>?/~`";
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum PasswordValidationError {
     #[error("password must not be empty")]
     Empty,

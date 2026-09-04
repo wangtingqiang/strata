@@ -1,10 +1,9 @@
 use secrecy::{ExposeSecret, SecretString};
 use sha2::{Digest, Sha256};
-use thiserror::Error;
 
 use crate::opaque_token::OpaqueToken;
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum TokenHashError {
     #[error("token hash must not be empty")]
     Empty,
