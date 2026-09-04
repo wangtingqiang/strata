@@ -1,5 +1,5 @@
 error: missing `kind` attribute
- --> tests/ui/03-missing-kind.rs:5:5
+ --> tests/ui/03-missing-kind.rs:3:5
   |
-5 |     #[info(code = "E001", message = "error")]
+3 |     #[info(code = "E001", message = "error")]
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

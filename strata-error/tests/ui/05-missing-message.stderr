@@ -1,5 +1,5 @@
 error: missing `message` attribute
- --> tests/ui/05-missing-message.rs:5:5
+ --> tests/ui/05-missing-message.rs:3:5
   |
-5 |     #[info(kind = "Validation", code = "E001")]
+3 |     #[info(kind = "Validation", code = "E001")]
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

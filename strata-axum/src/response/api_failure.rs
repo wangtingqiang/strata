@@ -153,9 +153,8 @@ impl<E: ErrorInfo + std::fmt::Display> From<E> for ApiFailure {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use strata_error::ErrorInfo;
 
-    #[derive(Debug, ErrorInfo)]
+    #[derive(Debug, strata_error::ErrorInfo)]
     enum TestError {
         #[info(kind = "Unauthenticated", code = "E001", message = "unauthenticated")]
         Unauthenticated,

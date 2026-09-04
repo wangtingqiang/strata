@@ -1,6 +1,4 @@
-use strata_error::ErrorInfo;
-
-#[derive(Debug, ErrorInfo)]
+#[derive(Debug, strata_error::ErrorInfo)]
 enum TransparentMultiField {
     #[info(transparent)]
     Variant(String, String),

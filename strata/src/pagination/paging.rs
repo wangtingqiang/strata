@@ -1,5 +1,3 @@
-use strata_error::ErrorInfo;
-
 pub const DEFAULT_PAGE: u64 = 1;
 pub const DEFAULT_PAGE_SIZE: u64 = 10;
 pub const MAX_PAGE_SIZE: u64 = 100;
@@ -13,7 +11,7 @@ pub struct Paging {
     need_total: bool,
 }
 
-#[derive(Debug, Clone, Copy, thiserror::Error, PartialEq, Eq, ErrorInfo)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error, strata_error::ErrorInfo)]
 pub enum PagingError {
     #[error("page must be greater than 0")]
     #[info(kind = "Validation", code = "INVALID_PAGE", message = "页码必须大于 0")]

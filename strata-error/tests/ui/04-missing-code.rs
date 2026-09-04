@@ -1,6 +1,4 @@
-use strata_error::ErrorInfo;
-
-#[derive(Debug, ErrorInfo)]
+#[derive(Debug, strata_error::ErrorInfo)]
 enum MissingCode {
     #[info(kind = "Validation", message = "error")]
     Variant,

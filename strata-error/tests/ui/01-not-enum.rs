@@ -1,6 +1,4 @@
-use strata_error::ErrorInfo;
-
-#[derive(ErrorInfo)]
+#[derive(strata_error::ErrorInfo)]
 struct NotAnEnum {
     _x: i32,
 }

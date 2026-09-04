@@ -1,5 +1,5 @@
 error: format specifier in placeholder `{key:?}` is not supported, use {0}, {1}, or {field_name}
- --> tests/ui/09-format-specifier.rs:5:5
+ --> tests/ui/09-format-specifier.rs:3:5
   |
-5 |     #[info(kind = "Validation", code = "E001", message = "error: {key:?}")]
+3 |     #[info(kind = "Validation", code = "E001", message = "error: {key:?}")]
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

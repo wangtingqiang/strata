@@ -1,5 +1,5 @@
 error: missing #[info] attribute
- --> tests/ui/02-missing-attr.rs:5:5
+ --> tests/ui/02-missing-attr.rs:3:5
   |
-5 |     NoAttr,
+3 |     NoAttr,
   |     ^^^^^^

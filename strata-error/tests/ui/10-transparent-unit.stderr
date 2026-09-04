@@ -1,6 +1,6 @@
 error: #[info(transparent)] requires exactly one field
- --> tests/ui/10-transparent-unit.rs:5:5
+ --> tests/ui/10-transparent-unit.rs:3:5
   |
-5 | /     #[info(transparent)]
-6 | |     Variant,
+3 | /     #[info(transparent)]
+4 | |     Variant,
   | |___________^

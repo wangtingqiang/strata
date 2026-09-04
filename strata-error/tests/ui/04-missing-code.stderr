@@ -1,5 +1,5 @@
 error: missing `code` attribute
- --> tests/ui/04-missing-code.rs:5:5
+ --> tests/ui/04-missing-code.rs:3:5
   |
-5 |     #[info(kind = "Validation", message = "error")]
+3 |     #[info(kind = "Validation", message = "error")]
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

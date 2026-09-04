@@ -1,6 +1,4 @@
-use strata_error::ErrorInfo;
-
-#[derive(Debug, ErrorInfo)]
+#[derive(Debug, strata_error::ErrorInfo)]
 enum PositionalOnUnit {
     #[info(kind = "Validation", code = "E001", message = "error: {0}")]
     Variant,
