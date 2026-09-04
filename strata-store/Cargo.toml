@@ -5,19 +5,20 @@ edition.workspace = true
 
 [features]
 clickhouse = ["dep:clickhouse", "dep:secrecy", "dep:serde", "dep:thiserror"]
-sqlx-mysql = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
-sqlx-postgres = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
 redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror"]
 s3 = ["dep:hex", "dep:hmac", "dep:secrecy", "dep:serde", "dep:sha2", "dep:thiserror", "dep:url"]
+sqlx-mysql = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
+sqlx-postgres = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
 
 [dependencies]
 clickhouse = { version = "0.15", optional = true }
-hex = { version = "0.4", optional = true }
-hmac = { version = "0.13", optional = true }
 redis = { version = "1.3", optional = true }
-secrecy = { version = "0.10", features = ["serde"], optional = true }
-serde = { version = "1", features = ["derive"], optional = true }
-sha2 = { version = "0.11", optional = true }
 sqlx = { version = "0.9", optional = true }
-thiserror = { version = "2", optional = true }
-url = { version = "2", optional = true }
+
+hex = { workspace = true, optional = true }
+hmac = { workspace = true, optional = true }
+secrecy = { workspace = true, features = ["serde"], optional = true }
+serde = { workspace = true, features = ["derive"], optional = true }
+sha2 = { workspace = true, optional = true }
+thiserror = { workspace = true, optional = true }
+url = { workspace = true, optional = true }
