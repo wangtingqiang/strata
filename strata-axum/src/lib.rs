@@ -2,11 +2,9 @@
 
 #![warn(missing_docs)]
 
-mod header_map_ext;
-
 /// 请求提取器。
 pub mod extract;
+/// HTTP 头工具。
+pub mod http;
 /// API 响应层。
 pub mod response;
-
-pub use header_map_ext::HeaderMapExt;
