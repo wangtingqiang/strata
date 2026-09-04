@@ -149,3 +149,66 @@ impl<E: ErrorInfo + std::fmt::Display> From<E> for ApiFailure {
         Self::new(status, code, message)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use strata_error::ErrorInfo;
+
+    #[derive(Debug, ErrorInfo)]
+    enum TestError {
+        #[info(kind = "Unauthenticated", code = "E001", message = "unauthenticated")]
+        Unauthenticated,
+        #[info(kind = "AccessDenied", code = "E002", message = "access denied")]
+        AccessDenied,
+        #[info(kind = "Validation", code = "E003", message = "validation error")]
+        Validation,
+        #[info(kind = "Business", code = "E004", message = "business error")]
+        Business,
+        #[info(kind = "NotFound", code = "E005", message = "not found")]
+        NotFound,
+        #[info(kind = "Conflict", code = "E006", message = "conflict")]
+        Conflict,
+        #[info(kind = "RateLimited", code = "E007", message = "rate limited")]
+        RateLimited,
+        #[info(kind = "Internal", code = "E008", message = "internal error")]
+        Internal,
+        #[info(kind = "Technical", code = "E009", message = "technical error")]
+        Technical,
+        #[info(kind = "Unexpected", code = "E010", message = "unexpected error")]
+        Unexpected,
+    }
+
+    impl std::fmt::Display for TestError {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_str("test error")
+        }
+    }
+
+    #[test]
+    fn maps_kind_to_status_code() {
+        let cases = [
+            (TestError::Unauthenticated, StatusCode::UNAUTHORIZED),
+            (TestError::AccessDenied, StatusCode::FORBIDDEN),
+            (TestError::Validation, StatusCode::BAD_REQUEST),
+            (TestError::Business, StatusCode::UNPROCESSABLE_ENTITY),
+            (TestError::NotFound, StatusCode::NOT_FOUND),
+            (TestError::Conflict, StatusCode::CONFLICT),
+            (TestError::RateLimited, StatusCode::TOO_MANY_REQUESTS),
+            (TestError::Internal, StatusCode::INTERNAL_SERVER_ERROR),
+            (TestError::Technical, StatusCode::INTERNAL_SERVER_ERROR),
+            (TestError::Unexpected, StatusCode::INTERNAL_SERVER_ERROR),
+        ];
+
+        for (error, expected_status) in cases {
+            let expected_code = error.code();
+            let expected_message = error.message();
+
+            let failure = ApiFailure::from(error);
+
+            assert_eq!(failure.status(), expected_status);
+            assert_eq!(failure.code(), expected_code);
+            assert_eq!(failure.message(), expected_message);
+        }
+    }
+}
