@@ -106,4 +106,31 @@ mod tests {
         assert_eq!(PagePagination::new(1, 10, Some(20)).total_pages, Some(2));
         assert_eq!(PagePagination::new(1, 10, None).total_pages, None);
     }
+
+    #[test]
+    fn serializes_page_variant_with_type_tag() {
+        let pagination = Pagination::<String>::page(1, 10);
+        let json = serde_json::to_string(&pagination).unwrap();
+        assert_eq!(json, r#"{"type":"page","current_page":1,"page_size":10}"#);
+    }
+
+    #[test]
+    fn serializes_cursor_variant_with_type_tag() {
+        let pagination = Pagination::cursor(10, true, Some("abc".to_owned()));
+        let json = serde_json::to_string(&pagination).unwrap();
+        assert_eq!(
+            json,
+            r#"{"type":"cursor","limit":10,"has_more":true,"next_cursor":"abc"}"#
+        );
+    }
+
+    #[test]
+    fn serializes_page_with_totals() {
+        let pagination = Pagination::<String>::page_with_total(2, 10, 25);
+        let json = serde_json::to_string(&pagination).unwrap();
+        assert_eq!(
+            json,
+            r#"{"type":"page","current_page":2,"page_size":10,"total_pages":3,"total_items":25}"#
+        );
+    }
 }
