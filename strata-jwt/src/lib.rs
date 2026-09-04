@@ -1,3 +1,7 @@
+//! JWT 功能：签名、验证与 JWK 导出。
+
+#![warn(missing_docs)]
+
 mod jwk;
 mod signer;
 mod verifier;
