@@ -1,9 +1,9 @@
 #[derive(Debug, thiserror::Error)]
 pub enum SigningError {
-    #[error("failed to build hmac")]
+    #[error("failed to build hmac: {0}")]
     BuildHmac(#[from] hmac::digest::InvalidLength),
 
-    #[error("failed to parse url")]
+    #[error("failed to parse url: {0}")]
     ParseUrl(#[from] url::ParseError),
 
     #[error("url must have a host")]
