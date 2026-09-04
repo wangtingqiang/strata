@@ -11,8 +11,6 @@ use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 /// Axum 中间件：为每个请求创建 span 并提取远端 trace 上下文，结束时记录状态码与耗时。
 pub async fn server_trace(request: Request, next: Next) -> Response {
-    crate::http::ensure_propagator();
-
     let route = request
         .extensions()
         .get::<MatchedPath>()

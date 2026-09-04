@@ -4,7 +4,8 @@ version = "0.1.0"
 edition.workspace = true
 
 [features]
-http = ["dep:axum", "dep:http"]
+http = ["dep:http"]
+axum = ["dep:axum", "http"]
 
 [dependencies]
 opentelemetry = { version = "0.32", features = ["internal-logs"] }

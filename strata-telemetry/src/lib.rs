@@ -11,6 +11,10 @@ pub use config::{TelemetryConfig, TelemetryLocalConfig, TelemetryRemoteConfig};
 pub use error::TelemetryInitError;
 pub use guard::TelemetryGuard;
 
+/// HTTP 传输相关工具。
 #[cfg(feature = "http")]
-/// Axum 中间件：请求追踪、服务指标与 trace 上下文注入。
 pub mod http;
+
+/// Axum 框架集成。
+#[cfg(feature = "axum")]
+pub mod axum;

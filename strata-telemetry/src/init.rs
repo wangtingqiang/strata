@@ -2,7 +2,10 @@ use std::time::Duration;
 
 use opentelemetry::{KeyValue, trace::TracerProvider as _};
 use opentelemetry_otlp::{MetricExporter, Protocol, SpanExporter, WithExportConfig};
-use opentelemetry_sdk::{Resource, metrics::SdkMeterProvider, trace::SdkTracerProvider};
+use opentelemetry_sdk::{
+    Resource, metrics::SdkMeterProvider, propagation::TraceContextPropagator,
+    trace::SdkTracerProvider,
+};
 use tracing_subscriber::{
     EnvFilter, Layer, fmt::time::LocalTime, layer::SubscriberExt as _, util::SubscriberInitExt as _,
 };
@@ -65,6 +68,7 @@ impl TelemetryConfig {
 
                 opentelemetry::global::set_tracer_provider(tracer_provider.clone());
                 opentelemetry::global::set_meter_provider(meter_provider.clone());
+                opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
 
                 let tracer = tracer_provider.tracer(service_name.to_owned());
 
