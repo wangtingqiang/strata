@@ -1,5 +1,4 @@
 use hmac::{Hmac, KeyInit, Mac};
-use secrecy::{ExposeSecret, SecretString};
 use sha2::{Digest, Sha256};
 use url::Url;
 
@@ -7,12 +6,7 @@ use super::SigningError;
 
 type HmacSha256 = Hmac<Sha256>;
 
-pub fn s3_signing_key(
-    secret_key: &SecretString,
-    date: &str,
-    region: &str,
-) -> Result<Vec<u8>, SigningError> {
-    let secret_key = secret_key.expose_secret();
+pub fn s3_signing_key(secret_key: &str, date: &str, region: &str) -> Result<Vec<u8>, SigningError> {
     let date_key = HmacSha256::new_from_slice(&[b"AWS4", secret_key.as_bytes()].concat())?
         .chain_update(date.as_bytes())
         .finalize()
@@ -41,8 +35,8 @@ pub fn s3_authorization(
     url: &str,
     amz_date: &str,
     region: &str,
-    access_key: &SecretString,
-    secret_key: &SecretString,
+    access_key: &str,
+    secret_key: &str,
 ) -> Result<String, SigningError> {
     if amz_date.len() != 16 {
         return Err(SigningError::InvalidAmzDate);
@@ -87,7 +81,6 @@ UNSIGNED-PAYLOAD"#,
         .into_bytes();
     let signature = hex::encode(signature);
 
-    let access_key = access_key.expose_secret();
     let authorization = format!(
         "AWS4-HMAC-SHA256 Credential={access_key}/{credential_scope}, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature={signature}"
     );
@@ -97,23 +90,16 @@ UNSIGNED-PAYLOAD"#,
 
 #[cfg(test)]
 mod tests {
-    use secrecy::SecretString;
-
     use super::*;
 
-    fn access_key() -> SecretString {
-        SecretString::from("AKIDEXAMPLE")
-    }
-
-    fn secret_key() -> SecretString {
-        SecretString::from("wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY")
-    }
+    const ACCESS_KEY: &str = "AKIDEXAMPLE";
+    const SECRET_KEY: &str = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY";
 
     #[test]
     fn signing_key_matches_known_answer() {
         // AWS SigV4 规范算法（secret=示例凭据, date=20150830, region=us-east-1, service=s3），
         // 期望值由 Python hmac 与 OpenSSL 两个独立实现演算交叉验证得出。
-        let key = s3_signing_key(&secret_key(), "20150830", "us-east-1").unwrap();
+        let key = s3_signing_key(SECRET_KEY, "20150830", "us-east-1").unwrap();
 
         assert_eq!(
             hex::encode(key),
@@ -123,8 +109,8 @@ mod tests {
 
     #[test]
     fn signing_key_is_deterministic() {
-        let first = s3_signing_key(&secret_key(), "20150830", "us-east-1").unwrap();
-        let second = s3_signing_key(&secret_key(), "20150830", "us-east-1").unwrap();
+        let first = s3_signing_key(SECRET_KEY, "20150830", "us-east-1").unwrap();
+        let second = s3_signing_key(SECRET_KEY, "20150830", "us-east-1").unwrap();
 
         assert_eq!(first, second);
     }
@@ -136,8 +122,8 @@ mod tests {
             "https://example.com/path/to/object",
             "20150830",
             "us-east-1",
-            &access_key(),
-            &secret_key(),
+            ACCESS_KEY,
+            SECRET_KEY,
         );
 
         assert!(matches!(result, Err(SigningError::InvalidAmzDate)));
@@ -150,8 +136,8 @@ mod tests {
             "not a url",
             "20150830T123600Z",
             "us-east-1",
-            &access_key(),
-            &secret_key(),
+            ACCESS_KEY,
+            SECRET_KEY,
         );
 
         assert!(matches!(result, Err(SigningError::ParseUrl(_))));
@@ -164,8 +150,8 @@ mod tests {
             "file:///tmp/object",
             "20150830T123600Z",
             "us-east-1",
-            &access_key(),
-            &secret_key(),
+            ACCESS_KEY,
+            SECRET_KEY,
         );
 
         assert!(matches!(result, Err(SigningError::MissingHost)));
@@ -179,8 +165,8 @@ mod tests {
             "https://example.com/path/to/object",
             "20150830T123600Z",
             "us-east-1",
-            &access_key(),
-            &secret_key(),
+            ACCESS_KEY,
+            SECRET_KEY,
         )
         .unwrap();
 
