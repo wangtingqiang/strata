@@ -5,7 +5,7 @@ use axum::{
 };
 use serde::Serialize;
 
-use crate::http::api::{ResponseBody, body_factory::success_body};
+use crate::api::{ResponseBody, body_factory::success_body};
 
 /// API 成功响应，包含 HTTP 状态码与统一响应体。
 #[derive(Debug)]

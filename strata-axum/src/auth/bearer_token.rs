@@ -1,6 +1,6 @@
 use axum::http::{HeaderMap, header};
 
-use crate::http::api::ApiFailure;
+use crate::api::ApiFailure;
 
 pub trait ExtractBearerToken {
     fn extract_bearer_token(&self) -> Result<String, ApiFailure>;

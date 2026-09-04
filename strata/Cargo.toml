@@ -7,7 +7,6 @@ edition.workspace = true
 config = ["dep:config", "dep:serde", "dep:thiserror"]
 error = ["dep:thiserror"]
 hash = ["dep:hex", "dep:sha2"]
-http = ["dep:axum", "dep:serde", "dep:tracing", "error", "time"]
 jwt = ["dep:base64", "dep:ed25519-dalek", "dep:jsonwebtoken", "dep:serde", "dep:serde_json", "dep:thiserror", "jsonwebtoken/rust_crypto"]
 opaque-token = ["dep:hex", "dep:secrecy", "dep:sha2", "dep:thiserror", "dep:uuid", "uuid/v4"]
 pagination = ["dep:const_format", "dep:serde", "dep:thiserror", "error"]
@@ -22,7 +21,6 @@ validation = ["dep:secrecy", "dep:thiserror"]
 strata-error = { path = "../strata-error" }
 
 argon2 = { version = "0.6.0", optional = true }
-axum = { workspace = true, optional = true }
 base64 = { workspace = true, optional = true }
 config = { version = "0.15", optional = true }
 const_format = { version = "0.2", optional = true }

@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "strata",
+    "strata-axum",
     "strata-error",
     "strata-error-macros",
     "strata-store",

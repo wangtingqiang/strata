@@ -6,7 +6,7 @@ use axum::{
 
 use strata_error::{ErrorInfo, ErrorKind};
 
-use crate::http::api::{ResponseBody, body_factory::failure_body};
+use crate::api::{ResponseBody, body_factory::failure_body};
 
 /// 统一失败响应类型，保证 API 错误体结构稳定。
 #[derive(Debug)]

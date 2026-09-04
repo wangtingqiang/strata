@@ -1,41 +1,40 @@
 use axum::{
-    extract::{FromRequestParts, rejection::PathRejection},
+    extract::{FromRequestParts, rejection::QueryRejection},
     http::request::Parts,
 };
 
-use crate::http::api::ApiFailure;
+use crate::api::ApiFailure;
 
-pub struct Path<T>(pub T);
+pub struct Query<T>(pub T);
 
-impl<T> Path<T> {
+impl<T> Query<T> {
     pub fn into_inner(self) -> T {
         self.0
     }
 }
 
-impl<S, T> FromRequestParts<S> for Path<T>
+impl<S, T> FromRequestParts<S> for Query<T>
 where
-    axum::extract::Path<T>: FromRequestParts<S, Rejection = PathRejection>,
+    axum::extract::Query<T>: FromRequestParts<S, Rejection = QueryRejection>,
     S: Send + Sync,
 {
     type Rejection = ApiFailure;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let value = axum::extract::Path::<T>::from_request_parts(parts, state)
+        let value = axum::extract::Query::<T>::from_request_parts(parts, state)
             .await
             .map_err(|rejection| {
                 let code = match rejection {
-                    PathRejection::FailedToDeserializePathParams(_) => {
-                        "FAILED_TO_DESERIALIZE_PATH_PARAMS"
+                    QueryRejection::FailedToDeserializeQueryString(_) => {
+                        "FAILED_TO_DESERIALIZE_QUERY_STRING"
                     }
-                    PathRejection::MissingPathParams(_) => "MISSING_PATH_PARAMS",
-                    _ => "PATH_REJECTION",
+                    _ => "QUERY_REJECTION",
                 };
 
                 tracing::debug!(
                     rejection.kind = %code,
                     rejection.detail = %rejection.body_text(),
-                    "path extractor rejected"
+                    "query extractor rejected"
                 );
 
                 ApiFailure::new(rejection.status(), code, "请求参数错误")
