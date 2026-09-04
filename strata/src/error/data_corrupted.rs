@@ -1,5 +1,6 @@
 use crate::error::{BoxedError, error_source_chain_fmt};
 
+/// 数据损坏错误。
 #[derive(Debug, thiserror::Error)]
 pub struct DataCorruptedError {
     message: String,
@@ -8,6 +9,7 @@ pub struct DataCorruptedError {
 }
 
 impl DataCorruptedError {
+    /// 构建带消息与根源错误的数据损坏错误。
     pub fn new(
         message: impl Into<String>,
         source: impl std::error::Error + Send + Sync + 'static,
@@ -18,6 +20,7 @@ impl DataCorruptedError {
         }
     }
 
+    /// 构建仅有消息的数据损坏错误。
     pub fn from_message(message: impl Into<String>) -> Self {
         Self {
             message: message.into(),
@@ -25,10 +28,12 @@ impl DataCorruptedError {
         }
     }
 
+    /// 错误消息。
     pub fn message(&self) -> &str {
         &self.message
     }
 
+    /// 根源错误。
     pub fn source_ref(&self) -> Option<&BoxedError> {
         self.source.as_ref()
     }

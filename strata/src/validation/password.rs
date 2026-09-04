@@ -4,20 +4,27 @@ const MAX_LENGTH: usize = 128;
 
 const SPECIAL_CHARS: &str = "!@#$%^&*()-_=+[]{}|;:'\",.<>?/~`";
 
+/// 密码校验错误。
 #[derive(Debug, thiserror::Error)]
 pub enum PasswordValidationError {
+    /// 密码为空。
     #[error("password must not be empty")]
     Empty,
+    /// 密码过短。
     #[error("password must be at least {MIN_LENGTH} characters")]
     TooShort,
+    /// 密码过长。
     #[error("password must not exceed {MAX_LENGTH} characters")]
     TooLong,
+    /// 包含非法字符。
     #[error("password contains invalid character '{0}'")]
     ContainsInvalidChar(char),
+    /// 字符类型不足（需含大写/小写/数字/特殊字符中至少三类）。
     #[error("password must contain at least 3 of: uppercase, lowercase, digit, special character")]
     InsufficientCharacterTypes,
 }
 
+/// 校验密码强度（`SecretString`）。
 pub fn validate_password(password: &SecretString) -> Result<(), PasswordValidationError> {
     validate_raw(password.expose_secret())
 }
@@ -65,7 +72,9 @@ fn validate_raw(password: &str) -> Result<(), PasswordValidationError> {
     Ok(())
 }
 
+/// 密码校验便捷 trait。
 pub trait ValidatePassword {
+    /// 校验密码强度。
     fn validate_password(&self) -> Result<(), PasswordValidationError>;
 }
 

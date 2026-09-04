@@ -3,15 +3,21 @@ use crate::config::EnvironmentError;
 /// 应用运行环境，用于决定加载 `<environment>.toml`。
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum Environment {
+    /// 本地环境（默认）。
     #[default]
     Local,
+    /// 开发环境。
     Development,
+    /// 测试环境。
     Test,
+    /// 预发布环境。
     Staging,
+    /// 生产环境。
     Production,
 }
 
 impl Environment {
+    /// 环境标识字符串。
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Local => "local",

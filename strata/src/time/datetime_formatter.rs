@@ -4,9 +4,13 @@ use time::{
 
 const DEFAULT_RFC3339_UTC8: &str = "1970-01-01T08:00:00+08:00";
 
+/// 日期时间格式化扩展（UTC+8）。
 pub trait DateTimeFormatter {
+    /// 格式化为人读日期时间（UTC+8）。
     fn to_human_friendly_utc8(&self) -> String;
+    /// 格式化为人读日期时间（UTC+8，无秒）。
     fn to_human_friendly_no_seconds_utc8(&self) -> String;
+    /// 格式化为 RFC3339（UTC+8）。
     fn to_rfc3339_utc8(&self) -> String;
 }
 

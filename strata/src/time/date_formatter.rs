@@ -1,6 +1,8 @@
 use time::Date;
 
+/// 日期格式化扩展。
 pub trait DateFormatter {
+    /// 格式化为 ISO 日期（`yyyy-MM-dd`）。
     fn to_iso_date(&self) -> String;
 }
 

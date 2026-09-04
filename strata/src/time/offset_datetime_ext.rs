@@ -1,8 +1,12 @@
 use time::{OffsetDateTime, PrimitiveDateTime, UtcOffset};
 
+/// OffsetDateTime 扩展。
 pub trait OffsetDateTimeExt {
+    /// 转为 UTC 的 PrimitiveDateTime。
     fn to_primitive_utc(&self) -> PrimitiveDateTime;
+    /// 毫秒时间戳。
     fn unix_timestamp_millis(&self) -> i64;
+    /// 从毫秒时间戳构建。
     fn from_unix_timestamp_millis(
         millis: i64,
     ) -> Result<OffsetDateTime, time::error::ComponentRange>;

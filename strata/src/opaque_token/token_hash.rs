@@ -3,15 +3,22 @@ use sha2::{Digest, Sha256};
 
 use crate::opaque_token::OpaqueToken;
 
+/// 令牌哈希错误。
 #[derive(Debug, thiserror::Error)]
 pub enum TokenHashError {
+    /// 哈希为空。
     #[error("token hash must not be empty")]
     Empty,
 
+    /// 哈希格式非法。
     #[error("invalid token hash format: {message}")]
-    InvalidFormat { message: String },
+    InvalidFormat {
+        /// 格式错误说明。
+        message: String,
+    },
 }
 
+/// 令牌的 SHA-256 哈希。
 #[derive(Debug, Clone)]
 pub struct TokenHash(SecretString);
 
@@ -62,6 +69,7 @@ impl TryFrom<&str> for TokenHash {
 }
 
 impl TokenHash {
+    /// 暴露哈希原文。
     pub fn expose_secret(&self) -> &str {
         self.0.expose_secret()
     }

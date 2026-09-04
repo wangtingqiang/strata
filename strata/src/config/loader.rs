@@ -20,20 +20,24 @@ pub struct ConfigLoader {
 }
 
 impl ConfigLoader {
+    /// 新建加载器。
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// 显式指定环境。
     pub fn with_environment(mut self, environment: Environment) -> Self {
         self.environment = Some(environment);
         self
     }
 
+    /// 显式指定配置目录。
     pub fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
         self.config_dir = Some(dir.into());
         self
     }
 
+    /// 按解析结果加载 `<environment>.toml` 并反序列化为目标类型。
     pub fn load<T: DeserializeOwned>(self) -> Result<T, ConfigError> {
         let environment = self.resolve_environment()?;
         let config_dir = self.resolve_config_dir()?;

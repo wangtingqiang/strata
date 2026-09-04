@@ -1,10 +1,13 @@
 use secrecy::{ExposeSecret, SecretString};
+/// 不透明令牌错误。
 #[derive(Debug, thiserror::Error)]
 pub enum OpaqueTokenError {
+    /// 令牌为空。
     #[error("token must not be empty")]
     Empty,
 }
 
+/// 不透明令牌（随机 UUID）。
 #[derive(Debug, Clone)]
 pub struct OpaqueToken(SecretString);
 
@@ -17,12 +20,14 @@ impl PartialEq for OpaqueToken {
 impl Eq for OpaqueToken {}
 
 impl OpaqueToken {
+    /// 生成新令牌。
     pub fn generate() -> Self {
         Self(SecretString::from(
             uuid::Uuid::new_v4().as_simple().to_string(),
         ))
     }
 
+    /// 暴露令牌原文。
     pub fn expose_secret(&self) -> &str {
         self.0.expose_secret()
     }

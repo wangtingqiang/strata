@@ -1,3 +1,4 @@
+/// 密码哈希格式错误。
 #[derive(Debug, thiserror::Error)]
 #[error("password hash format is corrupted: {0}")]
 pub struct PasswordHashFormatError(#[from] argon2::password_hash::phc::Error);

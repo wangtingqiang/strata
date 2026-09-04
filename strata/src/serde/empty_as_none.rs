@@ -1,5 +1,6 @@
 use serde::{Deserialize, Deserializer};
 
+/// 反序列化辅助：空字符串按缺失处理（u64）。
 pub fn deserialize_optional_u64_or_empty<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
 where
     D: Deserializer<'de>,
@@ -21,6 +22,7 @@ where
     }
 }
 
+/// 反序列化辅助：空字符串按缺失处理（String）。
 pub fn deserialize_optional_string_or_empty<'de, D>(
     deserializer: D,
 ) -> Result<Option<String>, D::Error>
@@ -41,6 +43,7 @@ where
     }
 }
 
+/// 反序列化辅助：空字符串按缺失处理（bool）。
 pub fn deserialize_optional_bool_or_empty<'de, D>(deserializer: D) -> Result<Option<bool>, D::Error>
 where
     D: Deserializer<'de>,
