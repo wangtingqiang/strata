@@ -131,3 +131,77 @@ fn validate_config_dir(dir: &Path) -> Result<(), ConfigError> {
 fn path_string(path: &Path) -> String {
     path.display().to_string()
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use std::path::PathBuf;
+
+    use serde::Deserialize;
+
+    use super::*;
+
+    #[derive(Debug, Deserialize)]
+    struct TestConfig {
+        host: String,
+        port: u16,
+    }
+
+    fn temp_config_dir() -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("strata-config-test-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn loads_config_by_environment() {
+        let dir = temp_config_dir();
+        fs::write(dir.join("test.toml"), "host = \"127.0.0.1\"\nport = 8080\n").unwrap();
+
+        let config: TestConfig = ConfigLoader::new()
+            .with_environment(Environment::Test)
+            .with_config_dir(&dir)
+            .load()
+            .unwrap();
+
+        assert_eq!(config.host, "127.0.0.1");
+        assert_eq!(config.port, 8080);
+    }
+
+    #[test]
+    fn errors_when_config_dir_missing() {
+        let missing = std::env::temp_dir().join("strata-config-test-does-not-exist");
+
+        let result: Result<TestConfig, ConfigError> =
+            ConfigLoader::new().with_config_dir(missing).load();
+
+        assert!(matches!(result, Err(ConfigError::ConfigDirNotFound { .. })));
+    }
+
+    #[test]
+    fn errors_when_config_dir_is_file() {
+        let dir = temp_config_dir();
+        let file = dir.join("not-a-dir.toml");
+        fs::write(&file, "x = 1\n").unwrap();
+
+        let result: Result<TestConfig, ConfigError> =
+            ConfigLoader::new().with_config_dir(&file).load();
+
+        assert!(matches!(result, Err(ConfigError::ConfigDirInvalid { .. })));
+    }
+
+    #[test]
+    fn errors_when_config_file_missing() {
+        let dir = temp_config_dir();
+
+        let result: Result<TestConfig, ConfigError> = ConfigLoader::new()
+            .with_environment(Environment::Production)
+            .with_config_dir(&dir)
+            .load();
+
+        assert!(matches!(
+            result,
+            Err(ConfigError::ConfigFileNotFound { .. })
+        ));
+    }
+}

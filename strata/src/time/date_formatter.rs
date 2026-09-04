@@ -16,3 +16,18 @@ impl DateFormatter for Date {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use time::macros::date;
+
+    use crate::time::date_parser::DateParser;
+
+    use super::*;
+
+    #[test]
+    fn iso_date_roundtrip() {
+        let day = date!(2026 - 09 - 05);
+        assert_eq!(day.to_iso_date().parse_iso_date().unwrap(), day);
+    }
+}

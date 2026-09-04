@@ -94,3 +94,16 @@ impl<C> Pagination<C> {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn page_pagination_computes_total_pages() {
+        assert_eq!(PagePagination::new(1, 10, Some(25)).total_pages, Some(3));
+        assert_eq!(PagePagination::new(1, 10, Some(30)).total_pages, Some(3));
+        assert_eq!(PagePagination::new(1, 10, Some(20)).total_pages, Some(2));
+        assert_eq!(PagePagination::new(1, 10, None).total_pages, None);
+    }
+}

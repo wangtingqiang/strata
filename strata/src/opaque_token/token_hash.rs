@@ -80,3 +80,54 @@ impl From<TokenHash> for SecretString {
         value.0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::opaque_token::OpaqueToken;
+
+    use super::*;
+
+    #[test]
+    fn accepts_lowercase_64_hex() {
+        let hash = "ab".repeat(32);
+        let token_hash = TokenHash::try_from(hash.as_str()).unwrap();
+        assert_eq!(token_hash.expose_secret(), hash);
+    }
+
+    #[test]
+    fn normalizes_uppercase_to_lowercase() {
+        let token_hash = TokenHash::try_from("AB".repeat(32)).unwrap();
+        assert_eq!(token_hash.expose_secret(), "ab".repeat(32));
+    }
+
+    #[test]
+    fn rejects_wrong_length() {
+        assert!(matches!(
+            TokenHash::try_from("abcdef"),
+            Err(TokenHashError::InvalidFormat { .. })
+        ));
+    }
+
+    #[test]
+    fn rejects_non_hex() {
+        assert!(matches!(
+            TokenHash::try_from("zz".repeat(32)),
+            Err(TokenHashError::InvalidFormat { .. })
+        ));
+    }
+
+    #[test]
+    fn rejects_empty() {
+        assert!(matches!(
+            TokenHash::try_from("   "),
+            Err(TokenHashError::Empty)
+        ));
+    }
+
+    #[test]
+    fn hashes_opaque_token_to_64_hex() {
+        let hash: TokenHash = (&OpaqueToken::generate()).into();
+        assert_eq!(hash.expose_secret().len(), 64);
+        assert!(hash.expose_secret().chars().all(|c| c.is_ascii_hexdigit()));
+    }
+}

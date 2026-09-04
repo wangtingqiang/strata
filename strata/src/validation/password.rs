@@ -95,3 +95,63 @@ impl ValidatePassword for &str {
         validate_raw(self)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use secrecy::SecretString;
+
+    use super::*;
+
+    fn validate(value: &str) -> Result<(), PasswordValidationError> {
+        value.validate_password()
+    }
+
+    #[test]
+    fn rejects_empty() {
+        assert!(matches!(validate(""), Err(PasswordValidationError::Empty)));
+    }
+
+    #[test]
+    fn rejects_too_short() {
+        assert!(matches!(
+            validate("Ab1!abc"),
+            Err(PasswordValidationError::TooShort)
+        ));
+    }
+
+    #[test]
+    fn rejects_too_long() {
+        let long = "Ab1!".to_owned() + &"a".repeat(MAX_LENGTH);
+        assert!(matches!(
+            validate(&long),
+            Err(PasswordValidationError::TooLong)
+        ));
+    }
+
+    #[test]
+    fn rejects_invalid_char() {
+        assert!(matches!(
+            validate("Ab1!abcd中"),
+            Err(PasswordValidationError::ContainsInvalidChar(_))
+        ));
+    }
+
+    #[test]
+    fn rejects_insufficient_character_types() {
+        assert!(matches!(
+            validate("abcdefgh1"),
+            Err(PasswordValidationError::InsufficientCharacterTypes)
+        ));
+    }
+
+    #[test]
+    fn accepts_three_character_types() {
+        assert!(matches!(validate("Abcdefg1"), Ok(())));
+    }
+
+    #[test]
+    fn validates_secret_string() {
+        let secret = SecretString::from("Abcdefg1");
+        assert!(matches!(secret.validate_password(), Ok(())));
+    }
+}

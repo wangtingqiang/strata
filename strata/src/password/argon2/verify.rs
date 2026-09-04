@@ -13,3 +13,34 @@ pub fn verify_password(password: &str, hash: &str) -> Result<bool, PasswordVerif
         Err(error) => Err(PasswordVerifyError(error)),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::password::argon2::{hash::hash_password, validate::validate_password_hash};
+
+    use super::*;
+
+    #[test]
+    fn roundtrip_matches_hashed_password() {
+        let hash = hash_password("correct horse battery staple").unwrap();
+        assert!(verify_password("correct horse battery staple", &hash).unwrap());
+    }
+
+    #[test]
+    fn wrong_password_returns_false_not_error() {
+        let hash = hash_password("correct horse battery staple").unwrap();
+        assert!(!verify_password("wrong password", &hash).unwrap());
+    }
+
+    #[test]
+    fn rejects_corrupted_hash_format() {
+        assert!(validate_password_hash("not-a-hash").is_err());
+        assert!(verify_password("whatever", "not-a-hash").is_err());
+    }
+
+    #[test]
+    fn accepts_valid_hash_format() {
+        let hash = hash_password("correct horse battery staple").unwrap();
+        assert!(validate_password_hash(&hash).is_ok());
+    }
+}

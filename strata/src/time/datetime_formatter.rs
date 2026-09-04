@@ -71,3 +71,26 @@ fn format_rfc3339_utc8(value: OffsetDateTime) -> String {
         Err(_) => DEFAULT_RFC3339_UTC8.to_owned(),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use time::OffsetDateTime;
+
+    use crate::time::datetime_parser::DateTimeParser;
+
+    use super::*;
+
+    #[test]
+    fn human_friendly_roundtrip() {
+        let now = OffsetDateTime::now_utc();
+        let formatted = now.to_human_friendly_utc8();
+        let parsed = formatted.parse_human_friendly_utc8().unwrap();
+        assert_eq!(parsed.to_human_friendly_utc8(), formatted);
+    }
+
+    #[test]
+    fn rfc3339_has_utc8_offset() {
+        let formatted = OffsetDateTime::now_utc().to_rfc3339_utc8();
+        assert!(formatted.ends_with("+08:00"));
+    }
+}

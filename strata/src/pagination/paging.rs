@@ -168,3 +168,67 @@ impl<C> CursorPaging<C> {
         (self.limit, self.cursor)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn paging_rejects_zero_page() {
+        assert!(matches!(
+            Paging::new(0, 10, false),
+            Err(PagingError::InvalidPage)
+        ));
+    }
+
+    #[test]
+    fn paging_rejects_zero_page_size() {
+        assert!(matches!(
+            Paging::new(1, 0, false),
+            Err(PagingError::InvalidPageSize)
+        ));
+    }
+
+    #[test]
+    fn paging_rejects_page_size_over_limit() {
+        assert!(matches!(
+            Paging::new(1, MAX_PAGE_SIZE + 1, false),
+            Err(PagingError::PageSizeExceeded)
+        ));
+    }
+
+    #[test]
+    fn paging_ok_with_getters() {
+        let paging = Paging::new(2, 20, true).unwrap();
+        assert_eq!(paging.page(), 2);
+        assert_eq!(paging.page_size(), 20);
+        assert!(paging.need_total());
+    }
+
+    #[test]
+    fn paging_from_optional_uses_defaults() {
+        let paging = Paging::from_optional(None, None, false).unwrap();
+        assert_eq!(paging.page(), DEFAULT_PAGE);
+        assert_eq!(paging.page_size(), DEFAULT_PAGE_SIZE);
+    }
+
+    #[test]
+    fn cursor_paging_rejects_limit_bounds() {
+        assert!(matches!(
+            CursorPaging::<String>::new(0, None),
+            Err(PagingError::InvalidLimit)
+        ));
+        assert!(matches!(
+            CursorPaging::<String>::new(MAX_LIMIT + 1, None),
+            Err(PagingError::LimitExceeded)
+        ));
+    }
+
+    #[test]
+    fn cursor_paging_ok() {
+        let paging = CursorPaging::new(5, Some("abc".to_owned())).unwrap();
+        assert_eq!(paging.limit(), 5);
+        assert_eq!(paging.cursor(), Some(&"abc".to_owned()));
+        assert_eq!(paging.into_parts(), (5, Some("abc".to_owned())));
+    }
+}
