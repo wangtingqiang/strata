@@ -18,8 +18,6 @@ pub mod password;
 pub mod serde;
 #[cfg(feature = "task")]
 pub mod task;
-#[cfg(feature = "telemetry")]
-pub mod telemetry;
 #[cfg(feature = "text")]
 pub mod text;
 #[cfg(feature = "time")]

@@ -7,12 +7,15 @@ use tracing_subscriber::{
     EnvFilter, Layer, fmt::time::LocalTime, layer::SubscriberExt as _, util::SubscriberInitExt as _,
 };
 
-use crate::telemetry::{
+use crate::{
     TelemetryGuard, TelemetryInitError, TelemetryLocalConfig, TelemetryRemoteConfig,
     config::TelemetryConfig,
 };
 
 impl TelemetryConfig {
+    /// 初始化日志与可观测性：装配本地 fmt 层，并按需装配 OTLP trace/metric 导出。
+    ///
+    /// 返回的 [`TelemetryGuard`] 在析构时关闭 tracer 与 meter provider，确保数据上报完成。
     pub fn init(
         &self,
         service_name: &str,

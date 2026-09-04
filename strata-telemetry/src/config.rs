@@ -1,25 +1,40 @@
 use serde::Deserialize;
 
+/// 可观测性配置：本地日志输出与远端 OTLP 上报。
 #[derive(Debug, Clone, Deserialize)]
 pub struct TelemetryConfig {
+    /// 本地日志输出配置。
     pub local: TelemetryLocalConfig,
+    /// 远端 OTLP 上报配置。
     pub remote: TelemetryRemoteConfig,
 }
 
+/// 本地日志输出配置。
 #[derive(Debug, Clone, Deserialize)]
 #[serde(try_from = "TelemetryLocalConfigHelper")]
 pub enum TelemetryLocalConfig {
+    /// 关闭本地日志输出。
     Disabled,
-    Enabled { filter: String },
+    /// 开启本地日志输出。
+    Enabled {
+        /// tracing 过滤器表达式（EnvFilter）。
+        filter: String,
+    },
 }
 
+/// 远端 OTLP 上报配置。
 #[derive(Debug, Clone, Deserialize)]
 #[serde(try_from = "TelemetryRemoteConfigHelper")]
 pub enum TelemetryRemoteConfig {
+    /// 关闭远端上报。
     Disabled,
+    /// 开启远端上报。
     Enabled {
+        /// tracing 过滤器表达式（EnvFilter）。
         filter: String,
+        /// OTLP HTTP 上报端点。
         otlp_http_endpoint: String,
+        /// 上报超时（毫秒）。
         otlp_http_timeout_ms: u64,
     },
 }

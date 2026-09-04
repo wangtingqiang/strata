@@ -9,8 +9,9 @@ use http::{HeaderMap, HeaderName};
 use tracing::Instrument;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
+/// Axum 中间件：为每个请求创建 span 并提取远端 trace 上下文，结束时记录状态码与耗时。
 pub async fn server_trace(request: Request, next: Next) -> Response {
-    crate::telemetry::http::ensure_propagator();
+    crate::http::ensure_propagator();
 
     let route = request
         .extensions()

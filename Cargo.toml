@@ -5,12 +5,14 @@ members = [
     "strata-error",
     "strata-error-macros",
     "strata-store",
+    "strata-telemetry",
 ]
 
 [workspace.package]
 edition = "2024"
 
 [workspace.dependencies]
+axum = "0.8"
 base64 = "0.22"
 hex = "0.4"
 hmac = "0.13"

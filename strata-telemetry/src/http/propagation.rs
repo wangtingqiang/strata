@@ -3,13 +3,15 @@ use opentelemetry::{global, propagation::Injector, trace::TraceContextExt};
 use tracing::Span;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
+/// 向 [`http::HeaderMap`] 注入当前 span 的 trace 上下文。
 pub trait HeaderMapExt {
+    /// 将当前 span 的 trace 上下文注入请求头（如 `traceparent`）。
     fn inject_trace_context(&mut self);
 }
 
 impl HeaderMapExt for HeaderMap {
     fn inject_trace_context(&mut self) {
-        crate::telemetry::http::ensure_propagator();
+        crate::http::ensure_propagator();
 
         let span = Span::current();
         let context = span.context();

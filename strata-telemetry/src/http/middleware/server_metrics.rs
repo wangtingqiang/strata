@@ -12,6 +12,7 @@ static HTTP_SERVER_DURATION: LazyLock<Histogram<f64>> = LazyLock::new(|| {
         .build()
 });
 
+/// Axum 中间件：记录 HTTP 请求耗时直方图（指标 `http.server.duration`，含路由与状态码标签）。
 pub async fn server_metrics(req: Request<Body>, next: Next) -> Response {
     let route = req
         .extensions()
