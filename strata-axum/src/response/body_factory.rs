@@ -1,9 +1,9 @@
 use time::OffsetDateTime;
 
-use crate::api::ResponseBody;
+use crate::response::ResponseBody;
 use strata::time::DateTimeFormatter;
 
-pub(in crate::api) fn success_body(message: impl Into<String>) -> ResponseBody<()> {
+pub(in crate::response) fn success_body(message: impl Into<String>) -> ResponseBody<()> {
     ResponseBody {
         success: true,
         code: "0".to_owned(),
@@ -13,7 +13,7 @@ pub(in crate::api) fn success_body(message: impl Into<String>) -> ResponseBody<(
     }
 }
 
-pub(in crate::api) fn failure_body(
+pub(in crate::response) fn failure_body(
     code: impl Into<String>,
     message: impl Into<String>,
 ) -> ResponseBody<()> {

@@ -1,6 +1,6 @@
 use axum::extract::{FromRequest, Request, rejection::JsonRejection};
 
-use crate::api::ApiFailure;
+use crate::response::ApiFailure;
 
 pub struct Json<T>(pub T);
 

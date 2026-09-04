@@ -3,7 +3,7 @@ use axum::{
     http::request::Parts,
 };
 
-use crate::api::ApiFailure;
+use crate::response::ApiFailure;
 
 pub struct Path<T>(pub T);
 

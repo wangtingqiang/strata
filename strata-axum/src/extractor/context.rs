@@ -1,6 +1,6 @@
 use axum::{extract::FromRequestParts, http::request::Parts};
 
-use crate::api::ApiFailure;
+use crate::response::ApiFailure;
 
 #[derive(Debug, Clone)]
 pub struct Context<T>(pub T);

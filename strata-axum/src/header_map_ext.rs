@@ -1,13 +1,13 @@
 use axum::http::{HeaderMap, header};
 
-use crate::api::ApiFailure;
+use crate::response::ApiFailure;
 
-pub trait ExtractBearerToken {
-    fn extract_bearer_token(&self) -> Result<String, ApiFailure>;
+pub trait HeaderMapExt {
+    fn bearer_token(&self) -> Result<String, ApiFailure>;
 }
 
-impl ExtractBearerToken for HeaderMap {
-    fn extract_bearer_token(&self) -> Result<String, ApiFailure> {
+impl HeaderMapExt for HeaderMap {
+    fn bearer_token(&self) -> Result<String, ApiFailure> {
         let value = self
             .get(header::AUTHORIZATION)
             .and_then(|v| v.to_str().ok())
