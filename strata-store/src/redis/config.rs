@@ -2,7 +2,7 @@ use redis::IntoConnectionInfo;
 use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
 
-use crate::redis::RedisClientInitError;
+use super::RedisClientInitError;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct RedisClientConfig {

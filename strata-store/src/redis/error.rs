@@ -1,6 +1,4 @@
-use thiserror::Error;
-
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum RedisClientInitError {
     #[error("redis host is empty")]
     EmptyHost,

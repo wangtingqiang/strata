@@ -1,6 +1,4 @@
-use thiserror::Error;
-
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum PgPoolInitError {
     #[error("postgres host is empty")]
     EmptyHost,

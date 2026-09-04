@@ -1,6 +1,4 @@
-use thiserror::Error;
-
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum MySqlPoolInitError {
     #[error("mysql host is empty")]
     EmptyHost,

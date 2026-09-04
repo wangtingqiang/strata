@@ -1,10 +1,10 @@
-use secrecy::{ExposeSecret, SecretString};
-use serde::Deserialize;
-use sqlx::PgPool;
-use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::time::Duration;
 
-use crate::sqlx::postgres::PgPoolInitError;
+use secrecy::{ExposeSecret, SecretString};
+use serde::Deserialize;
+use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
+
+use super::PgPoolInitError;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct PgPoolConfig {

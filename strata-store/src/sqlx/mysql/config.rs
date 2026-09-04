@@ -1,10 +1,10 @@
-use secrecy::{ExposeSecret, SecretString};
-use serde::Deserialize;
-use sqlx::MySqlPool;
-use sqlx::mysql::{MySqlConnectOptions, MySqlPoolOptions};
 use std::time::Duration;
 
-use crate::sqlx::mysql::MySqlPoolInitError;
+use secrecy::{ExposeSecret, SecretString};
+use serde::Deserialize;
+use sqlx::mysql::{MySqlConnectOptions, MySqlPool, MySqlPoolOptions};
+
+use super::MySqlPoolInitError;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct MySqlPoolConfig {

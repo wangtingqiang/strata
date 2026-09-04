@@ -3,19 +3,9 @@ use secrecy::{ExposeSecret, SecretString};
 use sha2::{Digest, Sha256};
 use url::Url;
 
-type HmacSha256 = Hmac<Sha256>;
+use super::SigningError;
 
-#[derive(Debug, thiserror::Error)]
-pub enum SigningError {
-    #[error("failed to build hmac")]
-    BuildHmac(#[from] hmac::digest::InvalidLength),
-    #[error("failed to parse url")]
-    ParseUrl(#[from] url::ParseError),
-    #[error("url must have a host")]
-    MissingHost,
-    #[error("invalid amz_date format")]
-    InvalidAmzDate,
-}
+type HmacSha256 = Hmac<Sha256>;
 
 pub fn s3_signing_key(
     secret_key: &SecretString,

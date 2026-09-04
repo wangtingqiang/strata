@@ -2,7 +2,7 @@ use clickhouse::Client;
 use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
 
-use crate::clickhouse::ChClientInitError;
+use super::ChClientInitError;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ChClientConfig {
