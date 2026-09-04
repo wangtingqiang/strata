@@ -5,7 +5,7 @@
 mod header_map_ext;
 
 /// 请求提取器。
-pub mod extractor;
+pub mod extract;
 /// API 响应层。
 pub mod response;
 
