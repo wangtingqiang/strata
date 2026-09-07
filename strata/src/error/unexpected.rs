@@ -45,3 +45,26 @@ impl std::fmt::Display for UnexpectedError {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::error::Error;
+
+    use super::*;
+
+    #[test]
+    fn new_carries_message_and_source() {
+        let error = UnexpectedError::new("boom", std::io::Error::other("io failed"));
+
+        assert_eq!(error.message(), "boom");
+        assert_eq!(error.source().unwrap().to_string(), "io failed");
+    }
+
+    #[test]
+    fn from_message_carries_no_source() {
+        let error = UnexpectedError::from_message("boom");
+
+        assert_eq!(error.message(), "boom");
+        assert!(error.source().is_none());
+    }
+}

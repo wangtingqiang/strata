@@ -45,3 +45,26 @@ impl std::fmt::Display for InvalidArgumentError {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::error::Error;
+
+    use super::*;
+
+    #[test]
+    fn new_carries_message_and_source() {
+        let error = InvalidArgumentError::new("bad", std::io::Error::other("invalid"));
+
+        assert_eq!(error.message(), "bad");
+        assert_eq!(error.source().unwrap().to_string(), "invalid");
+    }
+
+    #[test]
+    fn from_message_carries_no_source() {
+        let error = InvalidArgumentError::from_message("bad");
+
+        assert_eq!(error.message(), "bad");
+        assert!(error.source().is_none());
+    }
+}

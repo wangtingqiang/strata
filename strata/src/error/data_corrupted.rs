@@ -45,3 +45,26 @@ impl std::fmt::Display for DataCorruptedError {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::error::Error;
+
+    use super::*;
+
+    #[test]
+    fn new_carries_message_and_source() {
+        let error = DataCorruptedError::new("mismatch", std::io::Error::other("boom"));
+
+        assert_eq!(error.message(), "mismatch");
+        assert_eq!(error.source().unwrap().to_string(), "boom");
+    }
+
+    #[test]
+    fn from_message_carries_no_source() {
+        let error = DataCorruptedError::from_message("mismatch");
+
+        assert_eq!(error.message(), "mismatch");
+        assert!(error.source().is_none());
+    }
+}

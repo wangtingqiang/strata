@@ -56,3 +56,80 @@ impl PortError {
         UnexpectedError::from_message(message).into()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::error::Error;
+
+    use super::*;
+
+    #[test]
+    fn constructors_map_to_expected_variants() {
+        assert!(matches!(
+            PortError::invalid_argument("a", std::io::Error::other("boom")),
+            PortError::InvalidArgument(_)
+        ));
+        assert!(matches!(
+            PortError::invalid_argument_from_message("a"),
+            PortError::InvalidArgument(_)
+        ));
+        assert!(matches!(
+            PortError::data_corrupted("d", std::io::Error::other("boom")),
+            PortError::DataCorrupted(_)
+        ));
+        assert!(matches!(
+            PortError::data_corrupted_from_message("d"),
+            PortError::DataCorrupted(_)
+        ));
+        assert!(matches!(
+            PortError::unexpected("u", std::io::Error::other("boom")),
+            PortError::Unexpected(_)
+        ));
+        assert!(matches!(
+            PortError::unexpected_from_message("u"),
+            PortError::Unexpected(_)
+        ));
+    }
+
+    #[test]
+    fn with_source_constructors_carry_source() {
+        let error = PortError::invalid_argument("a", std::io::Error::other("boom"));
+
+        match error {
+            PortError::InvalidArgument(inner) => {
+                assert_eq!(inner.message(), "a");
+                assert!(inner.source().is_some());
+            }
+            _ => panic!("expected InvalidArgument variant"),
+        }
+    }
+
+    #[test]
+    fn from_message_constructors_carry_no_source() {
+        let error = PortError::data_corrupted_from_message("d");
+
+        match error {
+            PortError::DataCorrupted(inner) => {
+                assert_eq!(inner.message(), "d");
+                assert!(inner.source().is_none());
+            }
+            _ => panic!("expected DataCorrupted variant"),
+        }
+    }
+
+    #[test]
+    fn from_conversions_preserve_variant() {
+        assert!(matches!(
+            PortError::from(InvalidArgumentError::from_message("a")),
+            PortError::InvalidArgument(_)
+        ));
+        assert!(matches!(
+            PortError::from(DataCorruptedError::from_message("d")),
+            PortError::DataCorrupted(_)
+        ));
+        assert!(matches!(
+            PortError::from(UnexpectedError::from_message("u")),
+            PortError::Unexpected(_)
+        ));
+    }
+}
