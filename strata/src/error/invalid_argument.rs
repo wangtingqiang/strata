@@ -1,4 +1,4 @@
-use crate::error::{BoxedError, error_source_chain_fmt};
+use crate::error::BoxedError;
 
 /// 参数不合法错误。
 #[derive(Debug, thiserror::Error)]
@@ -32,16 +32,16 @@ impl InvalidArgumentError {
     pub fn message(&self) -> &str {
         &self.message
     }
-
-    /// 根源错误。
-    pub fn source_ref(&self) -> Option<&BoxedError> {
-        self.source.as_ref()
-    }
 }
 
 impl std::fmt::Display for InvalidArgumentError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "invalid_argument({})", self.message)?;
-        error_source_chain_fmt(&self, f)
+        write!(f, "invalid_argument ({})", self.message)?;
+
+        if let Some(source) = &self.source {
+            write!(f, ": {source}")?;
+        }
+
+        Ok(())
     }
 }
