@@ -12,3 +12,9 @@ serde = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
 time = { workspace = true }
 tracing = { workspace = true }
+
+[dev-dependencies]
+http-body-util = "0.1"
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }
+tower = { version = "0.5", features = ["util"] }

@@ -94,3 +94,77 @@ where
         (self.status, Json(self.body)).into_response()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use axum::{
+        http::StatusCode,
+        response::{IntoResponse, Response},
+    };
+    use http_body_util::BodyExt;
+    use serde_json::Value;
+
+    use super::*;
+
+    async fn body_json(response: Response) -> Value {
+        let bytes = response.into_body().collect().await.unwrap().to_bytes();
+        serde_json::from_slice(&bytes).unwrap()
+    }
+
+    #[tokio::test]
+    async fn ok_returns_200_with_success_envelope() {
+        let response = ApiSuccess::ok().into_response();
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let body = body_json(response).await;
+        assert_eq!(body["success"], true);
+        assert_eq!(body["code"], "0");
+        assert_eq!(body["message"], "ok");
+        assert!(body.get("data").is_none());
+
+        let time = body["time"].as_str().unwrap();
+        assert!(time.ends_with("+08:00"));
+    }
+
+    #[tokio::test]
+    async fn created_and_accepted_return_expected_status_and_message() {
+        let response = ApiSuccess::created().into_response();
+        assert_eq!(response.status(), StatusCode::CREATED);
+        let body = body_json(response).await;
+        assert_eq!(body["message"], "created");
+
+        let response = ApiSuccess::accepted().into_response();
+        assert_eq!(response.status(), StatusCode::ACCEPTED);
+        let body = body_json(response).await;
+        assert_eq!(body["message"], "accepted");
+    }
+
+    #[tokio::test]
+    async fn with_data_preserves_envelope_and_adds_data() {
+        let response = ApiSuccess::ok().with_data(42).into_response();
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let body = body_json(response).await;
+        assert_eq!(body["success"], true);
+        assert_eq!(body["code"], "0");
+        assert_eq!(body["message"], "ok");
+        assert!(body.get("time").is_some());
+        assert_eq!(body["data"], 42);
+    }
+
+    #[test]
+    fn with_status_overrides_status() {
+        let success = ApiSuccess::ok().with_status(StatusCode::CREATED);
+        assert_eq!(success.status(), StatusCode::CREATED);
+    }
+
+    #[test]
+    fn with_code_and_message_override_envelope() {
+        let success = ApiSuccess::ok().with_code("C1").with_message("hello");
+        assert_eq!(success.body().success, true);
+        assert_eq!(success.body().code, "C1");
+        assert_eq!(success.body().message, "hello");
+        assert!(success.body().time.is_some());
+        assert!(success.body().data.is_none());
+    }
+}

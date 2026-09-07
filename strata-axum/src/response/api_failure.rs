@@ -152,7 +152,15 @@ impl<E: ErrorInfo + std::fmt::Display> From<E> for ApiFailure {
 
 #[cfg(test)]
 mod tests {
+    use http_body_util::BodyExt;
+    use serde_json::Value;
+
     use super::*;
+
+    async fn body_json(response: Response) -> Value {
+        let bytes = response.into_body().collect().await.unwrap().to_bytes();
+        serde_json::from_slice(&bytes).unwrap()
+    }
 
     #[derive(Debug, strata_error::ErrorInfo)]
     enum TestError {
@@ -209,5 +217,85 @@ mod tests {
             assert_eq!(failure.code(), expected_code);
             assert_eq!(failure.message(), expected_message);
         }
+    }
+
+    #[test]
+    fn constructor_helpers_map_to_expected_status() {
+        let cases = [
+            (
+                ApiFailure::bad_request("E400", "bad"),
+                StatusCode::BAD_REQUEST,
+            ),
+            (
+                ApiFailure::unauthorized("E401", "unauthorized"),
+                StatusCode::UNAUTHORIZED,
+            ),
+            (
+                ApiFailure::forbidden("E403", "forbidden"),
+                StatusCode::FORBIDDEN,
+            ),
+            (
+                ApiFailure::not_found("E404", "not found"),
+                StatusCode::NOT_FOUND,
+            ),
+            (
+                ApiFailure::conflict("E409", "conflict"),
+                StatusCode::CONFLICT,
+            ),
+            (
+                ApiFailure::unprocessable_entity("E422", "unprocessable"),
+                StatusCode::UNPROCESSABLE_ENTITY,
+            ),
+            (
+                ApiFailure::too_many_requests("E429", "too many"),
+                StatusCode::TOO_MANY_REQUESTS,
+            ),
+            (
+                ApiFailure::internal_server_error("E500", "internal"),
+                StatusCode::INTERNAL_SERVER_ERROR,
+            ),
+            (
+                ApiFailure::service_unavailable("E503", "unavailable"),
+                StatusCode::SERVICE_UNAVAILABLE,
+            ),
+        ];
+
+        for (failure, expected_status) in cases {
+            assert_eq!(failure.status(), expected_status);
+        }
+    }
+
+    #[test]
+    fn constructors_carry_code_and_message() {
+        let failure = ApiFailure::not_found("USER_NOT_FOUND", "用户不存在");
+        assert_eq!(failure.code(), "USER_NOT_FOUND");
+        assert_eq!(failure.message(), "用户不存在");
+    }
+
+    #[test]
+    fn with_overrides_apply() {
+        let failure = ApiFailure::bad_request("A", "a")
+            .with_status(StatusCode::CONFLICT)
+            .with_code("B")
+            .with_message("b");
+
+        assert_eq!(failure.status(), StatusCode::CONFLICT);
+        assert_eq!(failure.code(), "B");
+        assert_eq!(failure.message(), "b");
+    }
+
+    #[tokio::test]
+    async fn into_response_has_failure_envelope_shape() {
+        let response = ApiFailure::bad_request("E400", "bad request").into_response();
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+
+        let body = body_json(response).await;
+        assert_eq!(body["success"], false);
+        assert_eq!(body["code"], "E400");
+        assert_eq!(body["message"], "bad request");
+        assert!(body.get("data").is_none());
+
+        let time = body["time"].as_str().unwrap();
+        assert!(time.ends_with("+08:00"));
     }
 }
