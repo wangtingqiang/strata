@@ -295,7 +295,7 @@ mod tests {
         assert_eq!(body["message"], "bad request");
         assert!(body.get("data").is_none());
 
-        let time = body["time"].as_str().unwrap();
-        assert!(time.ends_with("+08:00"));
+        let timestamp = body["timestamp"].as_str().unwrap();
+        assert!(timestamp.ends_with("+08:00"));
     }
 }

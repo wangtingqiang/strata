@@ -49,7 +49,7 @@ impl ApiSuccess<()> {
                 success: body.success,
                 code: body.code,
                 message: body.message,
-                time: body.time,
+                timestamp: body.timestamp,
                 data: Some(data),
             },
         }
@@ -122,8 +122,8 @@ mod tests {
         assert_eq!(body["message"], "ok");
         assert!(body.get("data").is_none());
 
-        let time = body["time"].as_str().unwrap();
-        assert!(time.ends_with("+08:00"));
+        let timestamp = body["timestamp"].as_str().unwrap();
+        assert!(timestamp.ends_with("+08:00"));
     }
 
     #[tokio::test]
@@ -148,7 +148,7 @@ mod tests {
         assert_eq!(body["success"], true);
         assert_eq!(body["code"], "0");
         assert_eq!(body["message"], "ok");
-        assert!(body.get("time").is_some());
+        assert!(body.get("timestamp").is_some());
         assert_eq!(body["data"], 42);
     }
 
@@ -164,7 +164,7 @@ mod tests {
         assert_eq!(success.body().success, true);
         assert_eq!(success.body().code, "C1");
         assert_eq!(success.body().message, "hello");
-        assert!(success.body().time.is_some());
+        assert!(success.body().timestamp.is_some());
         assert!(success.body().data.is_none());
     }
 }

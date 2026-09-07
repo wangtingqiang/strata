@@ -9,9 +9,9 @@ pub struct ResponseBody<T> {
     pub code: String,
     /// 人类可读消息。
     pub message: String,
-    /// 响应时间（RFC3339，UTC+8）。
+    /// 响应时间戳（RFC3339，UTC+8）。
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub time: Option<String>,
+    pub timestamp: Option<String>,
     /// 业务数据。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<T>,
