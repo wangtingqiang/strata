@@ -55,3 +55,64 @@ impl PgPoolConfig {
             .map_err(PgPoolInitError::Connect)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::*;
+
+    #[test]
+    fn deserializes_optional_fields() {
+        let config: PgPoolConfig = serde_json::from_value(json!({
+            "host": "localhost",
+            "port": 5432,
+            "username": "root",
+            "password": "secret",
+            "database": "app",
+            "max_connections": 10,
+            "acquire_timeout_seconds": 5,
+        }))
+        .unwrap();
+
+        assert_eq!(config.host, "localhost");
+        assert_eq!(config.port, 5432);
+        assert_eq!(config.username, "root");
+        assert_eq!(config.password.expose_secret(), "secret");
+        assert_eq!(config.database, "app");
+        assert_eq!(config.max_connections, Some(10));
+        assert_eq!(config.acquire_timeout_seconds, Some(5));
+    }
+
+    #[test]
+    fn optional_fields_default_to_none() {
+        let config: PgPoolConfig = serde_json::from_value(json!({
+            "host": "localhost",
+            "port": 5432,
+            "username": "root",
+            "password": "secret",
+            "database": "app",
+        }))
+        .unwrap();
+
+        assert_eq!(config.max_connections, None);
+        assert_eq!(config.acquire_timeout_seconds, None);
+    }
+
+    #[tokio::test]
+    async fn connect_rejects_empty_host_before_any_network_call() {
+        let config: PgPoolConfig = serde_json::from_value(json!({
+            "host": " ",
+            "port": 5432,
+            "username": "root",
+            "password": "secret",
+            "database": "app",
+        }))
+        .unwrap();
+
+        assert!(matches!(
+            config.connect().await.err(),
+            Some(PgPoolInitError::EmptyHost)
+        ));
+    }
+}

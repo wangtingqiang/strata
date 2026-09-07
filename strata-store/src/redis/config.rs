@@ -48,3 +48,45 @@ impl RedisClientConfig {
         Ok(client)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::*;
+
+    #[test]
+    fn deserializes_from_json() {
+        let config: RedisClientConfig = serde_json::from_value(json!({
+            "host": "127.0.0.1",
+            "port": 6379,
+            "username": "default",
+            "password": "secret",
+            "database": 0,
+        }))
+        .unwrap();
+
+        assert_eq!(config.host, "127.0.0.1");
+        assert_eq!(config.port, 6379);
+        assert_eq!(config.username, "default");
+        assert_eq!(config.password.expose_secret(), "secret");
+        assert_eq!(config.database, 0);
+    }
+
+    #[test]
+    fn connect_rejects_empty_host_before_any_network_call() {
+        let config: RedisClientConfig = serde_json::from_value(json!({
+            "host": "   ",
+            "port": 6379,
+            "username": "default",
+            "password": "secret",
+            "database": 0,
+        }))
+        .unwrap();
+
+        assert!(matches!(
+            config.connect().err(),
+            Some(RedisClientInitError::EmptyHost)
+        ));
+    }
+}

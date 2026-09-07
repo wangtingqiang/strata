@@ -39,3 +39,42 @@ impl ChClientConfig {
         Ok(client)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::*;
+
+    #[test]
+    fn deserializes_from_json() {
+        let config: ChClientConfig = serde_json::from_value(json!({
+            "url": "http://localhost:8123",
+            "database": "default",
+            "username": "admin",
+            "password": "secret",
+        }))
+        .unwrap();
+
+        assert_eq!(config.url, "http://localhost:8123");
+        assert_eq!(config.database, "default");
+        assert_eq!(config.username, "admin");
+        assert_eq!(config.password.expose_secret(), "secret");
+    }
+
+    #[tokio::test]
+    async fn connect_rejects_empty_url_before_any_network_call() {
+        let config: ChClientConfig = serde_json::from_value(json!({
+            "url": "   ",
+            "database": "default",
+            "username": "admin",
+            "password": "secret",
+        }))
+        .unwrap();
+
+        assert!(matches!(
+            config.connect().await.err(),
+            Some(ChClientInitError::EmptyUrl)
+        ));
+    }
+}
