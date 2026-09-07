@@ -37,3 +37,45 @@ where
         None => RequiredNullable::Null,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use serde::Deserialize;
+    use serde_json::json;
+
+    use super::*;
+
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct Entry {
+        #[serde(default, deserialize_with = "deserialize_required_nullable")]
+        nickname: RequiredNullable<String>,
+    }
+
+    #[test]
+    fn missing_field_is_missing() {
+        let entry: Entry = serde_json::from_value(json!({})).unwrap();
+        assert_eq!(entry.nickname, RequiredNullable::Missing);
+    }
+
+    #[test]
+    fn explicit_null_is_null() {
+        let entry: Entry = serde_json::from_value(json!({ "nickname": null })).unwrap();
+        assert_eq!(entry.nickname, RequiredNullable::Null);
+    }
+
+    #[test]
+    fn value_is_value() {
+        let entry: Entry = serde_json::from_value(json!({ "nickname": "alice" })).unwrap();
+        assert_eq!(entry.nickname, RequiredNullable::Value("alice".to_owned()));
+    }
+
+    #[test]
+    fn into_option_maps_three_states() {
+        assert_eq!(RequiredNullable::<i32>::Missing.into_option(), None);
+        assert_eq!(RequiredNullable::<i32>::Null.into_option(), Some(None));
+        assert_eq!(
+            RequiredNullable::<i32>::Value(7).into_option(),
+            Some(Some(7))
+        );
+    }
+}
