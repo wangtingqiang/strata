@@ -31,6 +31,8 @@ impl OffsetDateTimeExt for OffsetDateTime {
 
 #[cfg(test)]
 mod tests {
+    use time::macros::{date, offset, time};
+
     use super::*;
 
     #[test]
@@ -39,5 +41,38 @@ mod tests {
         let millis = now.unix_timestamp_millis();
         let restored = OffsetDateTime::from_unix_timestamp_millis(millis).unwrap();
         assert_eq!(restored.unix_timestamp_millis(), millis);
+    }
+
+    #[test]
+    fn unix_timestamp_millis_is_exact_including_fraction() {
+        let value = OffsetDateTime::new_utc(date!(2024 - 06 - 01), time!(12:34:56.123));
+        assert_eq!(value.unix_timestamp_millis(), 1_717_245_296_123);
+    }
+
+    #[test]
+    fn to_primitive_utc_converts_offset_datetime() {
+        // 2024-06-02 01:00:00 (+08:00) 对应的 UTC 瞬时是 2024-06-01 17:00:00。
+        let value =
+            OffsetDateTime::new_utc(date!(2024 - 06 - 01), time!(17:00)).to_offset(offset!(+8));
+
+        assert_eq!(
+            value.to_primitive_utc(),
+            PrimitiveDateTime::new(date!(2024 - 06 - 01), time!(17:00))
+        );
+    }
+
+    #[test]
+    fn to_primitive_utc_keeps_utc_untouched() {
+        let value = OffsetDateTime::new_utc(date!(2024 - 06 - 01), time!(12:34:56));
+
+        assert_eq!(
+            value.to_primitive_utc(),
+            PrimitiveDateTime::new(date!(2024 - 06 - 01), time!(12:34:56))
+        );
+    }
+
+    #[test]
+    fn from_unix_timestamp_millis_rejects_out_of_range() {
+        assert!(OffsetDateTime::from_unix_timestamp_millis(i64::MAX).is_err());
     }
 }

@@ -74,7 +74,7 @@ fn format_rfc3339_utc8(value: OffsetDateTime) -> String {
 
 #[cfg(test)]
 mod tests {
-    use time::OffsetDateTime;
+    use time::{OffsetDateTime, macros::datetime};
 
     use crate::time::datetime_parser::DateTimeParser;
 
@@ -92,5 +92,44 @@ mod tests {
     fn rfc3339_has_utc8_offset() {
         let formatted = OffsetDateTime::now_utc().to_rfc3339_utc8();
         assert!(formatted.ends_with("+08:00"));
+    }
+
+    #[test]
+    fn rfc3339_formats_fixed_timestamp() {
+        let value = datetime!(2024-06-01 12:34:56 UTC);
+        assert_eq!(value.to_rfc3339_utc8(), "2024-06-01T20:34:56+08:00");
+    }
+
+    #[test]
+    fn human_friendly_formats_fixed_timestamp() {
+        let value = datetime!(2024-06-01 12:34:56 UTC);
+        assert_eq!(value.to_human_friendly_utc8(), "2024-06-01 20:34:56");
+    }
+
+    #[test]
+    fn human_friendly_no_seconds_formats_fixed_timestamp() {
+        let value = datetime!(2024-06-01 12:34:56 UTC);
+        assert_eq!(
+            value.to_human_friendly_no_seconds_utc8(),
+            "2024-06-01 20:34"
+        );
+    }
+
+    #[test]
+    fn cross_day_shift_when_converting_to_utc8() {
+        let value = datetime!(2024-06-01 18:00:00 UTC);
+        assert_eq!(value.to_human_friendly_utc8(), "2024-06-02 02:00:00");
+    }
+
+    #[test]
+    fn primitive_datetime_formats_as_utc8() {
+        let value = datetime!(2024-06-01 12:34:56);
+
+        assert_eq!(value.to_rfc3339_utc8(), "2024-06-01T20:34:56+08:00");
+        assert_eq!(value.to_human_friendly_utc8(), "2024-06-01 20:34:56");
+        assert_eq!(
+            value.to_human_friendly_no_seconds_utc8(),
+            "2024-06-01 20:34"
+        );
     }
 }

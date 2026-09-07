@@ -30,3 +30,46 @@ impl DateTimeParser for str {
             .map(|value| value.assume_offset(offset!(+8)))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use time::{UtcOffset, macros::datetime};
+
+    use super::*;
+
+    #[test]
+    fn parses_human_friendly_with_utc8_offset() {
+        let parsed = "2024-06-01 12:34:56".parse_human_friendly_utc8().unwrap();
+
+        assert_eq!(
+            parsed.to_offset(UtcOffset::UTC),
+            datetime!(2024-06-01 04:34:56 UTC)
+        );
+        assert_eq!(parsed.offset(), offset!(+8));
+    }
+
+    #[test]
+    fn parses_human_friendly_no_seconds_with_utc8_offset() {
+        let parsed = "2024-06-01 12:34"
+            .parse_human_friendly_no_seconds_utc8()
+            .unwrap();
+
+        assert_eq!(
+            parsed.to_offset(UtcOffset::UTC),
+            datetime!(2024-06-01 04:34:00 UTC)
+        );
+        assert_eq!(parsed.offset(), offset!(+8));
+    }
+
+    #[test]
+    fn rejects_malformed_datetime() {
+        assert!("2024-6-1 12:34:56".parse_human_friendly_utc8().is_err());
+        assert!(
+            "2024-06-01 12:34:56"
+                .parse_human_friendly_no_seconds_utc8()
+                .is_err()
+        );
+        assert!("not a date".parse_human_friendly_utc8().is_err());
+        assert!("not a date".parse_human_friendly_no_seconds_utc8().is_err());
+    }
+}
