@@ -53,3 +53,79 @@ impl TryFrom<String> for Environment {
         Environment::try_from(value.as_str())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn as_str_returns_expected_identifiers() {
+        assert_eq!(Environment::Local.as_str(), "local");
+        assert_eq!(Environment::Development.as_str(), "development");
+        assert_eq!(Environment::Test.as_str(), "test");
+        assert_eq!(Environment::Staging.as_str(), "staging");
+        assert_eq!(Environment::Production.as_str(), "production");
+    }
+
+    #[test]
+    fn parses_all_supported_values() {
+        assert_eq!(Environment::try_from("local").unwrap(), Environment::Local);
+        assert_eq!(
+            Environment::try_from("development").unwrap(),
+            Environment::Development
+        );
+        assert_eq!(Environment::try_from("test").unwrap(), Environment::Test);
+        assert_eq!(
+            Environment::try_from("staging").unwrap(),
+            Environment::Staging
+        );
+        assert_eq!(
+            Environment::try_from("production").unwrap(),
+            Environment::Production
+        );
+    }
+
+    #[test]
+    fn parsing_is_case_insensitive() {
+        assert_eq!(Environment::try_from("LOCAL").unwrap(), Environment::Local);
+        assert_eq!(
+            Environment::try_from("Production").unwrap(),
+            Environment::Production
+        );
+    }
+
+    #[test]
+    fn parsing_trims_whitespace() {
+        assert_eq!(
+            Environment::try_from(" local ").unwrap(),
+            Environment::Local
+        );
+        assert_eq!(
+            Environment::try_from("  test\n").unwrap(),
+            Environment::Test
+        );
+    }
+
+    #[test]
+    fn unsupported_value_rejects_with_original() {
+        let error = Environment::try_from("unknown").unwrap_err();
+
+        assert!(matches!(
+            error,
+            EnvironmentError::Unsupported { value } if value == "unknown"
+        ));
+    }
+
+    #[test]
+    fn parses_owned_string() {
+        assert_eq!(
+            Environment::try_from("local".to_owned()).unwrap(),
+            Environment::Local
+        );
+    }
+
+    #[test]
+    fn default_is_local() {
+        assert_eq!(Environment::default(), Environment::Local);
+    }
+}

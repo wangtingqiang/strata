@@ -15,3 +15,18 @@ impl ServerConfig {
         format!("{}:{}", self.host, self.port)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn addr_joins_host_and_port() {
+        let config = ServerConfig {
+            host: "127.0.0.1".to_owned(),
+            port: 8080,
+        };
+
+        assert_eq!(config.addr(), "127.0.0.1:8080");
+    }
+}

@@ -204,4 +204,36 @@ mod tests {
             Err(ConfigError::ConfigFileNotFound { .. })
         ));
     }
+
+    #[test]
+    fn resolve_environment_honors_env_value() {
+        assert_eq!(
+            resolve_environment_from_env(Ok("production".to_owned())).unwrap(),
+            Environment::Production
+        );
+        assert!(matches!(
+            resolve_environment_from_env(Ok("unknown".to_owned())),
+            Err(ConfigError::InvalidEnvironment(_))
+        ));
+        assert_eq!(
+            resolve_environment_from_env(Err(std::env::VarError::NotPresent)).unwrap(),
+            Environment::default()
+        );
+    }
+
+    #[test]
+    fn resolve_config_dir_honors_env_value() {
+        assert_eq!(
+            resolve_config_dir_from_env(Ok("/tmp/configs".to_owned())).unwrap(),
+            Some(PathBuf::from("/tmp/configs"))
+        );
+        assert!(matches!(
+            resolve_config_dir_from_env(Ok("   ".to_owned())),
+            Err(ConfigError::EmptyAppConfigDir)
+        ));
+        assert_eq!(
+            resolve_config_dir_from_env(Err(std::env::VarError::NotPresent)).unwrap(),
+            None
+        );
+    }
 }
