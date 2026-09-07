@@ -84,3 +84,85 @@ impl TryFrom<TelemetryRemoteConfigHelper> for TelemetryRemoteConfig {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::*;
+
+    fn config_with(local: serde_json::Value, remote: serde_json::Value) -> TelemetryConfig {
+        serde_json::from_value(json!({ "local": local, "remote": remote })).unwrap()
+    }
+
+    #[test]
+    fn deserializes_both_disabled() {
+        let config: TelemetryConfig = serde_json::from_value(json!({
+            "local": { "enabled": false },
+            "remote": { "enabled": false },
+        }))
+        .unwrap();
+
+        assert!(matches!(config.local, TelemetryLocalConfig::Disabled));
+        assert!(matches!(config.remote, TelemetryRemoteConfig::Disabled));
+    }
+
+    #[test]
+    fn deserializes_local_enabled_with_filter() {
+        let config = config_with(
+            json!({ "enabled": true, "filter": "info" }),
+            json!({ "enabled": false }),
+        );
+
+        assert!(matches!(
+            config.local,
+            TelemetryLocalConfig::Enabled { ref filter } if filter == "info"
+        ));
+    }
+
+    #[test]
+    fn local_enabled_requires_filter() {
+        let result: Result<TelemetryConfig, _> = serde_json::from_value(
+            json!({ "local": { "enabled": true }, "remote": { "enabled": false } }),
+        );
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn deserializes_remote_enabled_with_all_fields() {
+        let config = config_with(
+            json!({ "enabled": false }),
+            json!({ "enabled": true, "filter": "info", "otlp_http_endpoint": "http://collector:4318", "otlp_http_timeout_ms": 5000 }),
+        );
+
+        match config.remote {
+            TelemetryRemoteConfig::Enabled {
+                filter,
+                otlp_http_endpoint,
+                otlp_http_timeout_ms,
+            } => {
+                assert_eq!(filter, "info");
+                assert_eq!(otlp_http_endpoint, "http://collector:4318");
+                assert_eq!(otlp_http_timeout_ms, 5000);
+            }
+            _ => panic!("expected remote enabled"),
+        }
+    }
+
+    #[test]
+    fn remote_enabled_requires_all_fields() {
+        for remote in [
+            json!({ "enabled": true, "otlp_http_endpoint": "http://x", "otlp_http_timeout_ms": 1 }),
+            json!({ "enabled": true, "filter": "info", "otlp_http_timeout_ms": 1 }),
+            json!({ "enabled": true, "filter": "info", "otlp_http_endpoint": "http://x" }),
+        ] {
+            let result: Result<TelemetryConfig, _> = serde_json::from_value(json!({
+                "local": { "enabled": false },
+                "remote": remote,
+            }));
+
+            assert!(result.is_err());
+        }
+    }
+}

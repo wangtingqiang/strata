@@ -155,3 +155,69 @@ fn build_meter_provider(
 
     Ok(provider)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn disabled_config_initializes_and_guard_drops() {
+        let config = TelemetryConfig {
+            local: TelemetryLocalConfig::Disabled,
+            remote: TelemetryRemoteConfig::Disabled,
+        };
+
+        let guard = config.init("test-service", "0.1.0").unwrap();
+
+        drop(guard);
+    }
+
+    #[test]
+    fn rejects_invalid_local_filter() {
+        let config = TelemetryConfig {
+            local: TelemetryLocalConfig::Enabled {
+                filter: "[[[invalid".to_owned(),
+            },
+            remote: TelemetryRemoteConfig::Disabled,
+        };
+
+        assert!(matches!(
+            config.init("test-service", "0.1.0").unwrap_err(),
+            TelemetryInitError::InvalidFilter(_)
+        ));
+    }
+
+    #[test]
+    fn rejects_empty_remote_endpoint() {
+        let config = TelemetryConfig {
+            local: TelemetryLocalConfig::Disabled,
+            remote: TelemetryRemoteConfig::Enabled {
+                filter: "info".to_owned(),
+                otlp_http_endpoint: "   ".to_owned(),
+                otlp_http_timeout_ms: 1000,
+            },
+        };
+
+        assert!(matches!(
+            config.init("test-service", "0.1.0").unwrap_err(),
+            TelemetryInitError::InvalidRemoteEndpoint
+        ));
+    }
+
+    #[test]
+    fn rejects_zero_remote_timeout() {
+        let config = TelemetryConfig {
+            local: TelemetryLocalConfig::Disabled,
+            remote: TelemetryRemoteConfig::Enabled {
+                filter: "info".to_owned(),
+                otlp_http_endpoint: "http://collector:4318".to_owned(),
+                otlp_http_timeout_ms: 0,
+            },
+        };
+
+        assert!(matches!(
+            config.init("test-service", "0.1.0").unwrap_err(),
+            TelemetryInitError::InvalidRemoteTimeout
+        ));
+    }
+}

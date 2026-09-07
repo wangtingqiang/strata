@@ -36,3 +36,50 @@ impl Injector for HeaderInjector<'_> {
         self.0.insert(header_name, header_value);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use axum::http::HeaderMap;
+    use opentelemetry::trace::TracerProvider;
+    use opentelemetry_sdk::propagation::TraceContextPropagator;
+    use tracing_subscriber::layer::SubscriberExt;
+
+    use super::*;
+
+    #[test]
+    fn no_op_without_valid_trace_context() {
+        let mut headers = HeaderMap::new();
+
+        headers.inject_trace_context();
+
+        assert!(headers.get("traceparent").is_none());
+    }
+
+    #[test]
+    fn injects_traceparent_with_valid_context() {
+        let provider = opentelemetry_sdk::trace::SdkTracerProvider::builder()
+            .with_sampler(opentelemetry_sdk::trace::Sampler::AlwaysOn)
+            .build();
+        opentelemetry::global::set_tracer_provider(provider.clone());
+        opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
+
+        let subscriber = tracing_subscriber::registry()
+            .with(tracing_opentelemetry::layer().with_tracer(provider.tracer("test")));
+
+        tracing::subscriber::with_default(subscriber, || {
+            let span = tracing::info_span!("inject-test");
+            let _enter = span.enter();
+
+            let mut headers = HeaderMap::new();
+            headers.inject_trace_context();
+
+            let traceparent = headers
+                .get("traceparent")
+                .expect("traceparent should be injected")
+                .to_str()
+                .unwrap();
+
+            assert!(traceparent.starts_with("00-"));
+        });
+    }
+}
