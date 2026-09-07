@@ -11,3 +11,36 @@ where
     let current_span = tracing::Span::current();
     tokio::task::spawn_blocking(move || current_span.in_scope(f))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn runs_closure_and_returns_result() {
+        let handle = spawn_blocking_with_current_span(|| 21 * 2);
+        assert_eq!(handle.await.unwrap(), 42);
+    }
+
+    #[tokio::test]
+    async fn propagates_current_span_to_blocking_thread() {
+        tracing_subscriber::fmt().with_test_writer().try_init().ok();
+
+        let span = tracing::info_span!("blocking-task");
+
+        let (caller_span_id, handle) = span.in_scope(|| {
+            let id = tracing::Span::current()
+                .id()
+                .expect("span should have an id with an active subscriber");
+            let handle = spawn_blocking_with_current_span(|| tracing::Span::current().id());
+            (id, handle)
+        });
+
+        let blocking_span_id = handle
+            .await
+            .unwrap()
+            .expect("blocking thread should inherit the caller span");
+
+        assert_eq!(blocking_span_id, caller_span_id);
+    }
+}
