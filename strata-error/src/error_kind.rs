@@ -13,6 +13,8 @@ pub enum ErrorKind {
     NotFound,
     /// 资源冲突。
     Conflict,
+    /// 临时锁定。
+    Locked,
     /// 超出频率限制。
     RateLimited,
     /// 内部错误。
@@ -39,6 +41,7 @@ impl std::fmt::Display for ErrorKind {
             Self::Business => write!(f, "business"),
             Self::NotFound => write!(f, "not_found"),
             Self::Conflict => write!(f, "conflict"),
+            Self::Locked => write!(f, "locked"),
             Self::RateLimited => write!(f, "rate_limited"),
             Self::Internal => write!(f, "internal"),
             Self::Technical => write!(f, "technical"),

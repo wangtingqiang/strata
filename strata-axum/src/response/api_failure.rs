@@ -54,6 +54,11 @@ impl ApiFailure {
         Self::new(StatusCode::UNPROCESSABLE_ENTITY, code, message)
     }
 
+    /// 423
+    pub fn locked(code: impl Into<String>, message: impl Into<String>) -> Self {
+        Self::new(StatusCode::LOCKED, code, message)
+    }
+
     /// 429
     pub fn too_many_requests(code: impl Into<String>, message: impl Into<String>) -> Self {
         Self::new(StatusCode::TOO_MANY_REQUESTS, code, message)
@@ -122,6 +127,7 @@ impl<E: ErrorInfo + std::fmt::Display> From<E> for ApiFailure {
             ErrorKind::Business => StatusCode::UNPROCESSABLE_ENTITY,
             ErrorKind::NotFound => StatusCode::NOT_FOUND,
             ErrorKind::Conflict => StatusCode::CONFLICT,
+            ErrorKind::Locked => StatusCode::LOCKED,
             ErrorKind::RateLimited => StatusCode::TOO_MANY_REQUESTS,
             ErrorKind::Internal => StatusCode::INTERNAL_SERVER_ERROR,
             ErrorKind::Technical => StatusCode::INTERNAL_SERVER_ERROR,
@@ -176,13 +182,15 @@ mod tests {
         NotFound,
         #[info(kind = "Conflict", code = "E006", message = "conflict")]
         Conflict,
-        #[info(kind = "RateLimited", code = "E007", message = "rate limited")]
+        #[info(kind = "Locked", code = "E007", message = "locked")]
+        Locked,
+        #[info(kind = "RateLimited", code = "E008", message = "rate limited")]
         RateLimited,
-        #[info(kind = "Internal", code = "E008", message = "internal error")]
+        #[info(kind = "Internal", code = "E009", message = "internal error")]
         Internal,
-        #[info(kind = "Technical", code = "E009", message = "technical error")]
+        #[info(kind = "Technical", code = "E010", message = "technical error")]
         Technical,
-        #[info(kind = "Unexpected", code = "E010", message = "unexpected error")]
+        #[info(kind = "Unexpected", code = "E011", message = "unexpected error")]
         Unexpected,
     }
 
@@ -201,6 +209,7 @@ mod tests {
             (TestError::Business, StatusCode::UNPROCESSABLE_ENTITY),
             (TestError::NotFound, StatusCode::NOT_FOUND),
             (TestError::Conflict, StatusCode::CONFLICT),
+            (TestError::Locked, StatusCode::LOCKED),
             (TestError::RateLimited, StatusCode::TOO_MANY_REQUESTS),
             (TestError::Internal, StatusCode::INTERNAL_SERVER_ERROR),
             (TestError::Technical, StatusCode::INTERNAL_SERVER_ERROR),
@@ -246,6 +255,7 @@ mod tests {
                 ApiFailure::unprocessable_entity("E422", "unprocessable"),
                 StatusCode::UNPROCESSABLE_ENTITY,
             ),
+            (ApiFailure::locked("E423", "locked"), StatusCode::LOCKED),
             (
                 ApiFailure::too_many_requests("E429", "too many"),
                 StatusCode::TOO_MANY_REQUESTS,
