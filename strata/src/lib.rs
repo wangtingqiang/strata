@@ -35,3 +35,6 @@ pub mod time;
 /// 输入校验。
 #[cfg(feature = "validation")]
 pub mod validation;
+
+mod tri_option;
+pub use tri_option::TriOption;
