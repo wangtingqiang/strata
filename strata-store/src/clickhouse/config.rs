@@ -18,7 +18,7 @@ pub struct ChClientConfig {
 }
 
 impl ChClientConfig {
-    /// 建立 ClickHouse 连接并执行 `SELECT 1` 探活，失败返回初始化错误。
+    /// 构建 `clickhouse::Client` 并探活，失败返回初始化错误。
     pub async fn connect(&self) -> Result<Client, ChClientInitError> {
         if self.url.trim().is_empty() {
             return Err(ChClientInitError::EmptyUrl);

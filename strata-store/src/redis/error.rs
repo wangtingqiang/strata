@@ -1,6 +1,6 @@
-/// Redis 客户端初始化错误。
+/// Redis 初始化错误。
 #[derive(Debug, thiserror::Error)]
-pub enum RedisClientInitError {
+pub enum RedisInitError {
     /// 主机为空。
     #[error("redis host is empty")]
     EmptyHost,
