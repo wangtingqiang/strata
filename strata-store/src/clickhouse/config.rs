@@ -1,12 +1,11 @@
-use clickhouse::Client;
 use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
 
-use super::ChClientInitError;
+use super::ClickHouseInitError;
 
-/// ClickHouse 客户端配置。
+/// ClickHouse 配置。
 #[derive(Debug, Clone, Deserialize)]
-pub struct ChClientConfig {
+pub struct ClickHouseConfig {
     /// ClickHouse 服务地址。
     pub url: String,
     /// 默认数据库。
@@ -17,14 +16,14 @@ pub struct ChClientConfig {
     pub password: SecretString,
 }
 
-impl ChClientConfig {
-    /// 构建 `clickhouse::Client` 并探活，失败返回初始化错误。
-    pub async fn connect(&self) -> Result<Client, ChClientInitError> {
+impl ClickHouseConfig {
+    /// 构建 `clickhouse::Client` 并探活。
+    pub async fn connect(&self) -> Result<clickhouse::Client, ClickHouseInitError> {
         if self.url.trim().is_empty() {
-            return Err(ChClientInitError::EmptyUrl);
+            return Err(ClickHouseInitError::EmptyUrl);
         }
 
-        let client = Client::default()
+        let client = clickhouse::Client::default()
             .with_url(&self.url)
             .with_database(&self.database)
             .with_user(&self.username)
@@ -34,7 +33,7 @@ impl ChClientConfig {
             .query("SELECT 1")
             .fetch_one::<u8>()
             .await
-            .map_err(ChClientInitError::Connect)?;
+            .map_err(ClickHouseInitError::Connect)?;
 
         Ok(client)
     }
@@ -48,7 +47,7 @@ mod tests {
 
     #[test]
     fn deserializes_from_json() {
-        let config: ChClientConfig = serde_json::from_value(json!({
+        let config: ClickHouseConfig = serde_json::from_value(json!({
             "url": "http://localhost:8123",
             "database": "default",
             "username": "admin",
@@ -64,7 +63,7 @@ mod tests {
 
     #[tokio::test]
     async fn connect_rejects_empty_url_before_any_network_call() {
-        let config: ChClientConfig = serde_json::from_value(json!({
+        let config: ClickHouseConfig = serde_json::from_value(json!({
             "url": "   ",
             "database": "default",
             "username": "admin",
@@ -74,7 +73,7 @@ mod tests {
 
         assert!(matches!(
             config.connect().await.err(),
-            Some(ChClientInitError::EmptyUrl)
+            Some(ClickHouseInitError::EmptyUrl)
         ));
     }
 }

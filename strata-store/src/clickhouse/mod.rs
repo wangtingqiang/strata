@@ -1,5 +1,5 @@
 mod config;
 mod error;
 
-pub use config::ChClientConfig;
-pub use error::ChClientInitError;
+pub use config::ClickHouseConfig;
+pub use error::ClickHouseInitError;

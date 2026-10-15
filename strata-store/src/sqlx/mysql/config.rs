@@ -26,7 +26,7 @@ pub struct MySqlPoolConfig {
 }
 
 impl MySqlPoolConfig {
-    /// 建立 MySQL 连接池，失败返回初始化错误。
+    /// 建立 MySQL 连接池。
     pub async fn connect(&self) -> Result<MySqlPool, MySqlPoolInitError> {
         if self.host.trim().is_empty() {
             return Err(MySqlPoolInitError::EmptyHost);
@@ -41,18 +41,23 @@ impl MySqlPoolConfig {
 
         let mut pool_options = MySqlPoolOptions::new();
 
-        if let Some(n) = self.max_connections {
-            pool_options = pool_options.max_connections(n);
+        if let Some(max_connections) = self.max_connections {
+            pool_options = pool_options.max_connections(max_connections);
         }
 
-        if let Some(t) = self.acquire_timeout_seconds {
-            pool_options = pool_options.acquire_timeout(Duration::from_secs(t));
+        if let Some(acquire_timeout) = self.acquire_timeout() {
+            pool_options = pool_options.acquire_timeout(acquire_timeout);
         }
 
         pool_options
             .connect_with(options)
             .await
             .map_err(MySqlPoolInitError::Connect)
+    }
+
+    /// 获取连接超时；未配置时为 `None`。
+    fn acquire_timeout(&self) -> Option<Duration> {
+        self.acquire_timeout_seconds.map(Duration::from_secs)
     }
 }
 

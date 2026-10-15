@@ -1,6 +1,6 @@
-/// ClickHouse 客户端初始化错误。
+/// ClickHouse 初始化错误。
 #[derive(Debug, thiserror::Error)]
-pub enum ChClientInitError {
+pub enum ClickHouseInitError {
     /// 地址为空。
     #[error("clickhouse url is empty")]
     EmptyUrl,
