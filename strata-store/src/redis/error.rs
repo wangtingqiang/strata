@@ -9,7 +9,7 @@ pub enum RedisInitError {
     #[error("failed to build redis client: {0}")]
     BuildClient(#[source] redis::RedisError),
 
-    /// 初始化探活连接失败。
-    #[error("failed to connect redis during client initialization: {0}")]
+    /// 初始化连接失败。
+    #[error("failed to connect redis during initialization: {0}")]
     Connect(#[source] redis::RedisError),
 }
