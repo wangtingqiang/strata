@@ -7,7 +7,6 @@ edition.workspace = true
 clickhouse = ["dep:clickhouse", "dep:secrecy", "dep:serde", "dep:thiserror"]
 redis = ["dep:redis", "dep:secrecy", "dep:serde", "dep:thiserror"]
 redis-connection-manager = ["redis", "redis/connection-manager", "redis/tokio-comp"]
-s3 = ["dep:hex", "dep:hmac", "dep:secrecy", "dep:serde", "dep:sha2", "dep:thiserror", "dep:url"]
 sqlx-mysql = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mysql"]
 sqlx-postgres = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
 
@@ -16,13 +15,9 @@ clickhouse = { version = "0.15", optional = true }
 redis = { version = "1", optional = true }
 sqlx = { version = "0.9", optional = true }
 
-hex = { workspace = true, optional = true }
-hmac = { workspace = true, optional = true }
 secrecy = { workspace = true, features = ["serde"], optional = true }
 serde = { workspace = true, features = ["derive"], optional = true }
-sha2 = { workspace = true, optional = true }
 thiserror = { workspace = true, optional = true }
-url = { workspace = true, optional = true }
 
 [dev-dependencies]
 serde_json = { workspace = true }
