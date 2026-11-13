@@ -11,12 +11,11 @@ sqlx-mysql = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/mys
 sqlx-postgres = ["dep:secrecy", "dep:serde", "dep:sqlx", "dep:thiserror", "sqlx/postgres"]
 
 [dependencies]
-clickhouse = { version = "0.15", optional = true }
-redis = { version = "1", optional = true }
-sqlx = { version = "0.9", optional = true }
-
+clickhouse = { workspace = true, optional = true }
+redis = { workspace = true, optional = true }
 secrecy = { workspace = true, features = ["serde"], optional = true }
 serde = { workspace = true, features = ["derive"], optional = true }
+sqlx = { workspace = true, optional = true }
 thiserror = { workspace = true, optional = true }
 
 [dev-dependencies]

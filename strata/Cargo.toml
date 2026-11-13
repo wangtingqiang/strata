@@ -18,8 +18,8 @@ validation = ["dep:secrecy", "dep:thiserror"]
 [dependencies]
 strata-error = { path = "../strata-error", optional = true }
 
-argon2 = { version = "0.6.0", optional = true }
-config = { version = "0.15", optional = true }
+argon2 = { workspace = true, optional = true }
+config = { workspace = true, optional = true }
 hex = { workspace = true, optional = true }
 secrecy = { workspace = true, features = ["serde"], optional = true }
 serde = { workspace = true, features = ["derive"], optional = true }
@@ -32,7 +32,7 @@ tracing = { workspace = true, optional = true }
 [dev-dependencies]
 serde_json = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt"] }
-tracing-subscriber = { version = "0.3", features = ["fmt"] }
+tracing-subscriber = { workspace = true, features = ["fmt"] }
 
 [lints]
 workspace = true

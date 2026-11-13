@@ -7,7 +7,7 @@ edition.workspace = true
 strata-error-macros = { path = "../strata-error-macros" }
 
 [dev-dependencies]
-trybuild = "1"
+trybuild = { workspace = true }
 
 [[test]]
 name = "compiletest"

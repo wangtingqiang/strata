@@ -8,23 +8,22 @@ http = ["dep:http"]
 axum = ["dep:axum", "http"]
 
 [dependencies]
-opentelemetry = { version = "0.32", features = ["internal-logs"] }
-opentelemetry-otlp = { version = "0.32", features = ["trace", "http-proto", "reqwest-blocking-client"] }
-opentelemetry_sdk = { version = "0.32", features = ["trace"] }
-tracing-opentelemetry = { version = "0.33" }
-tracing-subscriber = { version = "0.3", default-features = false, features = ["ansi", "fmt", "smallvec", "std", "env-filter", "local-time", "registry"] }
-
 axum = { workspace = true, optional = true }
-http = { version = "1", optional = true }
+http = { workspace = true, optional = true }
+opentelemetry = { workspace = true, features = ["internal-logs"] }
+opentelemetry-otlp = { workspace = true, features = ["trace", "http-proto", "reqwest-blocking-client"] }
+opentelemetry_sdk = { workspace = true, features = ["trace"] }
 serde = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
+tracing-opentelemetry = { workspace = true }
+tracing-subscriber = { workspace = true, default-features = false, features = ["ansi", "fmt", "smallvec", "std", "env-filter", "local-time", "registry"] }
 
 [dev-dependencies]
-opentelemetry_sdk = { version = "0.32", features = ["testing"] }
+opentelemetry_sdk = { workspace = true, features = ["testing"] }
 serde_json = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt"] }
-tower = { version = "0.5", features = ["util"] }
+tower = { workspace = true, features = ["util"] }
 
 [lints]
 workspace = true
