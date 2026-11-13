@@ -1,4 +1,4 @@
-//! 通用工具集：错误模型、配置加载、密码与令牌、文本与时间工具等。
+//! 通用工具集：错误模型、配置加载、密码、文本与时间工具等。
 
 #![warn(missing_docs)]
 
@@ -11,9 +11,6 @@ pub mod error;
 /// 哈希工具。
 #[cfg(feature = "hash")]
 pub mod hash;
-/// 不透明令牌。
-#[cfg(feature = "opaque-token")]
-pub mod opaque_token;
 /// 分页参数与响应。
 #[cfg(feature = "pagination")]
 pub mod pagination;
