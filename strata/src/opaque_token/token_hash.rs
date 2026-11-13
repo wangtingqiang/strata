@@ -9,7 +9,6 @@ pub enum TokenHashError {
     /// 哈希为空。
     #[error("token hash must not be empty")]
     Empty,
-
     /// 哈希格式非法。
     #[error("invalid token hash format: {message}")]
     InvalidFormat {

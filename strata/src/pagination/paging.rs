@@ -24,7 +24,6 @@ pub enum PagingError {
     #[error("page must be greater than 0")]
     #[info(kind = "Validation", code = "INVALID_PAGE", message = "页码必须大于 0")]
     InvalidPage,
-
     /// 每页条数必须大于 0。
     #[error("page size must be greater than 0")]
     #[info(
@@ -33,7 +32,6 @@ pub enum PagingError {
         message = "每页条数必须大于 0"
     )]
     InvalidPageSize,
-
     /// 每页条数超过上限。
     #[error("page size must not exceed {MAX_PAGE_SIZE}")]
     #[info(
@@ -42,7 +40,6 @@ pub enum PagingError {
         message = "每页条数不能超过 {MAX_PAGE_SIZE}"
     )]
     PageSizeExceeded,
-
     /// 查询条数必须大于 0。
     #[error("limit must be greater than 0")]
     #[info(
@@ -51,7 +48,6 @@ pub enum PagingError {
         message = "查询条数必须大于 0"
     )]
     InvalidLimit,
-
     /// 查询条数超过上限。
     #[error("limit must not exceed {MAX_LIMIT}")]
     #[info(

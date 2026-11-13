@@ -10,10 +10,8 @@ fn test_kind() {
     enum E {
         #[info(kind = "Validation", code = "E001", message = "validation error")]
         Validation,
-
         #[info(kind = "NotFound", code = "E002", message = "resource {0} not found")]
         NotFound(String),
-
         #[info(
             kind = "AccessDenied",
             code = "E003",
@@ -36,7 +34,6 @@ fn test_code() {
     enum E {
         #[info(kind = "Validation", code = "E001", message = "validation")]
         Validation,
-
         #[info(kind = "Internal", code = "E002", message = "internal")]
         Internal,
     }
@@ -62,7 +59,6 @@ fn test_message_positional() {
     enum E {
         #[info(kind = "NotFound", code = "E001", message = "resource {0} not found")]
         NotFound(String),
-
         #[info(kind = "Conflict", code = "E002", message = "conflict: {0} and {1}")]
         Conflict(String, String),
     }
@@ -182,16 +178,12 @@ fn test_is_severe() {
     enum E {
         #[info(kind = "Internal", code = "E001", message = "internal error")]
         Internal,
-
         #[info(kind = "Technical", code = "E002", message = "technical error")]
         Technical,
-
         #[info(kind = "Unexpected", code = "E003", message = "unexpected error")]
         Unexpected,
-
         #[info(kind = "Validation", code = "E004", message = "validation error")]
         Validation,
-
         #[info(kind = "NotFound", code = "E005", message = "not found")]
         NotFound,
     }
@@ -209,10 +201,8 @@ fn test_multiple_variants() {
     enum E {
         #[info(kind = "Validation", code = "E100", message = "invalid: {0}")]
         Invalid(String),
-
         #[info(kind = "NotFound", code = "E101", message = "resource {id} not found")]
         NotFound { id: u64 },
-
         #[info(kind = "Internal", code = "E102", message = "internal server error")]
         Internal,
     }
@@ -301,7 +291,6 @@ fn test_transparent_mixed_variants() {
     enum Outer {
         #[info(kind = "Unauthenticated", code = "O001", message = "未认证")]
         Unauthenticated,
-
         #[info(transparent)]
         Wrap(Inner),
     }

@@ -6,11 +6,9 @@ pub enum PortError {
     /// 参数不合法。
     #[error(transparent)]
     InvalidArgument(#[from] InvalidArgumentError),
-
     /// 数据损坏。
     #[error(transparent)]
     DataCorrupted(#[from] DataCorruptedError),
-
     /// 意外错误。
     #[error(transparent)]
     Unexpected(#[from] UnexpectedError),
