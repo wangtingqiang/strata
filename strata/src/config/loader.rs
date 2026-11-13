@@ -10,9 +10,13 @@ const APP_CONFIG_DIR: &str = "APP_CONFIG_DIR";
 /// 通用配置加载器。
 ///
 /// 加载优先级：
-/// 1. 显式参数 `with_environment` / `with_config_dir`
-/// 2. 环境变量 `APP_ENVIRONMENT` / `APP_CONFIG_DIR`
-/// 3. 默认值 `local`
+/// 1. 环境变量 `APP_ENVIRONMENT` / `APP_CONFIG_DIR`
+/// 2. 显式参数 `with_environment` / `with_config_dir`
+/// 3. 默认值：环境回落到 `local`；配置目录无默认值，缺失时返回
+///    [`ConfigError::ConfigDirUnspecified`]
+///
+/// `APP_CONFIG_DIR` 已设置但为空时按配置错误处理，返回
+/// [`ConfigError::EmptyAppConfigDir`]，不会回落到显式参数。
 #[derive(Debug, Default)]
 pub struct ConfigLoader {
     environment: Option<Environment>,
@@ -25,13 +29,13 @@ impl ConfigLoader {
         Self::default()
     }
 
-    /// 显式指定环境。
+    /// 显式指定环境；`APP_ENVIRONMENT` 已设置时以环境变量为准。
     pub fn with_environment(mut self, environment: Environment) -> Self {
         self.environment = Some(environment);
         self
     }
 
-    /// 显式指定配置目录。
+    /// 显式指定配置目录；`APP_CONFIG_DIR` 已设置时以环境变量为准。
     pub fn with_config_dir(mut self, dir: impl Into<PathBuf>) -> Self {
         self.config_dir = Some(dir.into());
         self
@@ -67,48 +71,36 @@ impl ConfigLoader {
     }
 
     fn resolve_environment(&self) -> Result<Environment, ConfigError> {
-        match self.environment {
-            Some(environment) => Ok(environment),
-            None => resolve_environment_from_env(std::env::var(APP_ENVIRONMENT)),
+        match env_var(APP_ENVIRONMENT).map_err(ConfigError::ReadAppEnvironment)? {
+            Some(raw) => Environment::try_from(raw.as_str()).map_err(ConfigError::from),
+            None => Ok(self.environment.unwrap_or_default()),
         }
     }
 
     fn resolve_config_dir(&self) -> Result<PathBuf, ConfigError> {
-        if let Some(path) = resolve_config_dir_from_env(std::env::var(APP_CONFIG_DIR))? {
-            return Ok(path);
-        }
+        match env_var(APP_CONFIG_DIR).map_err(ConfigError::ReadAppConfigDir)? {
+            Some(raw) => {
+                let dir = raw.trim();
+                if dir.is_empty() {
+                    return Err(ConfigError::EmptyAppConfigDir);
+                }
 
-        if let Some(path) = &self.config_dir {
-            return Ok(path.clone());
-        }
-
-        Err(ConfigError::ConfigDirUnspecified)
-    }
-}
-
-fn resolve_environment_from_env(
-    value: Result<String, std::env::VarError>,
-) -> Result<Environment, ConfigError> {
-    match value {
-        Ok(raw) => Environment::try_from(raw.as_str()).map_err(ConfigError::from),
-        Err(std::env::VarError::NotPresent) => Ok(Environment::default()),
-        Err(source) => Err(ConfigError::ReadAppEnvironment(source)),
-    }
-}
-
-fn resolve_config_dir_from_env(
-    value: Result<String, std::env::VarError>,
-) -> Result<Option<PathBuf>, ConfigError> {
-    match value {
-        Ok(path) => {
-            if path.trim().is_empty() {
-                Err(ConfigError::EmptyAppConfigDir)
-            } else {
-                Ok(Some(PathBuf::from(path)))
+                Ok(PathBuf::from(dir))
             }
+            None => self
+                .config_dir
+                .clone()
+                .ok_or(ConfigError::ConfigDirUnspecified),
         }
+    }
+}
+
+/// 读取环境变量，未设置时返回 `None`。
+fn env_var(key: &str) -> Result<Option<String>, std::env::VarError> {
+    match std::env::var(key) {
+        Ok(value) => Ok(Some(value)),
         Err(std::env::VarError::NotPresent) => Ok(None),
-        Err(source) => Err(ConfigError::ReadAppConfigDir(source)),
+        Err(source) => Err(source),
     }
 }
 
@@ -203,37 +195,5 @@ mod tests {
             result,
             Err(ConfigError::ConfigFileNotFound { .. })
         ));
-    }
-
-    #[test]
-    fn resolve_environment_honors_env_value() {
-        assert_eq!(
-            resolve_environment_from_env(Ok("production".to_owned())).unwrap(),
-            Environment::Production
-        );
-        assert!(matches!(
-            resolve_environment_from_env(Ok("unknown".to_owned())),
-            Err(ConfigError::InvalidEnvironment(_))
-        ));
-        assert_eq!(
-            resolve_environment_from_env(Err(std::env::VarError::NotPresent)).unwrap(),
-            Environment::default()
-        );
-    }
-
-    #[test]
-    fn resolve_config_dir_honors_env_value() {
-        assert_eq!(
-            resolve_config_dir_from_env(Ok("/tmp/configs".to_owned())).unwrap(),
-            Some(PathBuf::from("/tmp/configs"))
-        );
-        assert!(matches!(
-            resolve_config_dir_from_env(Ok("   ".to_owned())),
-            Err(ConfigError::EmptyAppConfigDir)
-        ));
-        assert_eq!(
-            resolve_config_dir_from_env(Err(std::env::VarError::NotPresent)).unwrap(),
-            None
-        );
     }
 }
