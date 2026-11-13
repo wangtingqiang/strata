@@ -25,3 +25,6 @@ thiserror = "2"
 time = "0.3"
 tokio = "1"
 tracing = "0.1"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

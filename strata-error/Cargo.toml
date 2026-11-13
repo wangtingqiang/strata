@@ -14,3 +14,6 @@ name = "compiletest"
 
 [[test]]
 name = "test_error_info"
+
+[lints]
+workspace = true

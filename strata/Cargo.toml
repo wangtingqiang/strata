@@ -33,3 +33,6 @@ tracing = { workspace = true, optional = true }
 serde_json = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt"] }
 tracing-subscriber = { version = "0.3", features = ["fmt"] }
+
+[lints]
+workspace = true
