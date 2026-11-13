@@ -7,7 +7,7 @@ edition.workspace = true
 config = ["dep:config", "dep:serde", "dep:thiserror"]
 error = ["dep:thiserror"]
 hash = ["dep:hex", "dep:sha2"]
-pagination = ["dep:const_format", "dep:serde", "dep:thiserror", "error"]
+pagination = ["dep:strata-error", "dep:serde", "dep:thiserror", "error"]
 password = ["dep:argon2", "dep:thiserror"]
 serde = ["dep:serde", "dep:secrecy"]
 task = ["dep:tokio", "dep:tracing", "tokio/rt"]
@@ -16,11 +16,10 @@ time = ["dep:time"]
 validation = ["dep:secrecy", "dep:thiserror"]
 
 [dependencies]
-strata-error = { path = "../strata-error" }
+strata-error = { path = "../strata-error", optional = true }
 
 argon2 = { version = "0.6.0", optional = true }
 config = { version = "0.15", optional = true }
-const_format = { version = "0.2", optional = true }
 hex = { workspace = true, optional = true }
 secrecy = { workspace = true, features = ["serde"], optional = true }
 serde = { workspace = true, features = ["derive"], optional = true }
