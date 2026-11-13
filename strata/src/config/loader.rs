@@ -15,8 +15,8 @@ const APP_CONFIG_DIR: &str = "APP_CONFIG_DIR";
 /// 3. 默认值：环境回落到 `local`；配置目录无默认值，缺失时返回
 ///    [`ConfigError::ConfigDirUnspecified`]
 ///
-/// `APP_CONFIG_DIR` 已设置但为空时按配置错误处理，返回
-/// [`ConfigError::EmptyAppConfigDir`]，不会回落到显式参数。
+/// `APP_ENVIRONMENT` / `APP_CONFIG_DIR` 已设置但为空时按配置错误处理，
+/// 返回 [`ConfigError::EmptyEnvVar`]，不会回落到显式参数。
 #[derive(Debug, Default)]
 pub struct ConfigLoader {
     environment: Option<Environment>,
@@ -71,6 +71,9 @@ impl ConfigLoader {
 
     fn resolve_environment(&self) -> Result<Environment, ConfigError> {
         match env_var(APP_ENVIRONMENT).map_err(ConfigError::ReadAppEnvironment)? {
+            Some(raw) if raw.trim().is_empty() => Err(ConfigError::EmptyEnvVar {
+                key: APP_ENVIRONMENT,
+            }),
             Some(raw) => Environment::try_from(raw).map_err(ConfigError::from),
             None => Ok(self.environment.unwrap_or_default()),
         }
@@ -80,7 +83,9 @@ impl ConfigLoader {
         let dir = match env_var(APP_CONFIG_DIR).map_err(ConfigError::ReadAppConfigDir)? {
             Some(raw) => {
                 let raw = raw.trim();
-                raw.is_empty().not().ok_or(ConfigError::EmptyAppConfigDir)?;
+                raw.is_empty().not().ok_or(ConfigError::EmptyEnvVar {
+                    key: APP_CONFIG_DIR,
+                })?;
                 PathBuf::from(raw)
             }
             None => self

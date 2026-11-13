@@ -20,17 +20,20 @@ pub enum ConfigError {
     #[error("failed to read APP_ENVIRONMENT: {0}")]
     ReadAppEnvironment(#[source] std::env::VarError),
 
-    /// 环境值不合法。
-    #[error(transparent)]
-    InvalidEnvironment(#[from] EnvironmentError),
-
     /// 读取 APP_CONFIG_DIR 失败。
     #[error("failed to read APP_CONFIG_DIR: {0}")]
     ReadAppConfigDir(#[source] std::env::VarError),
 
-    /// APP_CONFIG_DIR 已设置但为空。
-    #[error("APP_CONFIG_DIR is set but empty")]
-    EmptyAppConfigDir,
+    /// 环境变量已设置但为空。
+    #[error("environment variable `{key}` is set but empty")]
+    EmptyEnvVar {
+        /// 环境变量名。
+        key: &'static str,
+    },
+
+    /// 环境值不合法。
+    #[error(transparent)]
+    InvalidEnvironment(#[from] EnvironmentError),
 
     /// 未指定配置目录。
     #[error("config directory is not specified")]
