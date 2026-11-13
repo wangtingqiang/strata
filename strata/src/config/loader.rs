@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+    ops::Not,
+    path::{Path, PathBuf},
+};
 
 use serde::de::DeserializeOwned;
 
@@ -45,53 +48,59 @@ impl ConfigLoader {
     pub fn load<T: DeserializeOwned>(self) -> Result<T, ConfigError> {
         let environment = self.resolve_environment()?;
         let config_dir = self.resolve_config_dir()?;
-        validate_config_dir(&config_dir)?;
 
-        let config_path = config_dir.join(format!("{}.toml", environment.as_str()));
-        if !config_path.exists() {
-            return Err(ConfigError::ConfigFileNotFound {
-                path: path_string(&config_path),
-            });
-        }
+        let config_file = config_dir.join(format!("{}.toml", environment.as_str()));
 
-        let settings = config::Config::builder()
-            .add_source(config::File::from(config_path.clone()))
+        config_file
+            .exists()
+            .ok_or_else(|| ConfigError::ConfigFileNotFound {
+                path: path_string(&config_file),
+            })?;
+
+        let cfg = config::Config::builder()
+            .add_source(config::File::from(config_file.as_path()))
             .build()
             .map_err(|source| ConfigError::BuildConfig {
-                path: path_string(&config_path),
+                path: path_string(&config_file),
                 source,
             })?;
 
-        settings
-            .try_deserialize::<T>()
+        cfg.try_deserialize::<T>()
             .map_err(|source| ConfigError::DeserializeConfig {
-                path: path_string(&config_path),
+                path: path_string(&config_file),
                 source,
             })
     }
 
     fn resolve_environment(&self) -> Result<Environment, ConfigError> {
         match env_var(APP_ENVIRONMENT).map_err(ConfigError::ReadAppEnvironment)? {
-            Some(raw) => Environment::try_from(raw.as_str()).map_err(ConfigError::from),
+            Some(raw) => Environment::try_from(raw).map_err(ConfigError::from),
             None => Ok(self.environment.unwrap_or_default()),
         }
     }
 
     fn resolve_config_dir(&self) -> Result<PathBuf, ConfigError> {
-        match env_var(APP_CONFIG_DIR).map_err(ConfigError::ReadAppConfigDir)? {
+        let dir = match env_var(APP_CONFIG_DIR).map_err(ConfigError::ReadAppConfigDir)? {
             Some(raw) => {
-                let dir = raw.trim();
-                if dir.is_empty() {
-                    return Err(ConfigError::EmptyAppConfigDir);
-                }
-
-                Ok(PathBuf::from(dir))
+                let raw = raw.trim();
+                raw.is_empty().not().ok_or(ConfigError::EmptyAppConfigDir)?;
+                PathBuf::from(raw)
             }
             None => self
                 .config_dir
                 .clone()
-                .ok_or(ConfigError::ConfigDirUnspecified),
-        }
+                .ok_or(ConfigError::ConfigDirUnspecified)?,
+        };
+
+        dir.exists().ok_or_else(|| ConfigError::ConfigDirNotFound {
+            path: path_string(&dir),
+        })?;
+
+        dir.is_dir().ok_or_else(|| ConfigError::ConfigDirInvalid {
+            path: path_string(&dir),
+        })?;
+
+        Ok(dir)
     }
 }
 
@@ -102,22 +111,6 @@ fn env_var(key: &str) -> Result<Option<String>, std::env::VarError> {
         Err(std::env::VarError::NotPresent) => Ok(None),
         Err(source) => Err(source),
     }
-}
-
-fn validate_config_dir(dir: &Path) -> Result<(), ConfigError> {
-    if !dir.exists() {
-        return Err(ConfigError::ConfigDirNotFound {
-            path: path_string(dir),
-        });
-    }
-
-    if !dir.is_dir() {
-        return Err(ConfigError::ConfigDirInvalid {
-            path: path_string(dir),
-        });
-    }
-
-    Ok(())
 }
 
 fn path_string(path: &Path) -> String {
