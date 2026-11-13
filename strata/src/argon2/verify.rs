@@ -16,7 +16,7 @@ pub fn verify_password(password: &str, hash: &str) -> Result<bool, PasswordVerif
 
 #[cfg(test)]
 mod tests {
-    use crate::password::argon2::{hash::hash_password, validate::validate_password_hash};
+    use crate::argon2::{hash::hash_password, validate::validate_password_hash};
 
     use super::*;
 

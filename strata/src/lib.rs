@@ -2,6 +2,9 @@
 
 #![warn(missing_docs)]
 
+/// Argon2 密码哈希。
+#[cfg(feature = "argon2")]
+pub mod argon2;
 /// 配置加载。
 #[cfg(feature = "config")]
 pub mod config;
@@ -14,9 +17,6 @@ pub mod hash;
 /// 分页参数与响应。
 #[cfg(feature = "pagination")]
 pub mod pagination;
-/// 密码哈希。
-#[cfg(feature = "password")]
-pub mod password;
 /// 反序列化辅助。
 #[cfg(feature = "serde")]
 pub mod serde;

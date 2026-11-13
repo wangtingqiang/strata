@@ -4,11 +4,11 @@ version = "0.1.0"
 edition.workspace = true
 
 [features]
+argon2 = ["dep:argon2", "dep:thiserror"]
 config = ["dep:config", "dep:serde", "dep:thiserror"]
 error = ["dep:thiserror"]
 hash = ["dep:hex", "dep:sha2"]
 pagination = ["dep:strata-error", "dep:serde", "dep:thiserror", "error"]
-password = ["dep:argon2", "dep:thiserror"]
 serde = ["dep:serde", "dep:secrecy"]
 task = ["dep:tokio", "dep:tracing", "tokio/rt"]
 text = ["dep:thiserror"]
