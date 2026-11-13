@@ -1,7 +1,4 @@
-use std::{
-    ops::Not,
-    path::{Path, PathBuf},
-};
+use std::{ops::Not, path::PathBuf};
 
 use serde::de::DeserializeOwned;
 
@@ -54,20 +51,20 @@ impl ConfigLoader {
         config_file
             .exists()
             .ok_or_else(|| ConfigError::ConfigFileNotFound {
-                path: path_string(&config_file),
+                path: config_file.clone(),
             })?;
 
         let cfg = config::Config::builder()
             .add_source(config::File::from(config_file.as_path()))
             .build()
             .map_err(|source| ConfigError::BuildConfig {
-                path: path_string(&config_file),
+                path: config_file.clone(),
                 source,
             })?;
 
         cfg.try_deserialize::<T>()
             .map_err(|source| ConfigError::DeserializeConfig {
-                path: path_string(&config_file),
+                path: config_file,
                 source,
             })
     }
@@ -92,13 +89,11 @@ impl ConfigLoader {
                 .ok_or(ConfigError::ConfigDirUnspecified)?,
         };
 
-        dir.exists().ok_or_else(|| ConfigError::ConfigDirNotFound {
-            path: path_string(&dir),
-        })?;
+        dir.exists()
+            .ok_or_else(|| ConfigError::ConfigDirNotFound { path: dir.clone() })?;
 
-        dir.is_dir().ok_or_else(|| ConfigError::ConfigDirInvalid {
-            path: path_string(&dir),
-        })?;
+        dir.is_dir()
+            .ok_or_else(|| ConfigError::ConfigDirInvalid { path: dir.clone() })?;
 
         Ok(dir)
     }
@@ -111,10 +106,6 @@ fn env_var(key: &str) -> Result<Option<String>, std::env::VarError> {
         Err(std::env::VarError::NotPresent) => Ok(None),
         Err(source) => Err(source),
     }
-}
-
-fn path_string(path: &Path) -> String {
-    path.display().to_string()
 }
 
 #[cfg(test)]

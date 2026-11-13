@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 /// 环境字符串解析失败时返回的错误。
 #[derive(Debug, thiserror::Error)]
 pub enum EnvironmentError {
@@ -35,41 +37,41 @@ pub enum ConfigError {
     ConfigDirUnspecified,
 
     /// 配置目录不存在。
-    #[error("config directory `{path}` does not exist")]
+    #[error("config directory `{}` does not exist", path.display())]
     ConfigDirNotFound {
         /// 配置目录路径。
-        path: String,
+        path: PathBuf,
     },
 
     /// 配置目录不是目录。
-    #[error("config directory `{path}` is not a directory")]
+    #[error("config directory `{}` is not a directory", path.display())]
     ConfigDirInvalid {
         /// 配置目录路径。
-        path: String,
+        path: PathBuf,
     },
 
     /// 配置文件不存在。
-    #[error("config file `{path}` does not exist")]
+    #[error("config file `{}` does not exist", path.display())]
     ConfigFileNotFound {
         /// 配置文件路径。
-        path: String,
+        path: PathBuf,
     },
 
     /// 配置构建失败。
-    #[error("failed to build config from `{path}`: {source}")]
+    #[error("failed to build config from `{}`: {source}", path.display())]
     BuildConfig {
         /// 配置文件路径。
-        path: String,
+        path: PathBuf,
         /// 根源错误。
         #[source]
         source: config::ConfigError,
     },
 
     /// 配置反序列化失败。
-    #[error("failed to deserialize config from `{path}`: {source}")]
+    #[error("failed to deserialize config from `{}`: {source}", path.display())]
     DeserializeConfig {
         /// 配置文件路径。
-        path: String,
+        path: PathBuf,
         /// 根源错误。
         #[source]
         source: config::ConfigError,
