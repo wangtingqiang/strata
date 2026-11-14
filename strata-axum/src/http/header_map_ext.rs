@@ -15,11 +15,15 @@ impl HeaderMapExt for HeaderMap {
             .and_then(|v| v.to_str().ok())
             .ok_or_else(|| ApiFailure::unauthorized("MISSING_AUTHORIZATION", "缺少认证信息"))?;
 
-        let (scheme, token) = value
-            .split_once(' ')
+        let mut parts = value.split_ascii_whitespace();
+        let scheme = parts
+            .next()
+            .ok_or_else(|| ApiFailure::unauthorized("INVALID_AUTHORIZATION", "认证信息无效"))?;
+        let token = parts
+            .next()
             .ok_or_else(|| ApiFailure::unauthorized("INVALID_AUTHORIZATION", "认证信息无效"))?;
 
-        if !scheme.eq_ignore_ascii_case("bearer") || token.is_empty() {
+        if !scheme.eq_ignore_ascii_case("bearer") || parts.next().is_some() {
             return Err(ApiFailure::unauthorized(
                 "INVALID_AUTHORIZATION",
                 "认证信息无效",
@@ -85,6 +89,38 @@ mod tests {
     #[test]
     fn empty_token_rejects() {
         let rejection = header_map(Some("Bearer ")).bearer_token().unwrap_err();
+        assert_unauthorized(rejection, "INVALID_AUTHORIZATION");
+    }
+
+    #[test]
+    fn whitespace_only_token_rejects() {
+        for value in ["Bearer  ", "Bearer   ", "Bearer\t\t"] {
+            let rejection = header_map(Some(value)).bearer_token().unwrap_err();
+            assert_unauthorized(rejection, "INVALID_AUTHORIZATION");
+        }
+    }
+
+    #[test]
+    fn multiple_spaces_around_token_are_accepted() {
+        for value in ["Bearer  abc-123", "Bearer   abc-123", "  Bearer  abc-123  "] {
+            let token = header_map(Some(value)).bearer_token().unwrap();
+            assert_eq!(token, "abc-123");
+        }
+    }
+
+    #[test]
+    fn trailing_whitespace_is_ignored() {
+        for value in ["Bearer abc-123 ", "Bearer abc-123\t"] {
+            let token = header_map(Some(value)).bearer_token().unwrap();
+            assert_eq!(token, "abc-123");
+        }
+    }
+
+    #[test]
+    fn extra_token_fields_reject() {
+        let rejection = header_map(Some("Bearer abc-123 def-456"))
+            .bearer_token()
+            .unwrap_err();
         assert_unauthorized(rejection, "INVALID_AUTHORIZATION");
     }
 
