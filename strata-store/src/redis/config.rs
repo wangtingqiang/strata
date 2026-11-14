@@ -77,18 +77,12 @@ impl RedisConfig {
 
     /// 构建客户端。
     fn build_client(&self) -> Result<redis::Client, RedisInitError> {
-        let host = self.host.trim();
-
-        if host.is_empty() {
-            return Err(RedisInitError::EmptyHost);
-        }
-
         let redis_settings = redis::RedisConnectionInfo::default()
             .set_db(self.database as i64)
             .set_username(self.username.clone())
             .set_password(self.password.expose_secret());
 
-        let connection_info = redis::ConnectionAddr::Tcp(host.to_owned(), self.port)
+        let connection_info = redis::ConnectionAddr::Tcp(self.host.clone(), self.port)
             .into_connection_info()
             .map_err(RedisInitError::BuildClient)?
             .set_redis_settings(redis_settings);
@@ -133,23 +127,6 @@ mod tests {
         assert_eq!(config.password.expose_secret(), "secret");
         assert_eq!(config.database, 0);
     }
-
-    #[test]
-    fn connect_rejects_empty_host_before_any_network_call() {
-        let config: RedisConfig = serde_json::from_value(json!({
-            "host": "   ",
-            "port": 6379,
-            "username": "default",
-            "password": "secret",
-            "database": 0,
-        }))
-        .unwrap();
-
-        assert!(matches!(
-            config.connect().err(),
-            Some(RedisInitError::EmptyHost)
-        ));
-    }
 }
 
 #[cfg(all(test, feature = "redis-connection-manager"))]
@@ -187,22 +164,5 @@ mod connection_manager_tests {
         assert_eq!(config.connection_manager.response_timeout_ms, None);
         assert_eq!(config.connection_manager.connection_timeout_ms, None);
         assert_eq!(config.connection_manager.number_of_retries, None);
-    }
-
-    #[tokio::test]
-    async fn connection_manager_rejects_empty_host_before_any_network_call() {
-        let config: RedisConfig = serde_json::from_value(json!({
-            "host": "   ",
-            "port": 6379,
-            "username": "default",
-            "password": "secret",
-            "database": 0,
-        }))
-        .unwrap();
-
-        assert!(matches!(
-            config.connection_manager().await.err(),
-            Some(RedisInitError::EmptyHost)
-        ));
     }
 }

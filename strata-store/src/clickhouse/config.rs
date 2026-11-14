@@ -19,10 +19,6 @@ pub struct ClickHouseConfig {
 impl ClickHouseConfig {
     /// 构建 `clickhouse::Client` 并探活。
     pub async fn connect(&self) -> Result<clickhouse::Client, ClickHouseInitError> {
-        if self.url.trim().is_empty() {
-            return Err(ClickHouseInitError::EmptyUrl);
-        }
-
         let client = clickhouse::Client::default()
             .with_url(&self.url)
             .with_database(&self.database)
@@ -59,21 +55,5 @@ mod tests {
         assert_eq!(config.database, "default");
         assert_eq!(config.username, "admin");
         assert_eq!(config.password.expose_secret(), "secret");
-    }
-
-    #[tokio::test]
-    async fn connect_rejects_empty_url_before_any_network_call() {
-        let config: ClickHouseConfig = serde_json::from_value(json!({
-            "url": "   ",
-            "database": "default",
-            "username": "admin",
-            "password": "secret",
-        }))
-        .unwrap();
-
-        assert!(matches!(
-            config.connect().await.err(),
-            Some(ClickHouseInitError::EmptyUrl)
-        ));
     }
 }

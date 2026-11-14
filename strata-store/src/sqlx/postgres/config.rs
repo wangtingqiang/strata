@@ -28,10 +28,6 @@ pub struct PgPoolConfig {
 impl PgPoolConfig {
     /// 建立 PostgreSQL 连接池。
     pub async fn connect(&self) -> Result<PgPool, PgPoolInitError> {
-        if self.host.trim().is_empty() {
-            return Err(PgPoolInitError::EmptyHost);
-        }
-
         let options = PgConnectOptions::new()
             .host(&self.host)
             .port(self.port)
@@ -102,22 +98,5 @@ mod tests {
 
         assert_eq!(config.max_connections, None);
         assert_eq!(config.acquire_timeout_seconds, None);
-    }
-
-    #[tokio::test]
-    async fn connect_rejects_empty_host_before_any_network_call() {
-        let config: PgPoolConfig = serde_json::from_value(json!({
-            "host": " ",
-            "port": 5432,
-            "username": "root",
-            "password": "secret",
-            "database": "app",
-        }))
-        .unwrap();
-
-        assert!(matches!(
-            config.connect().await.err(),
-            Some(PgPoolInitError::EmptyHost)
-        ));
     }
 }
