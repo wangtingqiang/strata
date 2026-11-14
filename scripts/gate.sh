@@ -16,6 +16,8 @@ echo "==> check (default features)"
 cargo check --workspace
 
 echo "==> test (all features)"
+echo "    note: trybuild copies [workspace.dependencies] into its temporary workspace;"
+echo "          unused_workspace_dependencies warnings from it are expected."
 cargo test --workspace --all-features
 
 echo "==> doc (-D warnings)"
