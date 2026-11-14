@@ -161,7 +161,7 @@ mod tests {
     #[test]
     fn with_code_and_message_override_envelope() {
         let success = ApiSuccess::ok().with_code("C1").with_message("hello");
-        assert_eq!(success.body().success, true);
+        assert!(success.body().success);
         assert_eq!(success.body().code, "C1");
         assert_eq!(success.body().message, "hello");
         assert!(success.body().server_time.is_some());

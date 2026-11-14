@@ -7,7 +7,7 @@ echo "==> fmt"
 cargo fmt --all --check
 
 echo "==> clippy (-D warnings, all features)"
-cargo clippy --workspace --all-features -- -D warnings
+cargo clippy --workspace --all-features --all-targets -- -D warnings
 
 echo "==> check (all features)"
 cargo check --workspace --all-features

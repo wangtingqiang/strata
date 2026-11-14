@@ -77,10 +77,15 @@ mod tests {
 
     use super::*;
 
+    type SpanField = (String, String);
+    type SpanFields = Vec<SpanField>;
+    type RecordedSpan = (String, SpanFields);
+    type RecordedSpans = Arc<Mutex<Vec<RecordedSpan>>>;
+
     /// 捕获 new_span 的名称与字段，用于断言中间件创建的 span 内容。
     #[derive(Default)]
     struct RecordingSubscriber {
-        spans: Arc<Mutex<Vec<(String, Vec<(String, String)>)>>>,
+        spans: RecordedSpans,
     }
 
     impl tracing::Subscriber for RecordingSubscriber {
@@ -107,7 +112,7 @@ mod tests {
         fn exit(&self, _span: &tracing::span::Id) {}
     }
 
-    struct FieldVisitor<'a>(&'a mut Vec<(String, String)>);
+    struct FieldVisitor<'a>(&'a mut SpanFields);
 
     impl tracing::field::Visit for FieldVisitor<'_> {
         fn record_str(&mut self, field: &tracing::field::Field, value: &str) {
@@ -145,9 +150,7 @@ mod tests {
             .status()
     }
 
-    fn recorded_trace_span(
-        spans: &Mutex<Vec<(String, Vec<(String, String)>)>>,
-    ) -> (String, Vec<(String, String)>) {
+    fn recorded_trace_span(spans: &Mutex<Vec<RecordedSpan>>) -> RecordedSpan {
         spans
             .lock()
             .unwrap()

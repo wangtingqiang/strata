@@ -87,7 +87,7 @@ mod tests {
 
         assert_eq!(mapped.items, vec![1, 1]);
         assert_eq!(mapped.pagination.limit, 10);
-        assert_eq!(mapped.pagination.has_more, true);
+        assert!(mapped.pagination.has_more);
         assert_eq!(mapped.pagination.next_cursor.as_deref(), Some("next"));
     }
 
@@ -102,7 +102,7 @@ mod tests {
 
         assert_eq!(mapped.items, vec![1, 2]);
         assert_eq!(mapped.pagination.limit, 10);
-        assert_eq!(mapped.pagination.has_more, false);
+        assert!(!mapped.pagination.has_more);
         assert_eq!(mapped.pagination.next_cursor.as_deref(), Some("7"));
     }
 }
