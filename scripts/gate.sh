@@ -16,9 +16,13 @@ echo "==> check (default features)"
 cargo check --workspace
 
 echo "==> test (all features)"
-echo "    note: trybuild copies [workspace.dependencies] into its temporary workspace;"
-echo "          unused_workspace_dependencies warnings from it are expected."
 cargo test --workspace --all-features
+note=$'note: trybuild copies [workspace.dependencies] into its temporary workspace;\n      "unused workspace dependency" warnings from it are expected.'
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+    printf '\033[1;33m%s\033[0m\n' "$note"
+else
+    printf '%s\n' "$note"
+fi
 
 echo "==> doc (-D warnings)"
 RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps
