@@ -1,3 +1,5 @@
+use std::num::NonZeroU64;
+
 /// 默认页码。
 pub const DEFAULT_PAGE: u64 = 1;
 /// 默认每页条数。
@@ -12,8 +14,8 @@ pub const MAX_LIMIT: u64 = 100;
 /// 页码分页参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Paging {
-    page: u64,
-    page_size: u64,
+    page: NonZeroU64,
+    page_size: NonZeroU64,
     need_total: bool,
 }
 
@@ -61,15 +63,9 @@ pub enum PagingError {
 impl Paging {
     /// 构建分页参数（校验页码与每页条数）。
     pub fn new(page: u64, page_size: u64, need_total: bool) -> Result<Self, PagingError> {
-        if page == 0 {
-            return Err(PagingError::InvalidPage);
-        }
-        if page_size == 0 {
-            return Err(PagingError::InvalidPageSize);
-        }
-        if page_size > MAX_PAGE_SIZE {
-            return Err(PagingError::PageSizeExceeded);
-        }
+        let page = NonZeroU64::new(page).ok_or(PagingError::InvalidPage)?;
+        let page_size = NonZeroU64::new(page_size).ok_or(PagingError::InvalidPageSize)?;
+        (page_size.get() <= MAX_PAGE_SIZE).ok_or(PagingError::PageSizeExceeded)?;
 
         Ok(Self {
             page,
@@ -110,11 +106,21 @@ impl Paging {
 
     /// 页码。
     pub fn page(&self) -> u64 {
-        self.page
+        self.page.get()
     }
 
     /// 每页条数。
     pub fn page_size(&self) -> u64 {
+        self.page_size.get()
+    }
+
+    /// 页码（非零）。
+    pub fn page_nonzero(&self) -> NonZeroU64 {
+        self.page
+    }
+
+    /// 每页条数（非零）。
+    pub fn page_size_nonzero(&self) -> NonZeroU64 {
         self.page_size
     }
 
@@ -198,6 +204,8 @@ mod tests {
         let paging = Paging::new(2, 20, true).unwrap();
         assert_eq!(paging.page(), 2);
         assert_eq!(paging.page_size(), 20);
+        assert_eq!(paging.page_nonzero().get(), 2);
+        assert_eq!(paging.page_size_nonzero().get(), 20);
         assert!(paging.need_total());
     }
 

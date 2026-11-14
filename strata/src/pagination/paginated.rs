@@ -50,21 +50,30 @@ impl<T, C> CursorPaginated<T, C> {
 
 #[cfg(test)]
 mod tests {
+    use std::num::NonZeroU64;
+
     use crate::pagination::{CursorPagination, PagePagination};
 
     use super::*;
+
+    fn nz(value: u64) -> NonZeroU64 {
+        NonZeroU64::new(value).unwrap()
+    }
 
     #[test]
     fn page_maps_items_keeping_pagination() {
         let paginated = Paginated {
             items: vec![1, 2, 3],
-            pagination: PagePagination::new(1, 10, Some(25)),
+            pagination: PagePagination::new(nz(1), nz(10), Some(25)),
         };
 
         let mapped = paginated.map_items(|item| item * 10);
 
         assert_eq!(mapped.items, vec![10, 20, 30]);
-        assert_eq!(mapped.pagination, PagePagination::new(1, 10, Some(25)));
+        assert_eq!(
+            mapped.pagination,
+            PagePagination::new(nz(1), nz(10), Some(25))
+        );
     }
 
     #[test]

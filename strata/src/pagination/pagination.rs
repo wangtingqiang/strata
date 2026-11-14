@@ -1,3 +1,5 @@
+use std::num::NonZeroU64;
+
 use serde::{Deserialize, Serialize};
 
 /// 分页响应：页码或游标分页。
@@ -14,9 +16,9 @@ pub enum Pagination<C> {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PagePagination {
     /// 当前页码。
-    pub current_page: u64,
+    pub current_page: NonZeroU64,
     /// 每页条数。
-    pub page_size: u64,
+    pub page_size: NonZeroU64,
     /// 总页数。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub total_pages: Option<u64>,
@@ -38,8 +40,8 @@ pub struct CursorPagination<C> {
 
 impl PagePagination {
     /// 构建页码分页信息（按总条数计算总页数）。
-    pub fn new(current_page: u64, page_size: u64, total_items: Option<u64>) -> Self {
-        let total_pages = total_items.map(|total_items| total_items.div_ceil(page_size));
+    pub fn new(current_page: NonZeroU64, page_size: NonZeroU64, total_items: Option<u64>) -> Self {
+        let total_pages = total_items.map(|total_items| total_items.div_ceil(page_size.get()));
 
         Self {
             current_page,
@@ -72,12 +74,16 @@ impl<C> CursorPagination<C> {
 
 impl<C> Pagination<C> {
     /// 构造页码分页响应。
-    pub fn page(current_page: u64, page_size: u64) -> Self {
+    pub fn page(current_page: NonZeroU64, page_size: NonZeroU64) -> Self {
         Self::Page(PagePagination::new(current_page, page_size, None))
     }
 
     /// 构造含总数的页码分页响应。
-    pub fn page_with_total(current_page: u64, page_size: u64, total_items: u64) -> Self {
+    pub fn page_with_total(
+        current_page: NonZeroU64,
+        page_size: NonZeroU64,
+        total_items: u64,
+    ) -> Self {
         Self::Page(PagePagination::new(
             current_page,
             page_size,
@@ -99,17 +105,40 @@ impl<C> Pagination<C> {
 mod tests {
     use super::*;
 
+    fn nz(value: u64) -> NonZeroU64 {
+        NonZeroU64::new(value).unwrap()
+    }
+
     #[test]
     fn page_pagination_computes_total_pages() {
-        assert_eq!(PagePagination::new(1, 10, Some(25)).total_pages, Some(3));
-        assert_eq!(PagePagination::new(1, 10, Some(30)).total_pages, Some(3));
-        assert_eq!(PagePagination::new(1, 10, Some(20)).total_pages, Some(2));
-        assert_eq!(PagePagination::new(1, 10, None).total_pages, None);
+        assert_eq!(
+            PagePagination::new(nz(1), nz(10), Some(25)).total_pages,
+            Some(3)
+        );
+        assert_eq!(
+            PagePagination::new(nz(1), nz(10), Some(30)).total_pages,
+            Some(3)
+        );
+        assert_eq!(
+            PagePagination::new(nz(1), nz(10), Some(20)).total_pages,
+            Some(2)
+        );
+        assert_eq!(PagePagination::new(nz(1), nz(10), None).total_pages, None);
+    }
+
+    #[test]
+    fn rejects_zero_fields_when_deserializing() {
+        for json in [
+            r#"{"current_page":0,"page_size":10,"total_pages":null,"total_items":null}"#,
+            r#"{"current_page":1,"page_size":0,"total_pages":null,"total_items":null}"#,
+        ] {
+            assert!(serde_json::from_str::<PagePagination>(json).is_err());
+        }
     }
 
     #[test]
     fn serializes_page_variant_with_type_tag() {
-        let pagination = Pagination::<String>::page(1, 10);
+        let pagination = Pagination::<String>::page(nz(1), nz(10));
         let json = serde_json::to_string(&pagination).unwrap();
         assert_eq!(json, r#"{"type":"page","current_page":1,"page_size":10}"#);
     }
@@ -126,7 +155,7 @@ mod tests {
 
     #[test]
     fn serializes_page_with_totals() {
-        let pagination = Pagination::<String>::page_with_total(2, 10, 25);
+        let pagination = Pagination::<String>::page_with_total(nz(2), nz(10), 25);
         let json = serde_json::to_string(&pagination).unwrap();
         assert_eq!(
             json,
