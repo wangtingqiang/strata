@@ -12,8 +12,9 @@ impl HeaderMapExt for HeaderMap {
     fn bearer_token(&self) -> Result<String, ApiFailure> {
         let value = self
             .get(header::AUTHORIZATION)
-            .and_then(|v| v.to_str().ok())
-            .ok_or_else(|| ApiFailure::unauthorized("MISSING_AUTHORIZATION", "缺少认证信息"))?;
+            .ok_or_else(|| ApiFailure::unauthorized("MISSING_AUTHORIZATION", "缺少认证信息"))?
+            .to_str()
+            .map_err(|_| ApiFailure::unauthorized("INVALID_AUTHORIZATION", "认证信息无效"))?;
 
         let mut parts = value.split_ascii_whitespace();
         let scheme = parts
@@ -60,7 +61,7 @@ mod tests {
     }
 
     #[test]
-    fn non_utf8_authorization_header_rejects_as_missing() {
+    fn non_utf8_authorization_header_rejects_as_invalid() {
         let mut headers = HeaderMap::new();
         headers.insert(
             header::AUTHORIZATION,
@@ -69,7 +70,7 @@ mod tests {
 
         let rejection = headers.bearer_token().unwrap_err();
 
-        assert_unauthorized(rejection, "MISSING_AUTHORIZATION");
+        assert_unauthorized(rejection, "INVALID_AUTHORIZATION");
     }
 
     #[test]
