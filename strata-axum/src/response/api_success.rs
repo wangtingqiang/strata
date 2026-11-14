@@ -164,7 +164,7 @@ mod tests {
         assert!(success.body().success);
         assert_eq!(success.body().code, "C1");
         assert_eq!(success.body().message, "hello");
-        assert!(success.body().server_time.is_some());
+        assert!(success.body().server_time.ends_with("+08:00"));
         assert!(success.body().data.is_none());
     }
 }
