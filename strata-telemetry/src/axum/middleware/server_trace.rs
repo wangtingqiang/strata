@@ -9,13 +9,15 @@ use http::{HeaderMap, HeaderName};
 use tracing::Instrument;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
+use super::UNMATCHED_ROUTE;
+
 /// Axum 中间件：为每个请求创建 span 并提取远端 trace 上下文，结束时记录状态码与耗时。
 pub async fn server_trace(request: Request, next: Next) -> Response {
     let route = request
         .extensions()
         .get::<MatchedPath>()
         .map(MatchedPath::as_str)
-        .unwrap_or("unmatched");
+        .unwrap_or(UNMATCHED_ROUTE);
 
     let span = tracing::info_span!(
         "http.server.request",

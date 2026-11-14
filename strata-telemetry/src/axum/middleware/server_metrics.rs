@@ -4,6 +4,8 @@ use axum::{body::Body, extract::MatchedPath, middleware::Next, response::Respons
 use http::Request;
 use opentelemetry::{KeyValue, global, metrics::Histogram};
 
+use super::UNMATCHED_ROUTE;
+
 static HTTP_SERVER_DURATION: LazyLock<Histogram<f64>> = LazyLock::new(|| {
     global::meter("strata-telemetry")
         .f64_histogram("http.server.duration")
@@ -18,7 +20,7 @@ pub async fn server_metrics(req: Request<Body>, next: Next) -> Response {
         .extensions()
         .get::<MatchedPath>()
         .map(MatchedPath::as_str)
-        .unwrap_or_else(|| req.uri().path())
+        .unwrap_or(UNMATCHED_ROUTE)
         .to_owned();
 
     let start = Instant::now();
@@ -65,7 +67,7 @@ mod tests {
         let app = Router::new()
             .route("/items/{id}", get(|| async { StatusCode::OK }))
             .route("/fail", get(|| async { StatusCode::INTERNAL_SERVER_ERROR }))
-            .route_layer(middleware::from_fn(server_metrics));
+            .layer(middleware::from_fn(server_metrics));
 
         // `HTTP_SERVER_DURATION` 在首次访问时绑定全局 meter，因此断言集中在单个测试内串行完成。
         let runtime = tokio::runtime::Builder::new_current_thread()
@@ -85,10 +87,22 @@ mod tests {
             assert_eq!(ok.status(), StatusCode::OK);
 
             let error = app
+                .clone()
                 .oneshot(Request::builder().uri("/fail").body(Body::empty()).unwrap())
                 .await
                 .unwrap();
             assert_eq!(error.status(), StatusCode::INTERNAL_SERVER_ERROR);
+
+            let missing = app
+                .oneshot(
+                    Request::builder()
+                        .uri("/missing")
+                        .body(Body::empty())
+                        .unwrap(),
+                )
+                .await
+                .unwrap();
+            assert_eq!(missing.status(), StatusCode::NOT_FOUND);
         });
 
         provider.force_flush().unwrap();
@@ -110,13 +124,18 @@ mod tests {
         };
 
         let points: Vec<&HistogramDataPoint<f64>> = histogram.data_points().collect();
-        assert_eq!(points.len(), 2);
+        assert_eq!(points.len(), 3);
         assert!(
             points
                 .iter()
                 .any(|point| has_labels(point, "/items/{id}", 200))
         );
         assert!(points.iter().any(|point| has_labels(point, "/fail", 500)));
+        assert!(
+            points
+                .iter()
+                .any(|point| has_labels(point, UNMATCHED_ROUTE, 404))
+        );
     }
 
     fn has_labels(point: &HistogramDataPoint<f64>, route: &str, status: i64) -> bool {
