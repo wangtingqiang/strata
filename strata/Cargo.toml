@@ -2,6 +2,7 @@
 name = "strata"
 version = "0.1.0"
 edition.workspace = true
+rust-version.workspace = true
 
 [features]
 argon2 = ["dep:argon2", "dep:thiserror"]
