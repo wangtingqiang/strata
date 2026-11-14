@@ -47,4 +47,5 @@ tracing-subscriber = "0.3"
 trybuild = "1"
 
 [workspace.lints.rust]
+warnings = "deny"
 unsafe_code = "forbid"
