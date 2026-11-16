@@ -80,13 +80,13 @@ mod tests {
     fn cursor_maps_items_keeping_pagination() {
         let paginated = CursorPaginated {
             items: vec!["a".to_owned(), "b".to_owned()],
-            pagination: CursorPagination::new(10, true, Some("next".to_owned())),
+            pagination: CursorPagination::new(nz(10), true, Some("next".to_owned())),
         };
 
         let mapped = paginated.map_items(|item| item.len());
 
         assert_eq!(mapped.items, vec![1, 1]);
-        assert_eq!(mapped.pagination.limit, 10);
+        assert_eq!(mapped.pagination.limit.get(), 10);
         assert!(mapped.pagination.has_more);
         assert_eq!(mapped.pagination.next_cursor.as_deref(), Some("next"));
     }
@@ -95,13 +95,13 @@ mod tests {
     fn cursor_maps_cursor_type_keeping_items() {
         let paginated = CursorPaginated {
             items: vec![1, 2],
-            pagination: CursorPagination::new(10, false, Some(7u64)),
+            pagination: CursorPagination::new(nz(10), false, Some(7u64)),
         };
 
         let mapped = paginated.map_cursor(|cursor| cursor.to_string());
 
         assert_eq!(mapped.items, vec![1, 2]);
-        assert_eq!(mapped.pagination.limit, 10);
+        assert_eq!(mapped.pagination.limit.get(), 10);
         assert!(!mapped.pagination.has_more);
         assert_eq!(mapped.pagination.next_cursor.as_deref(), Some("7"));
     }

@@ -65,7 +65,11 @@ impl Paging {
     pub fn new(page: u64, page_size: u64, need_total: bool) -> Result<Self, PagingError> {
         let page = NonZeroU64::new(page).ok_or(PagingError::InvalidPage)?;
         let page_size = NonZeroU64::new(page_size).ok_or(PagingError::InvalidPageSize)?;
-        (page_size.get() <= MAX_PAGE_SIZE).ok_or(PagingError::PageSizeExceeded)?;
+
+        page_size
+            .get()
+            .le(&MAX_PAGE_SIZE)
+            .ok_or(PagingError::PageSizeExceeded)?;
 
         Ok(Self {
             page,
@@ -133,19 +137,19 @@ impl Paging {
 /// 游标分页参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CursorPaging<C> {
-    limit: u64,
+    limit: NonZeroU64,
     cursor: Option<C>,
 }
 
 impl<C> CursorPaging<C> {
     /// 构建游标分页参数（校验查询条数）。
     pub fn new(limit: u64, cursor: Option<C>) -> Result<Self, PagingError> {
-        if limit == 0 {
-            return Err(PagingError::InvalidLimit);
-        }
-        if limit > MAX_LIMIT {
-            return Err(PagingError::LimitExceeded);
-        }
+        let limit = NonZeroU64::new(limit).ok_or(PagingError::InvalidLimit)?;
+
+        limit
+            .get()
+            .le(&MAX_LIMIT)
+            .ok_or(PagingError::LimitExceeded)?;
 
         Ok(Self { limit, cursor })
     }
@@ -157,6 +161,11 @@ impl<C> CursorPaging<C> {
 
     /// 查询条数。
     pub fn limit(&self) -> u64 {
+        self.limit.get()
+    }
+
+    /// 查询条数（非零）。
+    pub fn limit_nonzero(&self) -> NonZeroU64 {
         self.limit
     }
 
@@ -167,7 +176,7 @@ impl<C> CursorPaging<C> {
 
     /// 拆分为（条数, 游标）。
     pub fn into_parts(self) -> (u64, Option<C>) {
-        (self.limit, self.cursor)
+        (self.limit.get(), self.cursor)
     }
 }
 
@@ -232,6 +241,7 @@ mod tests {
     fn cursor_paging_ok() {
         let paging = CursorPaging::new(5, Some("abc".to_owned())).unwrap();
         assert_eq!(paging.limit(), 5);
+        assert_eq!(paging.limit_nonzero().get(), 5);
         assert_eq!(paging.cursor(), Some(&"abc".to_owned()));
         assert_eq!(paging.into_parts(), (5, Some("abc".to_owned())));
     }

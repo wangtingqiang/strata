@@ -31,7 +31,7 @@ pub struct PagePagination {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CursorPagination<C> {
     /// 查询条数。
-    pub limit: u64,
+    pub limit: NonZeroU64,
     /// 是否还有下一页。
     pub has_more: bool,
     /// 下一页游标。
@@ -54,7 +54,7 @@ impl PagePagination {
 
 impl<C> CursorPagination<C> {
     /// 构建游标分页信息。
-    pub fn new(limit: u64, has_more: bool, next_cursor: Option<C>) -> Self {
+    pub fn new(limit: NonZeroU64, has_more: bool, next_cursor: Option<C>) -> Self {
         Self {
             limit,
             has_more,
@@ -92,12 +92,8 @@ impl<C> Pagination<C> {
     }
 
     /// 构造游标分页响应。
-    pub fn cursor(limit: u64, has_more: bool, next_cursor: Option<C>) -> Self {
-        Self::Cursor(CursorPagination {
-            limit,
-            has_more,
-            next_cursor,
-        })
+    pub fn cursor(limit: NonZeroU64, has_more: bool, next_cursor: Option<C>) -> Self {
+        Self::Cursor(CursorPagination::new(limit, has_more, next_cursor))
     }
 }
 
@@ -145,12 +141,19 @@ mod tests {
 
     #[test]
     fn serializes_cursor_variant_with_type_tag() {
-        let pagination = Pagination::cursor(10, true, Some("abc".to_owned()));
+        let pagination = Pagination::cursor(nz(10), true, Some("abc".to_owned()));
         let json = serde_json::to_string(&pagination).unwrap();
         assert_eq!(
             json,
             r#"{"type":"cursor","limit":10,"has_more":true,"next_cursor":"abc"}"#
         );
+    }
+
+    #[test]
+    fn rejects_zero_limit_when_deserializing_cursor_pagination() {
+        let json = r#"{"limit":0,"has_more":false,"next_cursor":null}"#;
+
+        assert!(serde_json::from_str::<CursorPagination<String>>(json).is_err());
     }
 
     #[test]
