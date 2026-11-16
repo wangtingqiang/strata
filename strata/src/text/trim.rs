@@ -1,3 +1,5 @@
+use super::StrExt;
+
 /// 文本处理错误。
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum TextError {
@@ -9,26 +11,19 @@ pub enum TextError {
     TooLong,
 }
 
-/// 去除首尾空白；空串返回 `None`。
-pub fn trim_non_empty(value: &str) -> Option<String> {
-    let value = value.trim();
-    if value.is_empty() {
-        None
-    } else {
-        Some(value.to_owned())
-    }
-}
-
 /// 去除可选文本的首尾空白。
 pub fn trim_optional(value: Option<String>) -> Option<String> {
-    value.and_then(|value| trim_non_empty(&value))
+    value
+        .as_deref()
+        .and_then(|value| value.trim_non_empty())
+        .map(str::to_owned)
 }
 
 /// 去除首尾空白并校验长度上限。
 pub fn trim_non_empty_bounded(value: &str, max_chars: usize) -> Result<String, TextError> {
-    let value = trim_non_empty(value).ok_or(TextError::Empty)?;
-    validate_max_chars(&value, max_chars)?;
-    Ok(value)
+    let value = value.trim_non_empty().ok_or(TextError::Empty)?;
+    validate_max_chars(value, max_chars)?;
+    Ok(value.to_owned())
 }
 
 /// 去除可选文本空白并校验长度上限。
@@ -58,8 +53,8 @@ mod tests {
 
     #[test]
     fn trims_and_filters_empty() {
-        assert_eq!(trim_non_empty("  hello  ").as_deref(), Some("hello"));
-        assert_eq!(trim_non_empty("   "), None);
+        assert_eq!("  hello  ".trim_non_empty(), Some("hello"));
+        assert_eq!("   ".trim_non_empty(), None);
         assert_eq!(
             trim_optional(Some("  x  ".to_owned())).as_deref(),
             Some("x")
