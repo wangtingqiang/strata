@@ -5,12 +5,12 @@ edition.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-strata = { path = "../strata", features = ["time"] }
+strata = { path = "../strata", features = ["jiff"] }
 strata-error = { path = "../strata-error" }
 
 axum = { workspace = true }
+jiff = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-time = { workspace = true }
 tracing = { workspace = true }
 
 [dev-dependencies]
