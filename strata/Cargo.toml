@@ -23,7 +23,7 @@ strata-error = { path = "../strata-error", optional = true }
 argon2 = { workspace = true, optional = true }
 config = { workspace = true, optional = true }
 hex = { workspace = true, optional = true }
-jiff = { workspace = true, optional = true }
+jiff = { workspace = true, default-features = false, features = ["std"], optional = true }
 secrecy = { workspace = true, features = ["serde"], optional = true }
 serde = { workspace = true, features = ["derive"], optional = true }
 sha2 = { workspace = true, optional = true }
