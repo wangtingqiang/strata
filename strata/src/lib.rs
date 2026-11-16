@@ -14,6 +14,9 @@ pub mod error;
 /// 哈希工具。
 #[cfg(feature = "hash")]
 pub mod hash;
+/// 时间处理。
+#[cfg(feature = "jiff")]
+pub mod jiff;
 /// 分页参数与响应。
 #[cfg(feature = "pagination")]
 pub mod pagination;
