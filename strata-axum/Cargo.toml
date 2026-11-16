@@ -9,7 +9,7 @@ strata = { path = "../strata", features = ["jiff"] }
 strata-error = { path = "../strata-error" }
 
 axum = { workspace = true }
-jiff = { workspace = true, default-features = false, features = ["std"] }
+jiff = { workspace = true, default-features = false, features = ["std", "perf-inline"] }
 serde = { workspace = true, features = ["derive"] }
 tracing = { workspace = true }
 
