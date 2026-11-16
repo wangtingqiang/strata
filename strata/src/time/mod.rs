@@ -1,3 +1,5 @@
+//! 冻结维护：不再修改本模块，新代码请使用 jiff。
+
 mod date_formatter;
 mod date_parser;
 mod datetime_formatter;
