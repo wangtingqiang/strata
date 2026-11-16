@@ -12,7 +12,7 @@ hash = ["dep:hex", "dep:sha2"]
 pagination = ["dep:strata-error", "dep:serde", "dep:thiserror"]
 serde = ["dep:serde", "dep:secrecy"]
 task = ["dep:tokio", "dep:tracing", "tokio/rt"]
-text = ["dep:thiserror"]
+text = []
 time = ["dep:time"]
 validation = ["dep:secrecy", "dep:thiserror"]
 

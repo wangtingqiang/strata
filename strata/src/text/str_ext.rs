@@ -9,6 +9,18 @@ pub trait StrExt {
     /// 去除首尾空白；空串或全空白返回 `None`。
     fn trim_non_empty(&self) -> Option<&str>;
 
+    /// 字节数至少为 `min`。
+    fn has_at_least_bytes(&self, min: usize) -> bool;
+
+    /// 字节数不超过 `max`。
+    fn has_at_most_bytes(&self, max: usize) -> bool;
+
+    /// 字符数（Unicode 标量值）至少为 `min`。
+    fn has_at_least_chars(&self, min: usize) -> bool;
+
+    /// 字符数（Unicode 标量值）不超过 `max`。
+    fn has_at_most_chars(&self, max: usize) -> bool;
+
     /// 校验字符串是否符合小写蛇形机器标识规则。
     ///
     /// 规则如下：
@@ -28,6 +40,22 @@ impl StrExt for str {
 
     fn trim_non_empty(&self) -> Option<&str> {
         self.trim().non_empty()
+    }
+
+    fn has_at_least_bytes(&self, min: usize) -> bool {
+        self.len() >= min
+    }
+
+    fn has_at_most_bytes(&self, max: usize) -> bool {
+        self.len() <= max
+    }
+
+    fn has_at_least_chars(&self, min: usize) -> bool {
+        min == 0 || self.chars().nth(min - 1).is_some()
+    }
+
+    fn has_at_most_chars(&self, max: usize) -> bool {
+        self.chars().nth(max).is_none()
     }
 
     fn is_snake_lower_alphanumeric(&self) -> bool {
@@ -70,6 +98,35 @@ mod tests {
         assert_eq!("  a  ".trim_non_empty(), Some("a"));
         assert_eq!("".trim_non_empty(), None);
         assert_eq!("   ".trim_non_empty(), None);
+    }
+
+    #[test]
+    fn byte_bounds_are_inclusive() {
+        assert!("abc".has_at_least_bytes(3));
+        assert!("abc".has_at_most_bytes(3));
+        assert!(!"abc".has_at_least_bytes(4));
+        assert!(!"abc".has_at_most_bytes(2));
+    }
+
+    #[test]
+    fn char_bounds_are_inclusive() {
+        assert!("中文".has_at_least_chars(2));
+        assert!("中文".has_at_most_chars(2));
+        assert!(!"中文".has_at_least_chars(3));
+        assert!(!"中文".has_at_most_chars(1));
+    }
+
+    #[test]
+    fn char_bounds_differ_from_byte_bounds() {
+        assert!("中文".has_at_least_bytes(6));
+        assert!(!"中文".has_at_most_bytes(2));
+    }
+
+    #[test]
+    fn char_bounds_handle_zero() {
+        assert!("".has_at_least_chars(0));
+        assert!("".has_at_most_chars(0));
+        assert!(!"".has_at_least_chars(1));
     }
 
     #[test]
