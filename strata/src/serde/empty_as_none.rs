@@ -1,5 +1,7 @@
 use serde::{Deserialize, Deserializer};
 
+use crate::text::StrExt;
+
 /// 反序列化辅助：空字符串按缺失处理（u64）。
 pub fn deserialize_optional_u64_or_empty<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
 where
@@ -9,10 +11,9 @@ where
     match value {
         None => Ok(None),
         Some(value) => {
-            let normalized = value.trim();
-            if normalized.is_empty() {
+            let Some(normalized) = value.trim_non_empty() else {
                 return Ok(None);
-            }
+            };
 
             normalized
                 .parse::<u64>()
@@ -33,10 +34,9 @@ where
     match value {
         None => Ok(None),
         Some(value) => {
-            let normalized = value.trim();
-            if normalized.is_empty() {
+            let Some(normalized) = value.trim_non_empty() else {
                 return Ok(None);
-            }
+            };
 
             Ok(Some(normalized.to_owned()))
         }
@@ -52,10 +52,9 @@ where
     match value {
         None => Ok(None),
         Some(value) => {
-            let normalized = value.trim();
-            if normalized.is_empty() {
+            let Some(normalized) = value.trim_non_empty() else {
                 return Ok(None);
-            }
+            };
 
             normalized
                 .parse::<bool>()
