@@ -1,8 +1,11 @@
-use std::{ops::Not, path::PathBuf};
+use std::path::PathBuf;
 
 use serde::de::DeserializeOwned;
 
-use crate::config::{ConfigError, Environment};
+use crate::{
+    config::{ConfigError, Environment},
+    text::StrExt,
+};
 
 const APP_ENVIRONMENT: &str = "APP_ENVIRONMENT";
 const APP_CONFIG_DIR: &str = "APP_CONFIG_DIR";
@@ -81,13 +84,9 @@ impl ConfigLoader {
 
     fn resolve_config_dir(&self) -> Result<PathBuf, ConfigError> {
         let dir = match env_var(APP_CONFIG_DIR).map_err(ConfigError::ReadAppConfigDir)? {
-            Some(raw) => {
-                let raw = raw.trim();
-                raw.is_empty().not().ok_or(ConfigError::EmptyEnvVar {
-                    key: APP_CONFIG_DIR,
-                })?;
-                PathBuf::from(raw)
-            }
+            Some(raw) => PathBuf::from(raw.trim_non_empty().ok_or(ConfigError::EmptyEnvVar {
+                key: APP_CONFIG_DIR,
+            })?),
             None => self
                 .config_dir
                 .clone()
